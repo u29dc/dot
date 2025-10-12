@@ -1,0 +1,5 @@
+# ~/.zprofile - Executed for login shells.
+
+# Add Homebrew to your PATH
+# This line is required for Homebrew to work correctly on Apple Silicon Macs.
+eval "$(/opt/homebrew/bin/brew shellenv)"

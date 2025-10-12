@@ -1,0 +1,23 @@
+# ~/.zshrc.local - Machine-specific shell configuration
+# This file is sourced by ~/.zshrc for local overrides and secrets
+
+# ------------------------------------------------------------------------------
+# AI TOOL API KEYS
+# ------------------------------------------------------------------------------
+
+# OpenAI API Key | https://platform.openai.com/api-keys
+export OPENAI_API_KEY="sk-proj-..."
+
+# OpenRouter API Key | https://openrouter.ai/keys
+export OPENROUTER_API_KEY="sk-or-v1-..."
+
+# Anthropic API Key | https://console.anthropic.com/settings/keys
+# export ANTHROPIC_API_KEY="sk-ant-..."
+
+# ------------------------------------------------------------------------------
+# PERSONAL ALIASES
+# ------------------------------------------------------------------------------
+
+# Cloud storage shortcuts (customize paths for your setup)
+# alias gdrive='cd "folder_path"'
+# alias dropbox='cd "folder_path"'

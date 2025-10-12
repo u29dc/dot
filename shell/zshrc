@@ -1,0 +1,137 @@
+# ~/.zshrc - Main Zsh configuration file
+
+# ------------------------------------------------------------------------------
+# ENVIRONMENT & PATH
+# Setting up environment variables and command search path
+# ------------------------------------------------------------------------------
+
+# Add user directories to PATH for custom scripts and tools
+export PATH="$HOME/bin:$HOME/.local/bin:$PATH"
+
+# Silence Homebrew environment hints
+export HOMEBREW_NO_ENV_HINTS=1
+
+# ------------------------------------------------------------------------------
+# ZSH COMPLETION SYSTEM
+# Enable and configure advanced tab completion
+# ------------------------------------------------------------------------------
+
+# Enable completion system
+autoload -Uz compinit
+# Only regenerate compdump once per day for performance
+if [ $(date +'%j') != $(stat -f '%Sm' -t '%j' ~/.zcompdump 2>/dev/null) ]; then
+    compinit
+else
+    compinit -C
+fi
+
+# Enhanced completion options
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+
+# ------------------------------------------------------------------------------
+# ZSH HISTORY CONFIGURATION
+# Optimize shell history behavior
+# ------------------------------------------------------------------------------
+
+# History configuration (before atuin)
+export HISTSIZE=50000
+export SAVEHIST=50000
+export HISTFILE="$HOME/.zsh_history"
+
+# History options
+setopt EXTENDED_HISTORY
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_IGNORE_SPACE
+setopt HIST_VERIFY
+setopt SHARE_HISTORY
+
+# Bat configuration - disable pagination for direct output
+export BAT_PAGER=""
+export BAT_STYLE="numbers,changes"
+
+# Starship prompt configuration path
+export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
+
+# ------------------------------------------------------------------------------
+# ALIASES
+# Command shortcuts and modern CLI tool replacements
+# ------------------------------------------------------------------------------
+
+# System & Shell Aliases
+alias cls='clear && echo "" > ~/.zsh_history && fc -p /dev/null && exec zsh'
+
+# Modern CLI Tool Replacements
+alias ls="eza -I $'Icon\r'"
+alias ll='eza -la'
+alias lt='eza --tree'
+alias tree='eza -T'
+alias cat='bat --paging=never'
+alias find='fd'
+alias htop='btm'
+alias top='btm'
+alias scc='scc --no-cocomo'
+
+# ------------------------------------------------------------------------------
+# FUNCTIONS
+# Custom shell functions for enhanced functionality
+# ------------------------------------------------------------------------------
+
+# EZA configuration for better tree view defaults
+EZA_DEFAULT_IGNORE="node_modules|.cache|cache|dist|build|.next|.nuxt|.turbo|coverage|.pytest_cache|__pycache__|.venv|venv|.env"
+
+# Wrapper function for eza to apply default tree options
+eza() {
+    # Check if --tree or -T flag is present
+    if [[ "$*" == *"--tree"* ]] || [[ "$*" == *"-T"* ]]; then
+        # Apply default ignore patterns and git-ignore for tree view
+        command eza --git-ignore -I "$EZA_DEFAULT_IGNORE" "$@"
+    else
+        # Run eza normally for non-tree commands
+        command eza "$@"
+    fi
+}
+
+# Zed editor wrapper (defaults to current directory)
+zed() {
+    if [ $# -eq 0 ]; then
+        command zed .
+    else
+        command zed "$@"
+    fi
+}
+
+# Load external functions
+DOTFILES_DIR="${DOTFILES_DIR:-$HOME/Git/dot}"
+source "$DOTFILES_DIR/shell/functions/update.sh"
+
+# ------------------------------------------------------------------------------
+# SHELL INTEGRATIONS
+# Initialize command-line tools and enhancements
+# ------------------------------------------------------------------------------
+
+# Initialize zoxide (smart cd replacement)
+eval "$(zoxide init zsh)"
+
+# Initialize Atuin (magical shell history)
+eval "$(atuin init zsh)"
+
+# Initialize Starship prompt
+eval "$(starship init zsh)"
+
+# Broot launcher integration
+if [ -f "$HOME/.config/broot/launcher/bash/br" ]; then
+    source "$HOME/.config/broot/launcher/bash/br"
+fi
+
+# ------------------------------------------------------------------------------
+# LOCAL OVERRIDES
+# Machine-specific settings like API keys, aliases, PATH modifications
+# Configure your secrets and machine-specific settings in ~/.zshrc.local
+# See shell/zshrc.local.example for a template
+# ------------------------------------------------------------------------------
+
+if [ -f ~/.zshrc.local ]; then
+  source ~/.zshrc.local
+fi
