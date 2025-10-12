@@ -1,0 +1,112 @@
+{
+  "version": 3,
+  "lines": [
+    [
+      {
+        "id": "371ac170-0144-426a-9470-d6cee9f79052",
+        "type": "session-clock",
+        "color": ""
+      },
+      {
+        "id": "b55959a9-7d12-4e98-ad1e-da012aa09659",
+        "type": "separator"
+      },
+      {
+        "id": "c88cb41f-47d5-4cb0-8a0f-d8a28b6246ab",
+        "type": "block-timer",
+        "color": ""
+      },
+      {
+        "id": "dc2579b4-a67f-4f7d-bf9a-960fc45d2a43",
+        "type": "separator"
+      },
+      {
+        "id": "55069ae1-e528-4872-8f54-5839b51a0852",
+        "type": "git-changes",
+        "color": ""
+      },
+      {
+        "id": "d1635063-bc8f-434e-9a50-1cfa828073a0",
+        "type": "separator"
+      },
+      {
+        "id": "3330dd6d-15bc-4788-842b-9e8c3507f7b4",
+        "type": "context-length",
+        "color": ""
+      },
+      {
+        "id": "68821f90-0d1a-4ade-a271-04bd98d2cd63",
+        "type": "separator"
+      },
+      {
+        "id": "3eb18017-9fd1-4dfd-a205-1470addb8a66",
+        "type": "context-percentage",
+        "color": ""
+      },
+      {
+        "id": "a5661d25-4c7e-40a4-835c-a3ba3f5bd05e",
+        "type": "separator"
+      },
+      {
+        "id": "17d33988-dc40-48ec-811d-e4489943e360",
+        "type": "tokens-input",
+        "color": ""
+      },
+      {
+        "id": "f6ede74c-6f0e-4e44-a1c2-5a024a54a86a",
+        "type": "separator"
+      },
+      {
+        "id": "1515435e-9efb-421c-9578-055b9c0d2e5f",
+        "type": "tokens-output",
+        "color": ""
+      },
+      {
+        "id": "e7376f3b-6bd3-41a6-8b66-bf08051d9045",
+        "type": "separator"
+      },
+      {
+        "id": "a973af1c-d07d-453a-aced-5a5acafa6a9d",
+        "type": "tokens-cached",
+        "color": ""
+      },
+      {
+        "id": "846c4309-43d3-40f8-a605-7f203dfe44a7",
+        "type": "separator"
+      },
+      {
+        "id": "bae0cd0b-d91d-4135-a682-8b40e1a8e85c",
+        "type": "tokens-total",
+        "color": ""
+      },
+      {
+        "id": "3d5c9392-0af9-4bd7-8ecc-c0408797d009",
+        "type": "separator"
+      },
+      {
+        "id": "9e9ab575-1916-4cd0-8b74-910558c068f0",
+        "type": "session-cost",
+        "color": ""
+      }
+    ],
+    [],
+    []
+  ],
+  "flexMode": "full-minus-40",
+  "compactThreshold": 60,
+  "colorLevel": 2,
+  "inheritSeparatorColors": false,
+  "globalBold": false,
+  "powerline": {
+    "enabled": false,
+    "separators": [
+      ""
+    ],
+    "separatorInvertBackground": [
+      false
+    ],
+    "startCaps": [],
+    "endCaps": [],
+    "autoAlign": false
+  }
+}

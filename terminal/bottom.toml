@@ -1,0 +1,16 @@
+# Bottom system monitor configuration
+
+[flags]
+avg_cpu = true
+group_processes = true
+case_sensitive = false
+whole_word = false
+regex = true
+default_widget_type = "process"
+default_widget_count = 1
+temperature_type = "c"
+rate = 1000
+color = "default"
+
+[colors]
+theme = "default-light"

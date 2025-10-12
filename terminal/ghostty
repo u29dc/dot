@@ -1,0 +1,121 @@
+# -----------------------------------------------------------------------------
+# Font & Rendering
+# -----------------------------------------------------------------------------
+# Use Apple's SF Mono for clean native macOS look
+font-family = "SF Mono"
+font-size = 12
+
+# Use a corrected blending mode for cleaner text rendering.
+alpha-blending = "linear-corrected"
+
+# -----------------------------------------------------------------------------
+# Theming & Colors
+# -----------------------------------------------------------------------------
+# Use the clean, built-in GitHub themes that respect your system's light/dark mode.
+theme = "light:GitHub Light Default,dark:GitHub Dark Default"
+
+# Use bright colors for bold text for better visibility.
+bold-is-bright = true
+
+# Use the Display P3 colorspace on macOS for richer colors.
+window-colorspace = "display-p3"
+
+# -----------------------------------------------------------------------------
+# Window & Layout
+# -----------------------------------------------------------------------------
+# Add padding to the window edges.
+window-padding-x = 8
+window-padding-y = 8
+
+# Center the text block by balancing extra padding.
+window-padding-balance = true
+
+# Resize the window in discrete increments of the cell size.
+window-step-resize = true
+
+# Always save the window state (size, position, etc.) on exit.
+window-save-state = "always"
+
+# Use a transparent titlebar on macOS for a seamless look.
+macos-titlebar-style = "transparent"
+
+# Make unfocused splits semi-transparent.
+unfocused-split-opacity = 0.5
+
+# -----------------------------------------------------------------------------
+# UI & Behavior
+# -----------------------------------------------------------------------------
+# Set the cursor to a solid, blinking block.
+cursor-style = "block"
+cursor-style-blink = true
+
+# Use the "blueprint" variant for the macOS application icon.
+macos-icon = "blueprint"
+
+# Show the current working directory in the window subtitle.
+window-subtitle = "working-directory"
+
+# Use the system theme for the window chrome.
+window-theme = "system"
+
+# Treat the macOS Option (⌥) key as the Alt key for shell/editor shortcuts.
+macos-option-as-alt = true
+
+# Hide the mouse cursor while typing.
+mouse-hide-while-typing = true
+
+# Allow moving the cursor in the prompt with Option+Click.
+cursor-click-to-move = true
+
+# Automatically trim trailing whitespace from copied text.
+clipboard-trim-trailing-spaces = true
+
+# Enable shell integration for features like directory reporting and prompt marking.
+shell-integration = "detect"
+
+# Clipboard behavior - explicit copy only (macOS standard)
+copy-on-select = false
+
+# Don't confirm when closing splits
+confirm-close-surface = false
+
+# New windows inherit working directory and font size
+window-inherit-working-directory = true
+window-inherit-font-size = true
+
+# Enhanced cursor visibility
+# cursor-color = "#0087ff"
+# cursor-text = "white"
+
+# -----------------------------------------------------------------------------
+# Keybindings
+# -----------------------------------------------------------------------------
+# Navigate between splits using Ctrl + Arrow Keys.
+keybind = "ctrl+left=goto_split:left"
+keybind = "ctrl+right=goto_split:right"
+keybind = "ctrl+up=goto_split:top"
+keybind = "ctrl+down=goto_split:bottom"
+
+# Insert a newline without executing with Shift+Enter.
+keybind = "shift+enter=text:\n"
+
+# --- macOS-style text navigation and deletion ---
+# Navigate word-by-word with Option+Arrow
+keybind = "opt+left=text:\x1bb"
+keybind = "opt+right=text:\x1bf"
+
+# Navigate to beginning/end of line with Command+Arrow
+keybind = "cmd+left=text:\x01"
+keybind = "cmd+right=text:\x05"
+
+# --- Backward Deletion ---
+# Delete word backward with Option+Backspace
+keybind = "opt+backspace=text:\x17"
+# Delete to beginning of line with Command+Backspace
+keybind = "cmd+backspace=text:\x15"
+
+# --- Forward Deletion ---
+# Delete word forward with Option+Delete (fn+backspace on laptops)
+keybind = "opt+delete=text:\x1bd"
+# Delete to end of line with Command+Delete (fn+backspace on laptops)
+keybind = "cmd+delete=text:\x0b"

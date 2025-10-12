@@ -1,0 +1,50 @@
+# Atuin configuration
+
+# Sync configuration (optional - can enable later)
+# sync_address = "https://api.atuin.sh"
+# sync_frequency = "10m"
+auto_sync = false
+
+# Search configuration
+search_mode = "fuzzy"
+filter_mode = "global"
+filter_mode_shell_up_key_binding = "session"
+style = "compact"
+inline_height = 10
+show_preview = true
+show_help = true
+exit_mode = "return-original"
+
+# History settings
+history_filter = [
+    "^ls",
+    "^cd",
+    "^pwd",
+    "^exit",
+    "^clear",
+    "^cls"
+]
+
+# Key bindings
+enter_accept = true
+
+# UI settings
+show_tabs = true
+
+# Enhanced features
+keymap_mode = "auto"
+workspaces = true
+
+# Database settings
+db_path = "~/.local/share/atuin/history.db"
+
+# Import history from zsh on first run
+import_on_launch = true
+
+# Keybindings - using Ctrl-R for search
+# key_path = ""
+# session_path = ""
+
+# Additional options
+secrets_filter = true  # Filter out potential secrets
+update_check = false    # Disable update notifications

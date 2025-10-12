@@ -1,0 +1,49 @@
+# Minimal Grayscale Neofetch Config
+print_info() {
+    info title
+    info underline
+
+    info "OS" distro
+    info "Host" model
+    info "Kernel" kernel
+    info "Shell" shell
+    info "Terminal" term
+    info "CPU" cpu
+    info "Memory" memory
+}
+
+# Grayscale color scheme
+colors=(8 8 8 8 8 8)
+ascii_colors=(8)
+
+# Minimal styling
+bold="off"
+underline_enabled="on"
+underline_char="-"
+separator=":"
+color_blocks="off"
+ascii_bold="off"
+
+# Keep ASCII art but make it grayscale
+image_backend="ascii"
+image_source="auto"
+ascii_distro="auto"
+
+# Hide extra options for minimalism
+title_fqdn="off"
+kernel_shorthand="on"
+distro_shorthand="off"
+os_arch="on"
+uptime_shorthand="on"
+memory_percent="off"
+memory_unit="mib"
+shell_path="off"
+shell_version="on"
+cpu_brand="on"
+cpu_speed="on"
+cpu_cores="logical"
+cpu_temp="off"
+gpu_brand="on"
+gpu_type="all"
+refresh_rate="off"
+package_managers="on"

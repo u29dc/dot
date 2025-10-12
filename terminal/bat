@@ -1,0 +1,76 @@
+# ~/.config/bat/config - bat configuration file
+# https://github.com/sharkdp/bat
+
+# ------------------------------------------------------------------------------
+# THEME CONFIGURATION
+# ------------------------------------------------------------------------------
+
+# Automatic theme switching based on system appearance (macOS)
+# This will detect if you're using dark or light mode and switch accordingly
+--theme=auto:system
+
+# Dark theme - used when macOS is in dark mode
+--theme-dark=TwoDark
+
+# Light theme - used when macOS is in light mode
+--theme-light=GitHub
+
+# ------------------------------------------------------------------------------
+# DISPLAY OPTIONS
+# ------------------------------------------------------------------------------
+
+# Disable automatic paging (no 'less' pager)
+# Output is displayed directly to terminal
+--paging=never
+
+# Style components to display
+# - numbers: show line numbers
+# - changes: show git modification markers (+/-/~)
+--style=numbers,changes
+
+# Display options
+--wrap=never
+--tabs=4
+
+# ------------------------------------------------------------------------------
+# SYNTAX MAPPINGS
+# ------------------------------------------------------------------------------
+
+# Map specific file patterns to syntax highlighting languages
+# This helps bat correctly highlight files with non-standard extensions
+
+# Shell configuration files without extensions
+--map-syntax="zshrc:Bourne Again Shell (bash)"
+--map-syntax="bashrc:Bourne Again Shell (bash)"
+--map-syntax="zprofile:Bourne Again Shell (bash)"
+--map-syntax="bash_profile:Bourne Again Shell (bash)"
+
+# Git configuration files
+--map-syntax=".gitignore:Git Ignore"
+--map-syntax=".gitattributes:Git Attributes"
+
+# Docker files
+--map-syntax="Dockerfile.*:Dockerfile"
+
+# Configuration files often use INI syntax
+--map-syntax="*.conf:INI"
+--map-syntax="*.cfg:INI"
+
+# Treat .env files as shell scripts (they define environment variables)
+--map-syntax=".env:Bourne Again Shell (bash)"
+--map-syntax=".env.*:Bourne Again Shell (bash)"
+
+# SSH config
+--map-syntax="ssh_config:SSH Config"
+--map-syntax="config:SSH Config"
+
+# Build and package files
+--map-syntax="Brewfile:Ruby"
+--map-syntax="justfile:Makefile"
+--map-syntax="*.toml:TOML"
+--map-syntax="*.log:Log File"
+
+# Configuration files
+--map-syntax=".prettierrc:JSON"
+--map-syntax=".eslintrc:JSON"
+--map-syntax="*.jsonc:JSON"
