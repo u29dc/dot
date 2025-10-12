@@ -1,0 +1,81 @@
+# Git global configuration
+
+[user]
+	name = Han
+	email = han@u29dc.com
+	signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKwIYIvbrtcd7jqPOSrqoISMDhaL205cJ3LwG1qSAAMq
+
+[init]
+	defaultBranch = main
+
+[credential]
+	helper = cache
+
+[commit]
+	gpgsign = true
+
+[gpg]
+	format = ssh
+
+[gpg "ssh"]
+	program = /Applications/1Password.app/Contents/MacOS/op-ssh-sign
+
+[core]
+	pager = delta
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	navigate = true
+	line-numbers = true
+	side-by-side = true
+	syntax-theme = GitHub
+	hyperlinks = true
+	features = decorations
+
+[delta "decorations"]
+	commit-decoration-style = bold yellow box
+	file-style = bold yellow
+	file-decoration-style = yellow box
+
+[merge]
+	conflictStyle = zdiff3
+
+[diff]
+	colorMoved = default
+
+[rebase]
+	autosquash = true
+	autostash = true
+
+[fetch]
+	prune = true
+	prunetags = true
+
+[pull]
+	rebase = true
+
+[rerere]
+	enabled = true
+
+[maintenance]
+	auto = true
+	strategy = incremental
+
+[push]
+	autoSetupRemote = true
+
+[branch]
+	sort = -committerdate
+
+[alias]
+	s = status -sb
+	co = checkout
+	cb = checkout -b
+	c = commit -v
+	ca = commit -v --amend
+	l = log --oneline --graph --decorate
+	p = pull --rebase --autostash
+	ps = push
+	psf = push --force-with-lease

@@ -1,0 +1,129 @@
+# Taps
+tap "stripe/stripe-cli"
+tap "supabase/tap"
+tap "oven-sh/bun"
+tap "arbourd/tap"
+
+# Core Development Tools
+brew "git"
+brew "gh"                 # GitHub CLI
+brew "neovim"
+brew "node"               # JavaScript runtime
+brew "oven-sh/bun/bun"    # Fast JavaScript runtime & bundler
+brew "deno"               # Secure JavaScript/TypeScript runtime
+brew "rust"               # Systems programming language
+brew "zig"                # Programming language for robustness
+
+# Modern CLI Tools
+brew "starship"           # Fast shell prompt
+brew "eza"                # Modern ls replacement
+brew "bat"                # Cat with syntax highlighting
+brew "fd"                 # Fast find alternative
+brew "bottom"             # System monitor
+brew "zoxide"             # Smarter cd
+
+# Git Tools
+brew "git-delta"          # Better git diffs
+brew "gitui"              # Fast git TUI
+brew "lazygit"            # Complex git operations
+brew "git-open"           # Open repo in browser
+brew "gitingest"          # Lightweight repository analysis
+
+# Shell Enhancements
+brew "atuin"              # Magic shell history search
+brew "broot"              # Interactive tree navigation
+
+# Media & Files
+brew "ffmpeg"             # Media processing framework
+brew "imagemagick"        # Image manipulation toolkit
+brew "gifsicle"           # GIF optimizer
+brew "sox"                # Sound processing
+brew "webp"               # WebP tools
+brew "openexr"            # HDR image format
+brew "yt-dlp"             # YouTube downloader
+
+# Utilities
+brew "blueutil"           # Bluetooth control
+brew "gnupg"              # GPG encryption
+brew "hyperfine"          # Command benchmarking
+brew "neofetch"           # System info display
+brew "pipx"               # Python app installer
+brew "poppler"            # PDF text extraction (pdftotext)
+brew "scc"                # Code statistics
+brew "tokei"              # Fast code statistics
+brew "wget"               # Web downloader
+brew "sd"                 # Modern sed replacement
+brew "dust"               # Intuitive disk usage
+brew "procs"              # Modern ps replacement
+brew "jq"                 # JSON processor
+brew "yq"                 # YAML processor
+brew "just"               # Command runner
+brew "direnv"             # Per-directory environments
+brew "tldr"               # Simplified man pages
+brew "shellcheck"         # Shell script linter
+brew "shfmt"              # Shell script formatter
+
+# AI & Cloud CLIs
+brew "codex"              # AI code assistant
+brew "gemini-cli"         # Gemini API CLI
+brew "stripe"             # Stripe CLI tools
+brew "supabase"           # Supabase CLI
+
+# Casks (GUI Applications)
+
+# Terminal & System Tools
+cask "1password-cli"      # Password manager CLI
+cask "ghostty"            # GPU-accelerated terminal
+cask "jordanbaird-ice"    # Menu bar manager
+cask "leader-key"         # Keyboard shortcut manager
+
+# Productivity & Notes
+cask "1password"          # Password manager (GUI version)
+cask "notion"             # Note-taking and productivity
+cask "notion-calendar"    # Calendar app
+cask "notion-mail"        # Email client
+cask "raycast"            # Launcher and productivity
+cask "cursor"             # AI-powered code editor
+cask "ollama-app"         # Local LLM runner
+
+# Development
+cask "zed@preview"        # Fast code editor
+
+# Media & Utilities
+cask "iina"               # Modern media player
+cask "figma"              # Design tool
+cask "cleanmymac"         # System cleaner
+cask "cleanshot"          # Screenshot tool
+cask "clop"               # Image optimizer
+cask "coteditor"          # Plain text editor
+cask "keka"               # Archive utility
+cask "karabiner-elements" # Keyboard customizer
+cask "monitorcontrol"     # External display control
+cask "transmission"       # BitTorrent client
+
+# Communication
+cask "whatsapp"           # Messaging
+cask "zoom"               # Video conferencing
+cask "lark"               # Team collaboration
+
+# Cloud Storage
+cask "google-drive"       # Google Drive sync
+cask "dropbox"            # Dropbox sync
+cask "backblaze"          # Backup service
+
+# Security
+cask "adguard"            # Ad blocker
+
+### Manual Installation Required
+#
+# - Microsoft Office Suite (Word, Excel, PowerPoint, Teams)
+# - Adobe Creative Cloud (After Effects, Illustrator, Premiere Pro, Photoshop, Lightroom)
+# - DaVinci Resolve
+# - Xcode
+# - Amazon Kindle
+# - Frame.io Transfer
+# - MacWhisper
+# - Dropover, Folder Preview
+# - Moves, Spaced, Umbra, Vivid, Dato
+# - Keystroke Pro, PixelSnap 2, Transnomino
+# - Parsec, TestFlight
