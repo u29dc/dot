@@ -1,0 +1,27 @@
+{
+	"name": "dot",
+	"version": "1.0.0",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/u29dc/dot.git"
+	},
+	"scripts": {
+		"setup--------------------------------": "",
+		"prepare": "husky",
+		"setup": "./scripts/setup.sh",
+		"setup:link": "./scripts/setup.sh --link-only",
+		"code---------------------------------": "",
+		"util:format": "bunx biome format --write .",
+		"util:lint": "bunx biome check --write .",
+		"util:format:shell": "shfmt -w -i 4 -ci scripts/ shell/",
+		"util:lint:shell": "shellcheck scripts/*.sh shell/functions/*.sh",
+		"validation--------------------------": "",
+		"util:check": "bun run util:format && bun run util:format:shell && bun run util:lint && bun run util:lint:shell"
+	},
+	"devDependencies": {
+		"@commitlint/cli": "^20.1.0",
+		"@commitlint/config-conventional": "^20.0.0",
+		"husky": "^9.1.7"
+	},
+	"type": "module"
+}

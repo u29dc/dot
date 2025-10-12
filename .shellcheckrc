@@ -1,0 +1,10 @@
+# ShellCheck configuration
+# https://github.com/koalaman/shellcheck
+
+# Disable noisy checks
+disable=SC1090  # Can't follow source (dynamic paths)
+disable=SC2155  # Declare and assign separately
+
+# Enable optional checks
+enable=quote-safe-variables
+enable=check-unassigned-uppercase
