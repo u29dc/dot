@@ -22,14 +22,6 @@
 			"**/*.bash",
 			"**/*rc",
 			"**/config"
-		],
-		"experimentalScannerIgnores": [
-			"node_modules",
-			"dist",
-			"build",
-			".next",
-			".turbo",
-			"coverage"
 		]
 	},
 	"formatter": {

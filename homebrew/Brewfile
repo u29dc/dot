@@ -64,7 +64,7 @@ brew "shellcheck"         # Shell script linter
 brew "shfmt"              # Shell script formatter
 
 # AI & Cloud CLIs
-brew "codex"              # AI code assistant
+cask "codex"              # AI code assistant
 brew "gemini-cli"         # Gemini API CLI
 brew "stripe"             # Stripe CLI tools
 brew "supabase"           # Supabase CLI
