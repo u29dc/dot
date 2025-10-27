@@ -1,0 +1,451 @@
+#!/bin/bash
+
+# ~/.macos - macOS System Preferences Configuration
+#
+# Run this script to apply these settings:
+#   chmod +x ~/.macos && ~/.macos
+#
+# Use --audit flag to preview changes without applying:
+#   ~/.macos --audit
+#
+# IMPORTANT: Some changes require logout/restart to take effect
+
+set -e
+
+# Audit mode - test for deprecated keys without applying
+AUDIT_MODE=false
+[[ "$1" == "--audit" ]] && AUDIT_MODE=true
+
+# Privilege check helper
+check_sudo_access() {
+    if ! sudo -v; then
+        echo "Error: sudo access required for some settings"
+        exit 1
+    fi
+    # Keep sudo alive during script execution
+    while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+}
+
+# Call privilege check early (needed for sudo operations later)
+# Skip in audit mode since we're only previewing changes
+if [[ "$AUDIT_MODE" == false ]]; then
+    check_sudo_access
+fi
+
+# Wrapper function for defaults write operations
+# Supports audit mode to preview changes without applying them
+defaults_write() {
+    local use_sudo=false
+    local use_currentHost=false
+    local domain key type_flag value dict_mode=false dict_key
+
+    # Parse optional sudo prefix
+    if [[ "$1" == "sudo" ]]; then
+        use_sudo=true
+        shift
+    fi
+
+    # Parse optional -currentHost flag
+    if [[ "$1" == "-currentHost" ]]; then
+        use_currentHost=true
+        shift
+    fi
+
+    # Parse positional parameters
+    domain="$1"
+    key="$2"
+
+    # Check for -dict-add mode
+    if [[ "$3" == "-dict-add" ]]; then
+        dict_mode=true
+        dict_key="$4"
+        type_flag="$5"
+        value="$6"
+    else
+        type_flag="$3"
+        value="$4"
+    fi
+
+    # Build command prefix
+    local cmd_prefix=""
+    [[ "$use_sudo" == true ]] && cmd_prefix="sudo "
+
+    # Build defaults command arguments
+    local defaults_args="defaults"
+    [[ "$use_currentHost" == true ]] && defaults_args="$defaults_args -currentHost"
+
+    # In audit mode, show what would change
+    if [[ "$AUDIT_MODE" == true ]]; then
+        # Read current value (suppress errors if key doesn't exist)
+        local current_value
+        if [[ "$use_currentHost" == true ]]; then
+            current_value=$(defaults -currentHost read "$domain" "$key" 2>/dev/null)
+        else
+            current_value=$(defaults read "$domain" "$key" 2>/dev/null)
+        fi
+
+        # Format current value display
+        local current_display
+        if [[ -z "$current_value" ]]; then
+            current_display="<not set>"
+        elif [[ "$current_value" == *$'\n'* ]] || [[ "$current_value" == "{"* ]] || [[ "$current_value" == "("* ]]; then
+            # Complex value (dict/array with multiple lines)
+            current_display="<complex value>"
+        else
+            current_display="$current_value"
+        fi
+
+        # Format new value for display
+        local new_display="$value"
+
+        # Build audit output
+        local audit_line="[AUDIT] ${domain}.${key}: ${current_display} → ${new_display} (${type_flag#-})"
+        [[ "$use_sudo" == true ]] && audit_line="${audit_line} [sudo]"
+        [[ "$dict_mode" == true ]] && audit_line="[AUDIT] ${domain}.${key}.${dict_key}: ${current_display} → ${new_display} (dict-add ${type_flag#-})"
+
+        echo "$audit_line"
+        return 0
+    fi
+
+    # Normal mode: execute the defaults write command
+    if [[ "$dict_mode" == true ]]; then
+        ${cmd_prefix}${defaults_args} write "$domain" "$key" -dict-add "$dict_key" "$type_flag" "$value"
+    else
+        ${cmd_prefix}${defaults_args} write "$domain" "$key" "$type_flag" "$value"
+    fi
+}
+
+# Close System Settings (Sequoia/Tahoe)
+osascript -e 'tell application "System Settings" to quit' 2>/dev/null || true
+
+echo "Applying macOS system preferences..."
+
+###############################################################################
+# General UI/UX
+###############################################################################
+
+echo "Configuring General UI/UX..."
+
+# Expand save and print panels by default
+defaults_write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -bool true
+defaults_write NSGlobalDomain NSNavPanelExpandedStateForSaveMode2 -bool true
+defaults_write NSGlobalDomain PMPrintingExpandedStateForPrint -bool true
+defaults_write NSGlobalDomain PMPrintingExpandedStateForPrint2 -bool true
+
+# Save to disk (not iCloud) by default
+defaults_write NSGlobalDomain NSDocumentSaveNewDocumentsToCloud -bool false
+
+# Always show scrollbars
+defaults_write NSGlobalDomain AppleShowScrollBars -string "Always"
+
+###############################################################################
+# Keyboard & Input
+###############################################################################
+
+echo "Configuring Keyboard & Input..."
+
+# Set blazingly fast keyboard repeat rate (requires logout)
+defaults_write NSGlobalDomain KeyRepeat -int 1
+defaults_write NSGlobalDomain InitialKeyRepeat -int 15
+
+# Disable press-and-hold for keys in favor of key repeat
+defaults_write NSGlobalDomain ApplePressAndHoldEnabled -bool false
+
+# Enable full keyboard access for all controls (Tab in dialogs)
+defaults_write NSGlobalDomain AppleKeyboardUIMode -int 3
+
+###############################################################################
+# Trackpad
+###############################################################################
+
+echo "Configuring Trackpad..."
+
+# Enable tap to click for built-in trackpad
+defaults_write com.apple.AppleMultitouchTrackpad Clicking -bool true
+defaults_write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
+
+# Map bottom right corner to right-click (built-in trackpad)
+defaults_write com.apple.AppleMultitouchTrackpad TrackpadCornerSecondaryClick -int 2
+defaults_write com.apple.AppleMultitouchTrackpad TrackpadRightClick -bool true
+
+# Map bottom right corner to right-click (Bluetooth trackpad)
+defaults_write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadCornerSecondaryClick -int 2
+defaults_write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadRightClick -bool true
+
+# Enable force click and haptic feedback
+defaults_write com.apple.AppleMultitouchTrackpad ActuateDetents -bool true
+defaults_write com.apple.AppleMultitouchTrackpad ForceSuppressed -bool false
+
+# Increase tracking speed (1.0 = default, range: 0.0 to 3.0)
+defaults_write NSGlobalDomain com.apple.trackpad.scaling -float 1.5
+
+# Enable natural scrolling
+defaults_write NSGlobalDomain com.apple.swipescrolldirection -bool true
+
+###############################################################################
+# Finder
+###############################################################################
+
+echo "Configuring Finder..."
+
+# Allow quitting Finder via Cmd+Q
+defaults_write com.apple.finder QuitMenuItem -bool true
+
+# Show hidden files by default
+defaults_write com.apple.finder AppleShowAllFiles -bool true
+
+# Show all filename extensions
+defaults_write NSGlobalDomain AppleShowAllExtensions -bool true
+
+# Show status bar and path bar
+defaults_write com.apple.finder ShowStatusBar -bool true
+defaults_write com.apple.finder ShowPathbar -bool true
+
+# Disable full POSIX path as Finder window title
+defaults_write com.apple.finder _FXShowPosixPathInTitle -bool false
+
+# Keep folders on top when sorting by name
+defaults_write com.apple.finder _FXSortFoldersFirst -bool true
+
+# Search current folder by default
+defaults_write com.apple.finder FXDefaultSearchScope -string "SCcf"
+
+# Enable extension change warning (prevents accidental file type changes)
+defaults_write com.apple.finder FXEnableExtensionChangeWarning -bool true
+
+# Enable spring loading for directories
+defaults_write NSGlobalDomain com.apple.springing.enabled -bool true
+defaults_write NSGlobalDomain com.apple.springing.delay -float 0
+
+# Avoid creating .DS_Store files on network and USB volumes
+defaults_write com.apple.desktopservices DSDontWriteNetworkStores -bool true
+defaults_write com.apple.desktopservices DSDontWriteUSBStores -bool true
+
+# Use list view in all Finder windows by default
+defaults_write com.apple.finder FXPreferredViewStyle -string "Nlsv"
+
+# Enable warning before emptying the Trash (prevents accidental deletions)
+defaults_write com.apple.finder WarnOnEmptyTrash -bool true
+
+# Enable AirDrop over Ethernet and on unsupported Macs
+defaults_write com.apple.NetworkBrowser BrowseAllInterfaces -bool true
+
+# Show the ~/Library folder
+chflags nohidden ~/Library
+
+# Show the /Volumes folder
+sudo chflags nohidden /Volumes 2>/dev/null || true
+
+###############################################################################
+# Dock
+###############################################################################
+
+echo "Configuring Dock..."
+
+# Set the icon size
+defaults_write com.apple.dock tilesize -int 24
+
+# Don't magnify icons
+defaults_write com.apple.dock magnification -bool false
+
+# Change minimize/maximize window effect to scale
+defaults_write com.apple.dock mineffect -string "scale"
+
+# Minimize windows into application icon
+defaults_write com.apple.dock minimize-to-application -bool true
+
+# Enable spring loading for all Dock items
+defaults_write com.apple.dock enable-spring-load-actions-on-all-items -bool true
+
+# Show indicator lights for open applications
+defaults_write com.apple.dock show-process-indicators -bool true
+
+# Don't animate opening applications
+defaults_write com.apple.dock launchanim -bool false
+
+# Speed up Mission Control animations
+defaults_write com.apple.dock expose-animation-duration -float 0.1
+
+# Don't group windows by application in Mission Control
+defaults_write com.apple.dock expose-group-by-app -bool false
+
+# Don't automatically rearrange Spaces based on most recent use
+defaults_write com.apple.dock mru-spaces -bool false
+
+# Remove the auto-hiding Dock delay
+defaults_write com.apple.dock autohide-delay -float 0
+
+# Remove the animation when hiding/showing the Dock
+defaults_write com.apple.dock autohide-time-modifier -float 0
+
+# Automatically hide and show the Dock
+defaults_write com.apple.dock autohide -bool true
+
+# Make Dock icons of hidden applications translucent
+defaults_write com.apple.dock showhidden -bool true
+
+# Don't show recent applications in Dock
+defaults_write com.apple.dock show-recents -bool false
+
+###############################################################################
+# Stage Manager
+###############################################################################
+
+echo "Configuring Stage Manager..."
+
+# Disable Stage Manager
+defaults_write com.apple.WindowManager GloballyEnabled -bool false
+
+# Keep recent apps in Dock instead of Stage Manager strips
+defaults_write com.apple.WindowManager HideDesktop -bool false
+
+###############################################################################
+# Window Tiling
+###############################################################################
+
+echo "Configuring Window Tiling..."
+
+# Enable native window tiling and snapping
+defaults_write com.apple.WindowManager EnableTiledWindowMargins -bool false
+defaults_write com.apple.WindowManager EnableWindowTiling -bool true
+
+# Set tiling margins to 0
+defaults_write com.apple.WindowManager TiledWindowMargins -float 0.0
+
+###############################################################################
+# Hot Corners
+###############################################################################
+
+echo "Configuring Hot Corners..."
+
+# Disable all hot corners
+# Top left screen corner
+defaults_write com.apple.dock wvous-tl-corner -int 0
+defaults_write com.apple.dock wvous-tl-modifier -int 0
+# Top right screen corner
+defaults_write com.apple.dock wvous-tr-corner -int 0
+defaults_write com.apple.dock wvous-tr-modifier -int 0
+# Bottom left screen corner
+defaults_write com.apple.dock wvous-bl-corner -int 0
+defaults_write com.apple.dock wvous-bl-modifier -int 0
+# Bottom right screen corner
+defaults_write com.apple.dock wvous-br-corner -int 0
+defaults_write com.apple.dock wvous-br-modifier -int 0
+
+###############################################################################
+# Screenshots
+###############################################################################
+
+echo "Configuring Screenshots..."
+
+# Save screenshots to ~/Screenshots
+mkdir -p "${HOME}/Screenshots"
+defaults_write com.apple.screencapture location -string "${HOME}/Screenshots"
+
+# Save screenshots in PNG format (other options: BMP, GIF, JPG, PDF, TIFF)
+defaults_write com.apple.screencapture type -string "png"
+
+# Disable shadow in screenshots
+defaults_write com.apple.screencapture disable-shadow -bool true
+
+###############################################################################
+# Time Machine
+###############################################################################
+
+echo "Configuring Time Machine..."
+
+# Prevent Time Machine from prompting to use new hard drives as backup volume
+defaults_write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
+
+###############################################################################
+# Activity Monitor
+###############################################################################
+
+echo "Configuring Activity Monitor..."
+
+# Show the main window when launching Activity Monitor
+defaults_write com.apple.ActivityMonitor OpenMainWindow -bool true
+
+# Visualize CPU usage in the Activity Monitor Dock icon
+defaults_write com.apple.ActivityMonitor IconType -int 5
+
+# Show all processes in Activity Monitor
+defaults_write com.apple.ActivityMonitor ShowCategory -int 100
+
+# Sort Activity Monitor results by CPU usage
+defaults_write com.apple.ActivityMonitor SortColumn -string "CPUUsage"
+defaults_write com.apple.ActivityMonitor SortDirection -int 0
+
+###############################################################################
+# TextEdit
+###############################################################################
+
+echo "Configuring TextEdit..."
+
+# Use plain text mode for new TextEdit documents
+defaults_write com.apple.TextEdit RichText -int 0
+
+# Open and save files as UTF-8 in TextEdit
+defaults_write com.apple.TextEdit PlainTextEncoding -int 4
+defaults_write com.apple.TextEdit PlainTextEncodingForWrite -int 4
+
+###############################################################################
+# Photos
+###############################################################################
+
+echo "Configuring Photos..."
+
+# Prevent Photos from opening automatically when devices are plugged in
+defaults_write -currentHost com.apple.ImageCapture disableHotPlug -bool true
+
+###############################################################################
+# Text Editing & Messages
+###############################################################################
+
+echo "Configuring Text Editing..."
+
+# Disable smart quotes globally (useful when typing code)
+# These settings apply to all apps including Messages, Notes, TextEdit, etc.
+defaults_write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
+defaults_write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false
+
+# Disable spell checking globally
+defaults_write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false
+defaults_write NSGlobalDomain WebAutomaticSpellingCorrectionEnabled -bool false
+
+###############################################################################
+# Menu Bar
+###############################################################################
+
+echo "Configuring Menu Bar..."
+
+# Automatically hide and show the menu bar
+defaults_write NSGlobalDomain _HIHideMenuBar -bool true
+
+# Don't flash the time separators
+defaults_write com.apple.menuextra.clock FlashDateSeparators -bool false
+
+# Use digital clock (not analog)
+defaults_write com.apple.menuextra.clock IsAnalog -bool false
+
+###############################################################################
+# Apply Changes
+###############################################################################
+
+echo ""
+echo "Done! Note that some changes require a logout/restart to take effect."
+echo ""
+echo "Restarting affected applications..."
+
+# Restart affected applications
+for app in "Activity Monitor" \
+	"Dock" \
+	"Finder" \
+	"SystemUIServer"; do
+	killall "${app}" &> /dev/null || true
+done
+
+echo ""
+echo "macOS system preferences have been applied successfully!"
+echo ""
+echo "You may need to log out and log back in for all changes to take effect."

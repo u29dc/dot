@@ -84,6 +84,7 @@ These configurations promote modern CLI tools (eza, bat, fd, rg, etc.) and inclu
 | Git          | `system/gitconfig`       | `~/.gitconfig`                                               |
 | Karabiner    | `system/karabiner`       | `~/.config/karabiner/karabiner.json`                         |
 | 1Password    | `system/1password`       | `~/.config/1Password/ssh/agent.toml`                         |
+| macOS        | `macos/.macos`           | `~/.macos`                                                   |
 | **Agents**   |                          |                                                              |
 | AI Manifesto | `agents/AGENTS.md`       | `~/.claude/CLAUDE.md`                                        |
 | Claude Code  | `agents/claude.json`     | `~/.claude/settings.json`                                    |

@@ -107,6 +107,7 @@ echo "System configurations:"
 link_file "$DOTFILES_DIR/system/gitconfig" "$HOME/.gitconfig"
 link_file "$DOTFILES_DIR/system/karabiner" "$HOME/.config/karabiner/karabiner.json"
 link_file "$DOTFILES_DIR/system/1password" "$HOME/.config/1Password/ssh/agent.toml"
+link_file "$DOTFILES_DIR/macos/.macos" "$HOME/.macos"
 
 # Agent configurations
 echo
