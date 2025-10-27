@@ -1,74 +1,42 @@
 #!/usr/bin/env bash
-# System update function - Updates all Homebrew packages
+# System update function
 
 upd() {
-    # Colors for output
-    local RED='\033[0;31m'
-    local GREEN='\033[0;32m'
-    local BLUE='\033[0;34m'
-    local YELLOW='\033[0;33m'
-    local CYAN='\033[0;36m'
-    local NC='\033[0m' # No Color
+    # color scheme (ANSI escape codes)
+    local RED='\x1b[31m'
+    local BLUE='\x1b[34m'
+    local YELLOW='\x1b[33m'
+    local DIM='\x1b[2m'
+    local RESET='\x1b[0m'
 
-    # Spinner characters
-    local SPINNER=("⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏")
-
-    # Function to show spinner while command runs
-    run_with_spinner() {
-        # Handle job control for different shells
-        if [ -n "$ZSH_VERSION" ]; then
-            # Zsh-specific job control
-            setopt local_options no_notify no_monitor
-        elif [ -n "$BASH_VERSION" ]; then
-            # Bash-specific job control
-            local old_monitor_mode=$(set -o | grep monitor | awk '{print $2}')
-            set +m
+    # Timing capture mechanism: EPOCHREALTIME provides microsecond precision (bash 5+)
+    # Fallback to date command for older bash versions
+    get_timestamp() {
+        if [ -n "$BASH_VERSION" ] && [ "${BASH_VERSINFO[0]}" -ge 5 ]; then
+            echo "$EPOCHREALTIME"
+        else
+            date +%s.%N
         fi
-
-        local msg="$1"
-        shift
-        local cmd="$*"
-
-        # Start spinner in background
-        (
-            local i=0
-            while true; do
-                printf "\r[${SPINNER[$i]}] %-40s" "$msg"
-                i=$(((i + 1) % 10))
-                sleep 0.1
-            done
-        ) &
-        local spinner_pid=$!
-        disown "$spinner_pid" 2>/dev/null
-
-        # Run command and capture exit code
-        local exit_code
-        eval "$cmd" >/dev/null 2>&1
-        exit_code=$?
-
-        # Stop spinner
-        kill "$spinner_pid" 2>/dev/null
-        wait "$spinner_pid" 2>/dev/null
-
-        # Restore Bash job control if needed
-        if [ -n "$BASH_VERSION" ] && [ "$old_monitor_mode" = "on" ]; then
-            set -m
-        fi
-
-        # Clear the spinner line
-        printf "\r%-50s\r" ""
-
-        return "$exit_code"
     }
 
-    echo "${BLUE}System Update${NC}"
-    echo "─────────────"
+    # Format elapsed time: <1s shows ms, ≥1s shows s with 2 decimals
+    format_time() {
+        local elapsed=$1
+        local seconds=$(echo "$elapsed" | awk '{printf "%.3f", $1}')
+        if (($(echo "$seconds < 1" | bc -l 2>/dev/null || echo 0))); then
+            local ms=$(echo "$seconds * 1000" | awk '{printf "%.0f", $1}')
+            echo "${ms}ms"
+        else
+            echo "$(echo "$seconds" | awk '{printf "%.2f", $1}')s"
+        fi
+    }
 
     # Check what's outdated before updating
-    echo -n "Checking for updates..."
+    local check_start=$(get_timestamp)
     local outdated_formulae=$(brew outdated --formula 2>/dev/null)
     local outdated_casks=$(brew outdated --cask 2>/dev/null)
-    printf "\r%-30s\r" "" # Clear the checking message
+    local check_elapsed=$(echo "$(get_timestamp) - $check_start" | bc 2>/dev/null || echo "0")
+    local check_time=$(format_time "$check_elapsed")
 
     # Count outdated packages
     local formula_count=0
@@ -82,60 +50,59 @@ upd() {
 
     local total_outdated=$((formula_count + cask_count))
 
+    # No updates case
     if [ "$total_outdated" -eq 0 ]; then
-        echo "${GREEN}✓${NC} Everything is up to date!"
+        echo -e "${BLUE}Checked Homebrew in ${check_time}. Everything up to date.${RESET}"
         return 0
     fi
 
-    echo "${YELLOW}Found $total_outdated package(s) to update${NC}"
-    echo ""
-
     # Update Homebrew
-    run_with_spinner "Updating Homebrew packages..." "brew update && brew upgrade && brew upgrade --cask"
-    local update_result=$?
+    local update_start=$(get_timestamp)
+    local update_output
+    local update_result
+
+    update_output=$(brew update 2>&1 && brew upgrade 2>&1 && brew upgrade --cask 2>&1)
+    update_result=$?
+
+    local update_elapsed=$(echo "$(get_timestamp) - $update_start" | bc 2>/dev/null || echo "0")
+    local update_time=$(format_time "$update_elapsed")
 
     if [ "$update_result" -eq 0 ]; then
-        echo "${GREEN}✓${NC} Updates completed successfully"
-        echo ""
-
-        # Show what was updated
-        if [ "$formula_count" -gt 0 ]; then
-            echo "${CYAN}Updated formulae:${NC}"
-            echo "$outdated_formulae" | while read -r line; do
-                echo "  • $line"
-            done
-            echo ""
-        fi
-
-        if [ "$cask_count" -gt 0 ]; then
-            echo "${CYAN}Updated casks:${NC}"
-            echo "$outdated_casks" | while read -r line; do
-                echo "  • $line"
-            done
-            echo ""
-        fi
-
-        echo "${GREEN}All updates complete!${NC}"
-        echo ""
+        # Success case: single-line summary
+        echo -e "${BLUE}Updated ${formula_count} formulae and ${cask_count} casks in ${update_time}. All packages current.${RESET}"
 
         # Cleanup old versions
-        echo "${CYAN}Cleaning up...${NC}"
-        run_with_spinner "Removing old versions..." "brew cleanup -s"
-        local cleanup_result=$?
+        local cleanup_start=$(get_timestamp)
+        local cleanup_output
+        local cleanup_result
+
+        cleanup_output=$(brew cleanup -s 2>&1)
+        cleanup_result=$?
+
+        local cleanup_elapsed=$(echo "$(get_timestamp) - $cleanup_start" | bc 2>/dev/null || echo "0")
+        local cleanup_time=$(format_time "$cleanup_elapsed")
 
         if [ "$cleanup_result" -eq 0 ]; then
-            echo "${GREEN}✓${NC} Cleanup complete"
-
             # Show space saved
             local saved=$(brew cleanup -ns 2>/dev/null | grep "Pruned" | awk '{print $2" "$3}')
             if [ -n "$saved" ]; then
-                echo "${CYAN}Disk space saved: $saved${NC}"
+                echo -e "${BLUE}Cleaned up ${saved} in ${cleanup_time}. No outdated versions remaining.${RESET}"
+            else
+                echo -e "${BLUE}Cleaned up in ${cleanup_time}. No outdated versions remaining.${RESET}"
             fi
         else
-            echo "${YELLOW}⚠${NC} Cleanup completed with warnings"
+            # Cleanup error case: expand to multi-line
+            echo -e "${RED}[FAIL]${RESET} Cleanup failed in ${cleanup_time}"
+            echo -e "${DIM}${cleanup_output}${RESET}"
         fi
     else
-        echo "${RED}✗${NC} Update failed"
-        echo "Run 'brew update && brew upgrade' manually to see errors"
+        # Update error case: expand to multi-line with details
+        echo -e "${RED}[FAIL]${RESET} Update failed after ${update_time}"
+        echo -e "${DIM}Attempted to update ${total_outdated} packages (${formula_count} formulae, ${cask_count} casks)${RESET}"
+        echo -e "${DIM}${update_output}${RESET}"
+        echo ""
+        echo -e "${YELLOW}[WARN]${RESET} Run 'brew update && brew upgrade' manually to see full errors"
+        return 1
     fi
+
 }
