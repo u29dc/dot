@@ -12,9 +12,19 @@
 
 set -e
 
+# Color scheme (ANSI escape codes)
+BLUE='\x1b[34m'
+RED='\x1b[31m'
+YELLOW='\x1b[33m'
+DIM='\x1b[2m'
+RESET='\x1b[0m'
+
 # Audit mode - test for deprecated keys without applying
 AUDIT_MODE=false
 [[ "$1" == "--audit" ]] && AUDIT_MODE=true
+
+# Track if any changes detected in audit mode
+CHANGES_DETECTED=false
 
 # Privilege check helper
 check_sudo_access() {
@@ -84,6 +94,15 @@ defaults_write() {
             current_value=$(defaults read "$domain" "$key" 2>/dev/null)
         fi
 
+        # Normalize boolean values for comparison
+        # macOS stores booleans as 0/1, but we write them as true/false
+        if [[ "$type_flag" == "-bool" ]]; then
+            case "$current_value" in
+                0) current_value="false" ;;
+                1) current_value="true" ;;
+            esac
+        fi
+
         # Format current value display
         local current_display
         if [[ -z "$current_value" ]]; then
@@ -98,12 +117,16 @@ defaults_write() {
         # Format new value for display
         local new_display="$value"
 
-        # Build audit output
-        local audit_line="[AUDIT] ${domain}.${key}: ${current_display} → ${new_display} (${type_flag#-})"
-        [[ "$use_sudo" == true ]] && audit_line="${audit_line} [sudo]"
-        [[ "$dict_mode" == true ]] && audit_line="[AUDIT] ${domain}.${key}.${dict_key}: ${current_display} → ${new_display} (dict-add ${type_flag#-})"
+        # Only output if value would actually change
+        if [[ "$current_value" != "$value" ]]; then
+            # Build audit output
+            local audit_line="[AUDIT] ${domain}.${key}: ${current_display} → ${new_display} (${type_flag#-})"
+            [[ "$use_sudo" == true ]] && audit_line="${audit_line} [sudo]"
+            [[ "$dict_mode" == true ]] && audit_line="[AUDIT] ${domain}.${key}.${dict_key}: ${current_display} → ${new_display} (dict-add ${type_flag#-})"
 
-        echo "$audit_line"
+            echo "$audit_line"
+            CHANGES_DETECTED=true
+        fi
         return 0
     fi
 
@@ -118,13 +141,17 @@ defaults_write() {
 # Close System Settings (Sequoia/Tahoe)
 osascript -e 'tell application "System Settings" to quit' 2>/dev/null || true
 
-echo "Applying macOS system preferences..."
+if [[ "$AUDIT_MODE" == true ]]; then
+    echo -e "${BLUE}Previewing macOS system preferences...${RESET}"
+else
+    echo -e "${BLUE}Applying macOS system preferences...${RESET}"
+fi
 
 ###############################################################################
 # General UI/UX
 ###############################################################################
 
-echo "Configuring General UI/UX..."
+# General UI/UX
 
 # Expand save and print panels by default
 defaults_write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -bool true
@@ -142,9 +169,9 @@ defaults_write NSGlobalDomain AppleShowScrollBars -string "Always"
 # Keyboard & Input
 ###############################################################################
 
-echo "Configuring Keyboard & Input..."
+# Keyboard & Input
 
-# Set blazingly fast keyboard repeat rate (requires logout)
+# Set fast keyboard repeat rate (requires logout)
 defaults_write NSGlobalDomain KeyRepeat -int 1
 defaults_write NSGlobalDomain InitialKeyRepeat -int 15
 
@@ -158,7 +185,7 @@ defaults_write NSGlobalDomain AppleKeyboardUIMode -int 3
 # Trackpad
 ###############################################################################
 
-echo "Configuring Trackpad..."
+# Trackpad
 
 # Enable tap to click for built-in trackpad
 defaults_write com.apple.AppleMultitouchTrackpad Clicking -bool true
@@ -186,7 +213,7 @@ defaults_write NSGlobalDomain com.apple.swipescrolldirection -bool true
 # Finder
 ###############################################################################
 
-echo "Configuring Finder..."
+# Finder
 
 # Allow quitting Finder via Cmd+Q
 defaults_write com.apple.finder QuitMenuItem -bool true
@@ -240,7 +267,7 @@ sudo chflags nohidden /Volumes 2>/dev/null || true
 # Dock
 ###############################################################################
 
-echo "Configuring Dock..."
+# Dock
 
 # Set the icon size
 defaults_write com.apple.dock tilesize -int 24
@@ -281,8 +308,8 @@ defaults_write com.apple.dock autohide-time-modifier -float 0
 # Automatically hide and show the Dock
 defaults_write com.apple.dock autohide -bool true
 
-# Make Dock icons of hidden applications translucent
-defaults_write com.apple.dock showhidden -bool true
+# Keep all Dock icons at normal opacity
+defaults_write com.apple.dock showhidden -bool false
 
 # Don't show recent applications in Dock
 defaults_write com.apple.dock show-recents -bool false
@@ -291,7 +318,7 @@ defaults_write com.apple.dock show-recents -bool false
 # Stage Manager
 ###############################################################################
 
-echo "Configuring Stage Manager..."
+# Stage Manager
 
 # Disable Stage Manager
 defaults_write com.apple.WindowManager GloballyEnabled -bool false
@@ -303,20 +330,20 @@ defaults_write com.apple.WindowManager HideDesktop -bool false
 # Window Tiling
 ###############################################################################
 
-echo "Configuring Window Tiling..."
+# Window Tiling
 
 # Enable native window tiling and snapping
 defaults_write com.apple.WindowManager EnableTiledWindowMargins -bool false
 defaults_write com.apple.WindowManager EnableWindowTiling -bool true
 
 # Set tiling margins to 0
-defaults_write com.apple.WindowManager TiledWindowMargins -float 0.0
+defaults_write com.apple.WindowManager TiledWindowMargins -int 0
 
 ###############################################################################
 # Hot Corners
 ###############################################################################
 
-echo "Configuring Hot Corners..."
+# Hot Corners
 
 # Disable all hot corners
 # Top left screen corner
@@ -336,7 +363,7 @@ defaults_write com.apple.dock wvous-br-modifier -int 0
 # Screenshots
 ###############################################################################
 
-echo "Configuring Screenshots..."
+# Screenshots
 
 # Save screenshots to ~/Screenshots
 mkdir -p "${HOME}/Screenshots"
@@ -352,7 +379,7 @@ defaults_write com.apple.screencapture disable-shadow -bool true
 # Time Machine
 ###############################################################################
 
-echo "Configuring Time Machine..."
+# Time Machine
 
 # Prevent Time Machine from prompting to use new hard drives as backup volume
 defaults_write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
@@ -361,7 +388,7 @@ defaults_write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
 # Activity Monitor
 ###############################################################################
 
-echo "Configuring Activity Monitor..."
+# Activity Monitor
 
 # Show the main window when launching Activity Monitor
 defaults_write com.apple.ActivityMonitor OpenMainWindow -bool true
@@ -380,7 +407,7 @@ defaults_write com.apple.ActivityMonitor SortDirection -int 0
 # TextEdit
 ###############################################################################
 
-echo "Configuring TextEdit..."
+# TextEdit
 
 # Use plain text mode for new TextEdit documents
 defaults_write com.apple.TextEdit RichText -int 0
@@ -393,7 +420,7 @@ defaults_write com.apple.TextEdit PlainTextEncodingForWrite -int 4
 # Photos
 ###############################################################################
 
-echo "Configuring Photos..."
+# Photos
 
 # Prevent Photos from opening automatically when devices are plugged in
 defaults_write -currentHost com.apple.ImageCapture disableHotPlug -bool true
@@ -402,7 +429,7 @@ defaults_write -currentHost com.apple.ImageCapture disableHotPlug -bool true
 # Text Editing & Messages
 ###############################################################################
 
-echo "Configuring Text Editing..."
+# Text Editing & Messages
 
 # Disable smart quotes globally (useful when typing code)
 # These settings apply to all apps including Messages, Notes, TextEdit, etc.
@@ -417,7 +444,7 @@ defaults_write NSGlobalDomain WebAutomaticSpellingCorrectionEnabled -bool false
 # Menu Bar
 ###############################################################################
 
-echo "Configuring Menu Bar..."
+# Menu Bar
 
 # Automatically hide and show the menu bar
 defaults_write NSGlobalDomain _HIHideMenuBar -bool true
@@ -432,20 +459,24 @@ defaults_write com.apple.menuextra.clock IsAnalog -bool false
 # Apply Changes
 ###############################################################################
 
-echo ""
-echo "Done! Note that some changes require a logout/restart to take effect."
-echo ""
-echo "Restarting affected applications..."
+if [[ "$AUDIT_MODE" == true ]]; then
+    if [[ "$CHANGES_DETECTED" == true ]]; then
+        echo -e "${BLUE}Changes would be applied. Run without --audit to apply.${RESET}"
+    else
+        echo -e "${BLUE}All settings are already applied.${RESET}"
+    fi
+else
+    echo -e "${BLUE}Applied macOS preferences.${RESET}"
 
-# Restart affected applications
-for app in "Activity Monitor" \
-	"Dock" \
-	"Finder" \
-	"SystemUIServer"; do
-	killall "${app}" &> /dev/null || true
-done
+    # Restart affected applications
+    for app in "Activity Monitor" \
+        "Dock" \
+        "Finder" \
+        "SystemUIServer"; do
+        killall "${app}" &> /dev/null || true
+    done
 
-echo ""
-echo "macOS system preferences have been applied successfully!"
-echo ""
-echo "You may need to log out and log back in for all changes to take effect."
+    echo -e "${BLUE}Restarted applications.${RESET}"
+fi
+
+echo -e "${DIM}Note: Some changes require logout/restart to take effect.${RESET}"
