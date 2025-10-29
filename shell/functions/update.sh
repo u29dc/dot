@@ -31,12 +31,34 @@ upd() {
         fi
     }
 
-    # Check what's outdated before updating
+    # Simple dot animation: cycles through . .. ...
+    show_dots() {
+        local dots=""
+        while true; do
+            for i in 1 2 3; do
+                dots=$(printf '.%.0s' $(seq 1 "$i"))
+                printf "\r%s   " "$dots"
+                sleep 0.5
+            done
+        done
+    }
+
+    # Start dot animation and check what's outdated
+    set +m # Disable job control messages
+    show_dots &
+    local dots_pid=$!
+
     local check_start=$(get_timestamp)
     local outdated_formulae=$(brew outdated --formula 2>/dev/null)
     local outdated_casks=$(brew outdated --cask 2>/dev/null)
     local check_elapsed=$(echo "$(get_timestamp) - $check_start" | bc 2>/dev/null || echo "0")
     local check_time=$(format_time "$check_elapsed")
+
+    # Stop animation and clear line
+    kill "$dots_pid" 2>/dev/null
+    wait "$dots_pid" 2>/dev/null
+    set -m # Re-enable job control
+    printf "\r\033[K"
 
     # Count outdated packages
     local formula_count=0
@@ -52,11 +74,15 @@ upd() {
 
     # No updates case
     if [ "$total_outdated" -eq 0 ]; then
-        echo -e "${BLUE}Checked Homebrew in ${check_time}. Everything up to date.${RESET}"
+        echo -e "${BLUE}Everything up to date (checked in ${check_time}).${RESET}"
         return 0
     fi
 
-    # Update Homebrew
+    # Update Homebrew with dot animation
+    set +m # Disable job control messages
+    show_dots &
+    dots_pid=$!
+
     local update_start=$(get_timestamp)
     local update_output
     local update_result
@@ -67,11 +93,21 @@ upd() {
     local update_elapsed=$(echo "$(get_timestamp) - $update_start" | bc 2>/dev/null || echo "0")
     local update_time=$(format_time "$update_elapsed")
 
-    if [ "$update_result" -eq 0 ]; then
-        # Success case: single-line summary
-        echo -e "${BLUE}Updated ${formula_count} formulae and ${cask_count} casks in ${update_time}. All packages current.${RESET}"
+    # Stop animation and clear line
+    kill "$dots_pid" 2>/dev/null
+    wait "$dots_pid" 2>/dev/null
+    set -m # Re-enable job control
+    printf "\r\033[K"
 
-        # Cleanup old versions
+    if [ "$update_result" -eq 0 ]; then
+        # Success case: show summary
+        echo -e "${BLUE}Updated ${formula_count} formulae and ${cask_count} casks in ${update_time}.${RESET}"
+
+        # Cleanup old versions with dot animation
+        set +m # Disable job control messages
+        show_dots &
+        dots_pid=$!
+
         local cleanup_start=$(get_timestamp)
         local cleanup_output
         local cleanup_result
@@ -82,16 +118,15 @@ upd() {
         local cleanup_elapsed=$(echo "$(get_timestamp) - $cleanup_start" | bc 2>/dev/null || echo "0")
         local cleanup_time=$(format_time "$cleanup_elapsed")
 
+        # Stop animation and clear line
+        kill "$dots_pid" 2>/dev/null
+        wait "$dots_pid" 2>/dev/null
+        set -m # Re-enable job control
+        printf "\r\033[K"
+
         if [ "$cleanup_result" -eq 0 ]; then
-            # Show space saved
-            local saved=$(brew cleanup -ns 2>/dev/null | grep "Pruned" | awk '{print $2" "$3}')
-            if [ -n "$saved" ]; then
-                echo -e "${BLUE}Cleaned up ${saved} in ${cleanup_time}. No outdated versions remaining.${RESET}"
-            else
-                echo -e "${BLUE}Cleaned up in ${cleanup_time}. No outdated versions remaining.${RESET}"
-            fi
+            echo -e "${BLUE}Cleaned up in ${cleanup_time}.${RESET}"
         else
-            # Cleanup error case: expand to multi-line
             echo -e "${RED}[FAIL]${RESET} Cleanup failed in ${cleanup_time}"
             echo -e "${DIM}${cleanup_output}${RESET}"
         fi
