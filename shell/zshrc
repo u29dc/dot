@@ -72,7 +72,7 @@ alias find='fd'
 alias htop='btm'
 alias top='btm'
 alias scc='scc --no-cocomo'
-alias claude-clear='bun "$DOTFILES_DIR/agents/claude-clear-history.ts"'
+alias b='bun run'
 
 # ------------------------------------------------------------------------------
 # FUNCTIONS
