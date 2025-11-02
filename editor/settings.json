@@ -4,11 +4,11 @@
 	"ui_font_size": 15,
 	// "ui_font_family": "JetBrains Mono",
 	"buffer_font_size": 12,
-	"buffer_font_family": "JetBrains Mono",
+	"buffer_font_family": "Fira Code Retina",
 	"icon_theme": "Zed (Default)",
 
 	// Panels
-	"git_panel": { "dock": "left" },
+	"git_panel": { "sort_by_path": true, "dock": "left" },
 	"outline_panel": { "dock": "right" },
 	"minimap": { "show": "always" },
 
