@@ -8,7 +8,7 @@
 	"icon_theme": "Zed (Default)",
 
 	// Panels
-	"git_panel": { "sort_by_path": true, "dock": "left" },
+	"git_panel": { "sort_by_path": false, "dock": "left" },
 	"outline_panel": { "dock": "right" },
 	"minimap": { "show": "always" },
 
