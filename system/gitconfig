@@ -75,7 +75,7 @@
 	cb = checkout -b
 	c = commit -v
 	ca = commit -v --amend
-	l = log --oneline --graph --decorate
+	l = !git --no-pager log --oneline --graph --decorate
 	p = pull --rebase --autostash
 	ps = push
 	psf = push --force-with-lease
