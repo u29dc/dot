@@ -60,14 +60,22 @@ upd() {
     set -m # Re-enable job control
     printf "\r\033[K"
 
-    # Count outdated packages
+    # Count outdated packages and extract names
     local formula_count=0
     local cask_count=0
+    local -a package_names=()
+
     if [ -n "$outdated_formulae" ]; then
         formula_count=$(echo "$outdated_formulae" | wc -l | tr -d ' ')
+        while IFS= read -r pkg; do
+            [ -n "$pkg" ] && package_names+=("$pkg")
+        done <<<"$outdated_formulae"
     fi
     if [ -n "$outdated_casks" ]; then
         cask_count=$(echo "$outdated_casks" | wc -l | tr -d ' ')
+        while IFS= read -r pkg; do
+            [ -n "$pkg" ] && package_names+=("$pkg")
+        done <<<"$outdated_casks"
     fi
 
     local total_outdated=$((formula_count + cask_count))
@@ -100,8 +108,30 @@ upd() {
     printf "\r\033[K"
 
     if [ "$update_result" -eq 0 ]; then
-        # Success case: show summary
-        echo -e "${BLUE}Updated ${formula_count} formulae and ${cask_count} casks in ${update_time}.${RESET}"
+        # Success case: format package list
+        local pkg_list=""
+        local pkg_count="${#package_names[@]}"
+        local array_offset=0
+
+        # zsh arrays start at index 1, bash arrays at 0. Offset keeps access correct.
+        if [ -n "$ZSH_VERSION" ]; then
+            array_offset=1
+        fi
+
+        if [ "$pkg_count" -eq 0 ]; then
+            pkg_list="${total_outdated} package(s)"
+        elif [ "$pkg_count" -eq 1 ]; then
+            pkg_list="${package_names[$((0 + array_offset))]}"
+        elif [ "$pkg_count" -eq 2 ]; then
+            pkg_list="${package_names[$((0 + array_offset))]} and ${package_names[$((1 + array_offset))]}"
+        else
+            for ((i = 0; i < pkg_count - 1; i++)); do
+                pkg_list+="${package_names[$((i + array_offset))]}, "
+            done
+            pkg_list+="and ${package_names[$((pkg_count - 1 + array_offset))]}"
+        fi
+
+        echo -e "${BLUE}Updated ${pkg_list} in ${update_time}.${RESET}"
 
         # Cleanup old versions with dot animation
         set +m # Disable job control messages
