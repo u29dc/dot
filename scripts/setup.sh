@@ -99,6 +99,7 @@ link_file "$DOTFILES_DIR/terminal/bottom.toml" "$HOME/.config/bottom/bottom.toml
 link_file "$DOTFILES_DIR/terminal/atuin.toml" "$HOME/.config/atuin/config.toml"
 link_file "$DOTFILES_DIR/terminal/ghostty" "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
 link_file "$DOTFILES_DIR/terminal/bat" "$HOME/.config/bat/config"
+link_file "$DOTFILES_DIR/terminal/yt-dlp" "$HOME/.config/yt-dlp/config"
 link_file "$DOTFILES_DIR/biome.json" "$HOME/.config/biome/biome.json"
 
 # System configs
