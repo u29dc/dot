@@ -165,7 +165,11 @@
 			"WebFetch(domain:jsr.io)",
 
 			"WebFetch(domain:raycast.com)",
-			"WebFetch(domain:developers.raycast.com)"
+			"WebFetch(domain:developers.raycast.com)",
+
+			"WebFetch(domain:astro.build)",
+			"WebFetch(domain:docs.astro.build)",
+			"WebFetch(domain:svelte.dev)"
 		],
 		"deny": [],
 		"ask": ["Bash(rm:*)", "Bash(rm -rf:*)", "Bash(rm -r:*)", "Bash(sudo:*)"],
