@@ -274,8 +274,8 @@ defaults_write com.apple.dock minimize-to-application -bool true
 # Enable spring loading for all Dock items
 defaults_write com.apple.dock enable-spring-load-actions-on-all-items -bool true
 
-# Show indicator lights for open applications
-defaults_write com.apple.dock show-process-indicators -bool true
+# Don't show indicator lights for open applications
+defaults_write com.apple.dock show-process-indicators -bool false
 
 # Don't animate opening applications
 defaults_write com.apple.dock launchanim -bool false
