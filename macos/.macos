@@ -203,6 +203,12 @@ defaults_write NSGlobalDomain com.apple.trackpad.scaling -float 1.5
 # Enable natural scrolling
 defaults_write NSGlobalDomain com.apple.swipescrolldirection -bool true
 
+# Enable three-finger swipe gestures for spaces and Mission Control
+defaults_write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerHorizSwipeGesture -int 2
+defaults_write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerVertSwipeGesture -int 2
+defaults_write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerHorizSwipeGesture -int 2
+defaults_write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerVertSwipeGesture -int 2
+
 ###############################################################################
 # Finder
 ###############################################################################
