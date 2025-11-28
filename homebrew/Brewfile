@@ -84,7 +84,6 @@ cask "notion-calendar"    # Calendar app
 cask "notion-mail"        # Email client
 cask "raycast"            # Launcher and productivity
 cask "cursor"             # AI-powered code editor
-cask "ollama-app"         # Local LLM runner
 
 # Development
 cask "zed@preview"        # Fast code editor
