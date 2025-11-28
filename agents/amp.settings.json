@@ -1,0 +1,14 @@
+{
+	"amp.permissions": [
+		{ "tool": "Read", "matches": { "path": "**" }, "action": "allow" },
+		{ "tool": "Write", "matches": { "path": "**" }, "action": "allow" },
+		{ "tool": "Bash", "matches": { "cmd": "*" }, "action": "ask" }
+	],
+	"amp.tools.disable": [],
+	"amp.mcpServers": {},
+	"amp.anthropic.thinking.enabled": true,
+	"amp.experimental.planMode": true,
+	"amp.git.commit.ampThread.enabled": false,
+	"amp.git.commit.coauthor.enabled": false,
+	"amp.todos.enabled": true
+}

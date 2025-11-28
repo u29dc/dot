@@ -115,13 +115,17 @@ echo
 echo "Agent configurations:"
 # Claude Code
 link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.claude/CLAUDE.md"
-link_file "$DOTFILES_DIR/agents/subagents" "$HOME/.claude/agents"
-link_file "$DOTFILES_DIR/agents/commands" "$HOME/.claude/commands"
 link_file "$DOTFILES_DIR/agents/claude.json" "$HOME/.claude/settings.json"
+link_file "$DOTFILES_DIR/agents/commands" "$HOME/.claude/agents"
+link_file "$DOTFILES_DIR/agents/commands" "$HOME/.claude/commands"
 # Codex CLI
 link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.codex/AGENTS.md"
+link_file "$DOTFILES_DIR/agents/commands" "$HOME/.codex/commands"
 link_file "$DOTFILES_DIR/agents/codex.toml" "$HOME/.codex/config.toml"
-link_file "$DOTFILES_DIR/agents/subagents" "$HOME/.codex/prompts"
+# AMP CLI
+link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.config/amp/AGENTS.md"
+link_file "$DOTFILES_DIR/agents/commands" "$HOME/.config/amp/commands"
+link_file "$DOTFILES_DIR/agents/amp.settings.json" "$HOME/.config/amp/settings.json"
 
 echo
 echo "Symlinks created successfully."

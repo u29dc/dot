@@ -144,6 +144,7 @@
 			"WebFetch(domain:platform.openai.com)",
 			"WebFetch(domain:ai.google.dev)",
 			"WebFetch(domain:modelcontextprotocol.io)",
+			"WebFetch(domain:ampcode.com)",
 
 			"WebFetch(domain:bun.sh)",
 			"WebFetch(domain:biomejs.dev)",
