@@ -29,10 +29,10 @@ bun run util:check         # Run all linting checks
 ```
 dot/
 ├── agents/                   # AI coding assistant configurations
-│   ├── subagents/            # Specialized agent configs (executor, researcher, reviewer, troubleshooter, cleaner)
-│   ├── commands/             # Slash commands (commit, execute, research, review, troubleshoot, cleanup)
+│   ├── commands/             # Self-contained commands (clean/execute/plan/research/review/troubleshoot/commit/pr)
 │   ├── AGENTS.md             # Main AI agent manifesto
 │   ├── claude.json           # Claude Code settings
+│   ├── amp.settings.json     # AMP CLI settings
 │   └── codex.toml            # Codex AI configuration
 ├── shell/                    # Shell configurations
 │   ├── functions/            # Extracted shell functions
@@ -50,47 +50,47 @@ dot/
 
 The `agents/` directory contains configurations for AI coding assistants:
 
-| File          | Description                                       | Usage                               |
-| ------------- | ------------------------------------------------- | ----------------------------------- |
-| `AGENTS.md`   | Main AI agent manifesto and guidelines            | Linked to `~/.claude/CLAUDE.md`     |
-| `claude.json` | Claude Code settings with modern tool permissions | Linked to `~/.claude/settings.json` |
-| `subagents/`  | Specialized agent configurations (5 agents)       | Linked to `~/.claude/agents/`       |
-| `commands/`   | Slash command definitions (6 commands)            | Linked to `~/.claude/commands/`     |
-| `codex.toml`  | Codex AI configuration and model settings         | Linked to `~/.config/codex.toml`    |
+| File                | Description                                                                         | Usage                                                                                              |
+| ------------------- | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `AGENTS.md`         | Main AI agent manifesto and guidelines                                              | Linked to `~/.claude/CLAUDE.md` and `~/.config/amp/AGENTS.md`                                      |
+| `claude.json`       | Claude Code settings with modern tool permissions                                   | Linked to `~/.claude/settings.json`                                                                |
+| `amp.settings.json` | AMP CLI settings and permissions                                                    | Linked to `~/.config/amp/settings.json`                                                            |
+| `commands/`         | Self-contained commands (clean/execute/plan/research/review/troubleshoot/commit/pr) | Linked to `~/.claude/agents`, `~/.claude/commands`, `~/.codex/commands`, `~/.config/amp/commands/` |
+| `codex.toml`        | Codex AI configuration and model settings                                           | Linked to `~/.config/codex.toml`                                                                   |
 
 These configurations promote modern CLI tools (eza, bat, fd, rg, etc.) and include comprehensive development guidelines.
 
 ## Configuration Mappings
 
-| Config       | Source                   | Destination                                                  |
-| ------------ | ------------------------ | ------------------------------------------------------------ |
-| **Shell**    |                          |                                                              |
-| Zsh          | `shell/zshrc`            | `~/.zshrc`                                                   |
-| Zsh Profile  | `shell/zprofile`         | `~/.zprofile`                                                |
-| **Editor**   |                          |                                                              |
-| Zed Settings | `editor/settings.json`   | `~/.config/zed/settings.json`                                |
-| Zed Keymap   | `editor/keymap.json`     | `~/.config/zed/keymap.json`                                  |
-| **Terminal** |                          |                                                              |
-| SSH          | `terminal/ssh`           | `~/.ssh/config`                                              |
-| Neofetch     | `terminal/neofetch`      | `~/.config/neofetch/config.conf`                             |
-| Statusline   | `terminal/statusline`    | `~/.config/ccstatusline/settings.json`                       |
-| Starship     | `terminal/starship.toml` | `~/.config/starship/starship.toml`                           |
-| Bottom       | `terminal/bottom.toml`   | `~/.config/bottom/bottom.toml`                               |
-| Atuin        | `terminal/atuin.toml`    | `~/.config/atuin/config.toml`                                |
-| Ghostty      | `terminal/ghostty`       | `~/Library/Application Support/com.mitchellh.ghostty/config` |
-| Bat          | `terminal/bat`           | `~/.config/bat/config`                                       |
-| Biome        | `biome.json`             | `~/.config/biome/biome.json`                                 |
-| **System**   |                          |                                                              |
-| Git          | `system/gitconfig`       | `~/.gitconfig`                                               |
-| Karabiner    | `system/karabiner`       | `~/.config/karabiner/karabiner.json`                         |
-| 1Password    | `system/1password`       | `~/.config/1Password/ssh/agent.toml`                         |
-| macOS        | `macos/.macos`           | `~/.macos`                                                   |
-| **Agents**   |                          |                                                              |
-| AI Manifesto | `agents/AGENTS.md`       | `~/.claude/CLAUDE.md`                                        |
-| Claude Code  | `agents/claude.json`     | `~/.claude/settings.json`                                    |
-| Codex        | `agents/codex.toml`      | `~/.config/codex.toml`                                       |
-| Subagents    | `agents/subagents`       | `~/.claude/agents`                                           |
-| Commands     | `agents/commands`        | `~/.claude/commands`                                         |
+| Config       | Source                     | Destination                                                                             |
+| ------------ | -------------------------- | --------------------------------------------------------------------------------------- |
+| **Shell**    |                            |                                                                                         |
+| Zsh          | `shell/zshrc`              | `~/.zshrc`                                                                              |
+| Zsh Profile  | `shell/zprofile`           | `~/.zprofile`                                                                           |
+| **Editor**   |                            |                                                                                         |
+| Zed Settings | `editor/settings.json`     | `~/.config/zed/settings.json`                                                           |
+| Zed Keymap   | `editor/keymap.json`       | `~/.config/zed/keymap.json`                                                             |
+| **Terminal** |                            |                                                                                         |
+| SSH          | `terminal/ssh`             | `~/.ssh/config`                                                                         |
+| Neofetch     | `terminal/neofetch`        | `~/.config/neofetch/config.conf`                                                        |
+| Statusline   | `terminal/statusline`      | `~/.config/ccstatusline/settings.json`                                                  |
+| Starship     | `terminal/starship.toml`   | `~/.config/starship/starship.toml`                                                      |
+| Bottom       | `terminal/bottom.toml`     | `~/.config/bottom/bottom.toml`                                                          |
+| Atuin        | `terminal/atuin.toml`      | `~/.config/atuin/config.toml`                                                           |
+| Ghostty      | `terminal/ghostty`         | `~/Library/Application Support/com.mitchellh.ghostty/config`                            |
+| Bat          | `terminal/bat`             | `~/.config/bat/config`                                                                  |
+| Biome        | `biome.json`               | `~/.config/biome/biome.json`                                                            |
+| **System**   |                            |                                                                                         |
+| Git          | `system/gitconfig`         | `~/.gitconfig`                                                                          |
+| Karabiner    | `system/karabiner`         | `~/.config/karabiner/karabiner.json`                                                    |
+| 1Password    | `system/1password`         | `~/.config/1Password/ssh/agent.toml`                                                    |
+| macOS        | `macos/.macos`             | `~/.macos`                                                                              |
+| **Agents**   |                            |                                                                                         |
+| AI Manifesto | `agents/AGENTS.md`         | `~/.claude/CLAUDE.md`, `~/.config/amp/AGENTS.md`                                        |
+| Claude Code  | `agents/claude.json`       | `~/.claude/settings.json`                                                               |
+| AMP CLI      | `agents/amp.settings.json` | `~/.config/amp/settings.json`                                                           |
+| Codex        | `agents/codex.toml`        | `~/.config/codex.toml`                                                                  |
+| Commands     | `agents/commands`          | `~/.claude/agents`, `~/.claude/commands`, `~/.codex/commands`, `~/.config/amp/commands` |
 
 ## Installed Applications
 
