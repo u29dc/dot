@@ -65,6 +65,7 @@ brew "shfmt"              # Shell script formatter
 
 # AI & Cloud CLIs
 cask "codex"              # AI code assistant
+cask "claude-code"        # Claude AI CLI
 brew "gemini-cli"         # Gemini API CLI
 brew "stripe"             # Stripe CLI tools
 brew "supabase"           # Supabase CLI
