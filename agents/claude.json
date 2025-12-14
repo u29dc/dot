@@ -16,6 +16,16 @@
 
 			"mcp__next-devtools__init",
 			"mcp__next-devtools__nextjs_docs",
+			"mcp__next-devtools__browser_eval",
+			"mcp__next-devtools__nextjs_index",
+			"mcp__next-devtools__nextjs_call",
+			"mcp__next-devtools__upgrade_nextjs_16",
+			"mcp__next-devtools__enable_cache_components",
+
+			"mcp__svelte__list-sections",
+			"mcp__svelte__get-documentation",
+			"mcp__svelte__svelte-autofixer",
+			"mcp__svelte__playground-link",
 
 			"Bash(bun:*)",
 			"Bash(bun run:*)",
@@ -68,6 +78,7 @@
 			"Bash(xargs:*)",
 			"Bash(jq:*)",
 			"Bash(yq:*)",
+			"Bash(sqlite3:*)",
 
 			"Bash(cp:*)",
 			"Bash(mv:*)",
@@ -191,6 +202,7 @@
 			"WebFetch(domain:docs.convex.dev)",
 			"WebFetch(domain:stack.convex.dev)",
 			"WebFetch(domain:neon.tech)",
+			"WebFetch(domain:neon.com)",
 			"WebFetch(domain:turso.tech)",
 			"WebFetch(domain:upstash.com)",
 			"WebFetch(domain:planetscale.com)",
