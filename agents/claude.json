@@ -9,17 +9,17 @@
 			"Glob(**)",
 			"Grep(**)",
 			"LS(**)",
+
 			"TodoWrite(**)",
 			"Task(**)",
 			"TodoRead",
 
-			"Bash(git:*)",
-			"Bash(gh:*)",
+			"mcp__next-devtools__init",
+			"mcp__next-devtools__nextjs_docs",
 
 			"Bash(bun:*)",
 			"Bash(bun run:*)",
 			"Bash(bunx:*)",
-
 			"Bash(npm:*)",
 			"Bash(npm run:*)",
 			"Bash(npx:*)",
@@ -31,15 +31,22 @@
 
 			"Bash(biome:*)",
 			"Bash(oxlint:*)",
-			"Bash(scc:*)",
 			"Bash(tsc:*)",
 			"Bash(webpack:*)",
 			"Bash(vite:*)",
 			"Bash(dotenv:*)",
+
 			"Bash(sh:*)",
 			"Bash(brew:*)",
 			"Bash(vercel:*)",
 			"Bash(stripe:*)",
+
+			"Bash(git:*)",
+			"Bash(gh:*)",
+			"Bash(gitui:*)",
+			"Bash(lazygit:*)",
+			"Bash(delta:*)",
+			"Bash(gitingest:*)",
 
 			"Bash(ls:*)",
 			"Bash(eza:*)",
@@ -48,24 +55,33 @@
 			"Bash(pdftotext:*)",
 			"Bash(head:*)",
 			"Bash(tail:*)",
+
 			"Bash(grep:*)",
 			"Bash(rg:*)",
 			"Bash(ripgrep:*)",
 			"Bash(find:*)",
 			"Bash(fd:*)",
+
 			"Bash(sed:*)",
 			"Bash(sd:*)",
 			"Bash(awk:*)",
 			"Bash(xargs:*)",
+			"Bash(jq:*)",
+			"Bash(yq:*)",
+
 			"Bash(cp:*)",
 			"Bash(mv:*)",
 			"Bash(mkdir:*)",
 			"Bash(touch:*)",
 			"Bash(pwd:*)",
 			"Bash(cd:*)",
+
 			"Bash(tree:*)",
 			"Bash(broot:*)",
 			"Bash(br:*)",
+			"Bash(zoxide:*)",
+			"Bash(z:*)",
+
 			"Bash(du:*)",
 			"Bash(dust:*)",
 			"Bash(dua:*)",
@@ -73,15 +89,17 @@
 			"Bash(top:*)",
 			"Bash(btm:*)",
 			"Bash(bottom:*)",
-			"Bash(gitui:*)",
-			"Bash(lazygit:*)",
-			"Bash(delta:*)",
+
+			"Bash(cargo:*)",
+			"Bash(rustc:*)",
+			"Bash(rustup:*)",
+			"Bash(rustfmt:*)",
+			"Bash(clippy:*)",
+
+			"Bash(scc:*)",
 			"Bash(tokei:*)",
 			"Bash(hyperfine:*)",
-			"Bash(zoxide:*)",
-			"Bash(z:*)",
 
-			"Bash(gitingest:*)",
 			"Bash(echo:*)",
 			"Bash(printf:*)",
 			"Bash(which:*)",
@@ -93,38 +111,32 @@
 			"Bash(sort:*)",
 			"Bash(uniq:*)",
 			"Bash(diff:*)",
+
 			"Bash(curl:*)",
 			"Bash(wget:*)",
 
-			"Bash(cargo:*)",
-			"Bash(rustc:*)",
-			"Bash(rustup:*)",
-			"Bash(rustfmt:*)",
-			"Bash(clippy:*)",
-
-			"Bash(jq:*)",
-			"Bash(yq:*)",
 			"Bash(tar:*)",
 			"Bash(unzip:*)",
 			"Bash(gzip:*)",
 			"Bash(gunzip:*)",
+
 			"Bash(file:*)",
 			"Bash(ps:*)",
-
 			"Bash(env:*)",
 			"Bash(printenv:*)",
 			"Bash(basename:*)",
 			"Bash(dirname:*)",
 			"Bash(realpath:*)",
 			"Bash(readlink:*)",
-
 			"Bash(kill:*)",
 			"Bash(killall:*)",
 			"Bash(sleep:*)",
 			"Bash(time:*)",
+
 			"Bash(pbcopy:*)",
 			"Bash(pbpaste:*)",
 			"Bash(open:*)",
+
 			"Bash(:* | :*)",
 			"Bash(:* | :* | :*)",
 
@@ -133,8 +145,13 @@
 			"WebFetch(domain:github.com)",
 			"WebFetch(domain:raw.githubusercontent.com)",
 			"WebFetch(domain:gist.githubusercontent.com)",
+			"WebFetch(domain:api.github.com)",
+
 			"WebFetch(domain:npmjs.com)",
 			"WebFetch(domain:registry.npmjs.org)",
+			"WebFetch(domain:jsr.io)",
+			"WebFetch(domain:crates.io)",
+
 			"WebFetch(domain:developer.mozilla.org)",
 			"WebFetch(domain:stackoverflow.com)",
 
@@ -143,34 +160,100 @@
 			"WebFetch(domain:openai.com)",
 			"WebFetch(domain:platform.openai.com)",
 			"WebFetch(domain:ai.google.dev)",
+
 			"WebFetch(domain:modelcontextprotocol.io)",
 			"WebFetch(domain:ampcode.com)",
 
 			"WebFetch(domain:bun.sh)",
+			"WebFetch(domain:deno.com)",
 			"WebFetch(domain:biomejs.dev)",
 			"WebFetch(domain:typescriptlang.org)",
+			"WebFetch(domain:vitejs.dev)",
+			"WebFetch(domain:turbo.build)",
+
 			"WebFetch(domain:nextjs.org)",
 			"WebFetch(domain:react.dev)",
+			"WebFetch(domain:react-hook-form.com)",
+			"WebFetch(domain:astro.build)",
+			"WebFetch(domain:docs.astro.build)",
+			"WebFetch(domain:svelte.dev)",
+
 			"WebFetch(domain:vercel.com)",
-			"WebFetch(domain:tailwindcss.com)",
-			"WebFetch(domain:vitejs.dev)",
-			"WebFetch(domain:deno.com)",
+			"WebFetch(domain:netlify.com)",
+			"WebFetch(domain:fly.io)",
+			"WebFetch(domain:railway.app)",
+			"WebFetch(domain:cloudflare.com)",
+			"WebFetch(domain:developers.cloudflare.com)",
+
 			"WebFetch(domain:supabase.com)",
 			"WebFetch(domain:supabase.io)",
+			"WebFetch(domain:convex.dev)",
+			"WebFetch(domain:docs.convex.dev)",
+			"WebFetch(domain:stack.convex.dev)",
+			"WebFetch(domain:neon.tech)",
+			"WebFetch(domain:turso.tech)",
+			"WebFetch(domain:upstash.com)",
+			"WebFetch(domain:planetscale.com)",
+
+			"WebFetch(domain:prisma.io)",
+			"WebFetch(domain:orm.drizzle.team)",
+
+			"WebFetch(domain:clerk.com)",
+			"WebFetch(domain:authjs.dev)",
+			"WebFetch(domain:lucia-auth.com)",
+
+			"WebFetch(domain:stripe.com)",
+			"WebFetch(domain:docs.stripe.com)",
+			"WebFetch(domain:polar.sh)",
+			"WebFetch(domain:useautumn.com)",
+			"WebFetch(domain:docs.useautumn.com)",
+			"WebFetch(domain:lemonsqueezy.com)",
+
+			"WebFetch(domain:tailwindcss.com)",
+			"WebFetch(domain:shadcn.com)",
+			"WebFetch(domain:ui.shadcn.com)",
+			"WebFetch(domain:radix-ui.com)",
+			"WebFetch(domain:headlessui.com)",
+			"WebFetch(domain:lucide.dev)",
+
+			"WebFetch(domain:zod.dev)",
+			"WebFetch(domain:tanstack.com)",
+			"WebFetch(domain:trpc.io)",
+
+			"WebFetch(domain:vitest.dev)",
+			"WebFetch(domain:playwright.dev)",
+
+			"WebFetch(domain:resend.com)",
+			"WebFetch(domain:react.email)",
+
+			"WebFetch(domain:sanity.io)",
+			"WebFetch(domain:payloadcms.com)",
+
+			"WebFetch(domain:replicate.com)",
+			"WebFetch(domain:huggingface.co)",
+			"WebFetch(domain:groq.com)",
+			"WebFetch(domain:sdk.vercel.ai)",
+			"WebFetch(domain:langchain.com)",
+			"WebFetch(domain:mistral.ai)",
+
+			"WebFetch(domain:posthog.com)",
+			"WebFetch(domain:sentry.io)",
+
+			"WebFetch(domain:motion.dev)",
 			"WebFetch(domain:bunny.net)",
 
 			"WebFetch(domain:rust-lang.org)",
 			"WebFetch(domain:doc.rust-lang.org)",
 			"WebFetch(domain:docs.rs)",
-			"WebFetch(domain:crates.io)",
-			"WebFetch(domain:jsr.io)",
+			"WebFetch(domain:ziglang.org)",
+
+			"WebFetch(domain:web.dev)",
+			"WebFetch(domain:tc39.es)",
 
 			"WebFetch(domain:raycast.com)",
 			"WebFetch(domain:developers.raycast.com)",
-
-			"WebFetch(domain:astro.build)",
-			"WebFetch(domain:docs.astro.build)",
-			"WebFetch(domain:svelte.dev)"
+			"WebFetch(domain:zed.dev)",
+			"WebFetch(domain:cursor.com)"
 		],
 		"deny": [],
 		"ask": ["Bash(rm:*)", "Bash(rm -rf:*)", "Bash(rm -r:*)", "Bash(sudo:*)"],
@@ -183,5 +266,6 @@
 		"padding": 0
 	},
 	"spinnerTipsEnabled": false,
-	"alwaysThinkingEnabled": true
+	"alwaysThinkingEnabled": true,
+	"model": "opus"
 }
