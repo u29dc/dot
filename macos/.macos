@@ -209,6 +209,14 @@ defaults_write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerVertSwipeGes
 defaults_write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerHorizSwipeGesture -int 2
 defaults_write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerVertSwipeGesture -int 2
 
+# Disable three-finger drag (enables three-finger swipe gestures)
+defaults_write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerDrag -bool false
+defaults_write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag -bool false
+
+# Disable four-finger vertical swipe (use three-finger instead)
+defaults_write com.apple.AppleMultitouchTrackpad TrackpadFourFingerVertSwipeGesture -int 0
+defaults_write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadFourFingerVertSwipeGesture -int 0
+
 ###############################################################################
 # Finder
 ###############################################################################
