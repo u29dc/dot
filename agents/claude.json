@@ -255,7 +255,8 @@
 			"WebFetch(domain:raycast.com)",
 			"WebFetch(domain:developers.raycast.com)",
 			"WebFetch(domain:zed.dev)",
-			"WebFetch(domain:cursor.com)"
+			"WebFetch(domain:cursor.com)",
+			"WebFetch(domain:ghostty.org)"
 		],
 		"deny": [],
 		"ask": ["Bash(rm:*)", "Bash(rm -rf:*)", "Bash(rm -r:*)", "Bash(sudo:*)"],
