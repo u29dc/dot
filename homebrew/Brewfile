@@ -21,6 +21,7 @@ brew "bat"                # Cat with syntax highlighting
 brew "fd"                 # Fast find alternative
 brew "bottom"             # System monitor
 brew "zoxide"             # Smarter cd
+brew "ripgrep"            # Fast grep alternative
 
 # Git Tools
 brew "git-delta"          # Better git diffs
@@ -65,10 +66,10 @@ brew "shfmt"              # Shell script formatter
 
 # AI & Cloud CLIs
 cask "codex"              # AI code assistant
-cask "claude-code"        # Claude AI CLI
 brew "gemini-cli"         # Gemini API CLI
 brew "stripe"             # Stripe CLI tools
 brew "supabase"           # Supabase CLI
+brew "vercel-cli"         # Vercel deployment CLI
 
 # Casks (GUI Applications)
 
@@ -84,6 +85,7 @@ cask "notion"             # Note-taking and productivity
 cask "notion-calendar"    # Calendar app
 cask "notion-mail"        # Email client
 cask "raycast"            # Launcher and productivity
+cask "mochi"              # Spaced repetition learning
 cask "cursor"             # AI-powered code editor
 
 # Development
@@ -100,11 +102,12 @@ cask "keka"               # Archive utility
 cask "karabiner-elements" # Keyboard customizer
 cask "monitorcontrol"     # External display control
 cask "transmission"       # BitTorrent client
+cask "blender"            # 3D creation suite
+cask "spotify"            # Music streaming
 
 # Communication
 cask "whatsapp"           # Messaging
 cask "zoom"               # Video conferencing
-cask "lark"               # Team collaboration
 
 # Cloud Storage
 cask "google-drive"       # Google Drive sync
