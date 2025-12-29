@@ -48,7 +48,7 @@ Applies to all agents (Claude Code, Codex CLI, AMP) unless an agent-specific not
 ## 4. Task Management
 
 1. Focus Management: Single task at a time, clear boundaries, regular progress updates.
-2. Incremental Development: Small verifiable changes, test after each change, commit frequently, maximum 10 files per session.
+2. Incremental Development: Small verifiable changes, test after each change, commit frequently.
 3. Git Workflow: Strict commitlint format `type(scope): subject line`, all lowercase, no trailing punctuation. Allowed types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`. No build artifacts or generated files. PR template: Summary, Related Issues, Testing Steps, Screenshots (UI), Risks/Follow-ups.
 4. Command Execution: Use tool-specific filtering over bash pipes. Chain with `&&` only when dependent; avoid `||` for critical operations. Parallelize independent commands via multiple calls. Check permissions when needed.
 

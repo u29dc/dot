@@ -166,6 +166,7 @@
 			"WebFetch(domain:ampcode.com)",
 
 			"WebFetch(domain:bun.sh)",
+			"WebFetch(domain:bun.com)",
 			"WebFetch(domain:deno.com)",
 			"WebFetch(domain:biomejs.dev)",
 			"WebFetch(domain:typescriptlang.org)",
