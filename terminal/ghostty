@@ -56,7 +56,7 @@ cursor-style = "block"
 cursor-style-blink = true
 
 # Use the "blueprint" variant for the macOS application icon.
-macos-icon = "blueprint"
+macos-icon = "glass"
 
 # Show the current working directory in the window subtitle.
 window-subtitle = "working-directory"

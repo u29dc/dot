@@ -1,47 +1,26 @@
-# Dependencies & Package Management
+# dependencies
 node_modules/
-bun.lockb
-bun.lock
 
-# Git Hooks & Tooling
-.husky/_
-
-# Biome cache
+# build
+dist/
+build/
+*.tsbuildinfo
 .biome
 
-# Operating System Files
+# system
 .DS_Store
-.AppleDouble
-.LSOverride
 ._*
-.Spotlight-V100
-.Trashes
-Thumbs.db
-ehthumbs.db
-
-# IDEs
 .vscode/
-.idea/
 .zed/
-
-# Misc
-*.backup
-*.bak
-*.tmp
-*.temp
-.tmp/
-.temp/
-
-# Logs
+.idea/
 *.log
-logs/
-npm-debug.log*
+.tmp/
+.env
+.env.*
+!.env.example
+.husky/_/
 
-# Local Overrides
+# project
 .zshrc.local
 .bashrc.local
 shell/zshrc.local
-
-# Local environment files
-.env
-.env.local

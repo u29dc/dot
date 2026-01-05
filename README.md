@@ -1,18 +1,13 @@
-# dot
-
-## Quick Start
+## 1. Quick Start
 
 ```bash
-# Clone and setup
 git clone git@github.com:u29dc/dot.git ~/Git/dot
 cd ~/Git/dot
 bun install     # Install dependencies (formatter, linter, git hooks)
-
-# Note: This will install 70+ packages including GUI applications
-bun run setup   # Setup Homebrew packages & create symlinks
+bun run setup   # Setup Homebrew packages & create symlinks (installs 70+ packages including GUI apps)
 ```
 
-## Commands
+## 2. Commands
 
 ```bash
 bun run setup              # Setup Homebrew packages & create all symlinks
@@ -24,7 +19,7 @@ bun run util:format:shell  # Format shell scripts
 bun run util:check         # Run all linting checks
 ```
 
-## Directory Structure
+## 3. Directory Structure
 
 ```
 dot/
@@ -46,9 +41,7 @@ dot/
 └── scripts/                  # Setup and utility scripts
 ```
 
-## Agent Configurations
-
-The `agents/` directory contains configurations for AI coding assistants:
+## 4. Agent Configurations
 
 | File                | Description                                                                         | Usage                                                                                              |
 | ------------------- | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
@@ -58,9 +51,7 @@ The `agents/` directory contains configurations for AI coding assistants:
 | `commands/`         | Self-contained commands (clean/execute/plan/research/review/troubleshoot/commit/pr) | Linked to `~/.claude/agents`, `~/.claude/commands`, `~/.codex/commands`, `~/.config/amp/commands/` |
 | `codex.toml`        | Codex AI configuration and model settings                                           | Linked to `~/.config/codex.toml`                                                                   |
 
-These configurations promote modern CLI tools (eza, bat, fd, rg, etc.) and include comprehensive development guidelines.
-
-## Configuration Mappings
+## 5. Configuration Mappings
 
 | Config       | Source                     | Destination                                                                             |
 | ------------ | -------------------------- | --------------------------------------------------------------------------------------- |
@@ -92,100 +83,39 @@ These configurations promote modern CLI tools (eza, bat, fd, rg, etc.) and inclu
 | Codex        | `agents/codex.toml`        | `~/.config/codex.toml`                                                                  |
 | Commands     | `agents/commands`          | `~/.claude/agents`, `~/.claude/commands`, `~/.codex/commands`, `~/.config/amp/commands` |
 
-## Installed Applications
+## 6. Applications
 
-The Homebrew bundle (`homebrew/Brewfile`) includes:
-
-### Command-Line Tools
-
-- **Development**: Git, GitHub CLI, Node.js, Bun, Deno, Rust, Zig, Neovim
-- **Modern CLI Tools**: eza (ls), bat (cat), fd (find), bottom (htop), zoxide (cd), ripgrep, sd (sed), dust (du), procs (ps)
-- **Git Enhancements**: git-delta, gitui, lazygit, git-open
-- **Shell Tools**: Starship prompt, Atuin history, Broot file navigation
-- **AI Tools**: codex, gemini-cli
-- **Media Processing**: ffmpeg, ImageMagick, yt-dlp, gifsicle, sox, webp, openexr
-- **Development Utilities**: jq, yq, just, direnv, shellcheck, shfmt, tldr
-- **Utilities**: hyperfine, neofetch, pipx, scc, wget, gitingest, blueutil, gnupg, poppler
-- **Cloud & Services**: stripe, supabase
-
-### GUI Applications
-
-- **Productivity**: 1Password, Notion suite, Raycast, Cursor, Ollama
-- **Development**: Zed (preview), Ghostty terminal, CotEditor
-- **Media & Design**: IINA, Figma, CleanShot, Clop
-- **System Utilities**: CleanMyMac, Karabiner Elements, MonitorControl, Keka, Ice, Leader Key, Transmission
-- **Communication**: WhatsApp, Zoom, Lark
-- **Cloud Storage**: Google Drive, Dropbox, Backblaze
-- **Security**: AdGuard
+- **CLI Development**: Git, GitHub CLI, Node.js, Bun, Deno, Rust, Zig, Neovim
+- **CLI Modern Tools**: eza (ls), bat (cat), fd (find), bottom (htop), zoxide (cd), ripgrep, sd (sed), dust (du), procs (ps)
+- **CLI Git**: git-delta, gitui, lazygit, git-open
+- **CLI Shell**: Starship prompt, Atuin history, Broot file navigation
+- **CLI AI**: codex, gemini-cli
+- **CLI Media**: ffmpeg, ImageMagick, yt-dlp, gifsicle, sox, webp, openexr
+- **CLI Utilities**: jq, yq, just, direnv, shellcheck, shfmt, tldr, hyperfine, neofetch, pipx, scc, wget, gitingest, blueutil, gnupg, poppler, stripe, supabase
+- **GUI Productivity**: 1Password, Notion suite, Raycast, Cursor, Ollama
+- **GUI Development**: Zed (preview), Ghostty terminal, CotEditor
+- **GUI Media**: IINA, Figma, CleanShot, Clop
+- **GUI System**: CleanMyMac, Karabiner Elements, MonitorControl, Keka, Ice, Leader Key, Transmission
+- **GUI Communication**: WhatsApp, Zoom, Lark
+- **GUI Cloud**: Google Drive, Dropbox, Backblaze
+- **GUI Security**: AdGuard
 
 See `homebrew/Brewfile` for the complete list with descriptions.
 
-## Shell Functions and Aliases
+## 7. Shell
 
-### Functions
+- **Functions**: `upd` (update all Homebrew packages with progress tracking), `zed` (open Zed editor, defaults to current directory), `eza` (wrapper with smart defaults for tree view)
+- **Aliases**: `ls`/`ll`/`lt`/`tree` → eza variants, `cat` → bat, `find` → fd, `htop`/`top` → btm
 
-Custom functions available in zsh:
+## 8. Setup
 
-- `upd` - Update all Homebrew packages with progress tracking and detailed output
-- `zed` - Open Zed editor (defaults to current directory)
-- `eza` - Wrapper for eza with smart defaults for tree view
+- **Prerequisites**: Install Homebrew via `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`, Bun installed via Homebrew during setup
+- **Manual steps**: Clone to `~/Git/dot`, run `bun install`, run `./scripts/setup.sh`
+- **Local config**: Copy `shell/zshrc.local.example` to `shell/zshrc.local` for API keys and secrets (gitignored, auto-sourced by zshrc)
 
-### Aliases
-
-Modern CLI tool aliases (replacing traditional commands):
-
-- `ls` → `eza` - Modern ls with git integration and colors
-- `ll` → `eza -la` - Detailed list view
-- `lt` → `eza --tree` - Tree view
-- `tree` → `eza -T` - Tree view alternative
-- `cat` → `bat --paging=never` - Syntax highlighting
-- `find` → `fd` - Fast file search
-- `htop` → `btm` - Modern system monitor
-- `top` → `btm` - Modern system monitor
-
-## Manual Setup
-
-### Prerequisites
-
-```bash
-# Install Homebrew
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-# Note: Bun will be installed via Homebrew during setup
-```
-
-### Manual Installation Steps
-
-```bash
-# Clone repository
-git clone git@github.com:u29dc/dot.git ~/Git/dot
-cd ~/Git/dot
-
-# Install Node.js dependencies
-bun install
-
-# Setup all Homebrew packages and create symlinks
-./scripts/setup.sh
-```
-
-### Local Configuration
-
-For sensitive information like API keys, use the local configuration template:
-
-```bash
-# Copy the example template
-cp shell/zshrc.local.example shell/zshrc.local
-
-# Edit with your API keys and secrets
-# The file is gitignored and won't be committed
-```
-
-The `zshrc.local` file is automatically sourced by `zshrc` if it exists, allowing you to keep API keys, tokens, and other sensitive environment variables separate from the version-controlled configuration.
-
-## Notes
+## 9. Notes
 
 - Existing files are backed up with `.backup` extension before creating symlinks
 - Git hooks are automatically set up for commit linting and formatting
 - Shell configurations are optimized with extracted functions for better maintainability
-- The `upd` function provides detailed feedback on which packages are being updated
 - All modern CLI tools are configured with sensible defaults

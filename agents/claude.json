@@ -97,6 +97,9 @@
 			"Bash(rustfmt:*)",
 			"Bash(clippy:*)",
 
+			"Bash(xcodebuild:*)",
+			"Bash(codesign:*)",
+
 			"Bash(scc:*)",
 			"Bash(tokei:*)",
 			"Bash(hyperfine:*)",
@@ -238,11 +241,13 @@
 			"WebFetch(domain:sdk.vercel.ai)",
 			"WebFetch(domain:langchain.com)",
 			"WebFetch(domain:mistral.ai)",
+			"WebFetch(domain:openrouter.ai)",
 
 			"WebFetch(domain:posthog.com)",
 			"WebFetch(domain:sentry.io)",
 
 			"WebFetch(domain:motion.dev)",
+			"WebFetch(domain:echarts.apache.org)",
 			"WebFetch(domain:bunny.net)",
 
 			"WebFetch(domain:rust-lang.org)",
@@ -257,7 +262,16 @@
 			"WebFetch(domain:developers.raycast.com)",
 			"WebFetch(domain:zed.dev)",
 			"WebFetch(domain:cursor.com)",
-			"WebFetch(domain:ghostty.org)"
+			"WebFetch(domain:ghostty.org)",
+
+			"WebFetch(domain:swift.org)",
+			"WebFetch(domain:docs.swift.org)",
+			"WebFetch(domain:developer.apple.com)",
+
+			"WebFetch(domain:google.com)",
+			"WebFetch(domain:developers.google.com)",
+
+			"WebFetch(domain:nonstrict.eu)"
 		],
 		"deny": [],
 		"ask": ["Bash(rm:*)", "Bash(rm -rf:*)", "Bash(rm -r:*)", "Bash(sudo:*)"],
