@@ -100,7 +100,11 @@ link_file "$DOTFILES_DIR/terminal/atuin.toml" "$HOME/.config/atuin/config.toml"
 link_file "$DOTFILES_DIR/terminal/ghostty" "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
 link_file "$DOTFILES_DIR/terminal/bat" "$HOME/.config/bat/config"
 link_file "$DOTFILES_DIR/terminal/yt-dlp" "$HOME/.config/yt-dlp/config"
+link_file "$DOTFILES_DIR/terminal/ignore" "$HOME/.ignore"
+
 link_file "$DOTFILES_DIR/biome.json" "$HOME/.config/biome/biome.json"
+link_file "$DOTFILES_DIR/tsconfig.json" "$HOME/.config/typescript/tsconfig.json"
+link_file "$DOTFILES_DIR/bunfig.toml" "$HOME/.bunfig.toml"
 
 # System configs
 echo
