@@ -1,0 +1,82 @@
+# Global ignore file for ripgrep, fd, and other tools
+# Symlinked to ~/.ignore
+
+# Dependencies
+node_modules/
+bun.lockb
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# Build outputs
+dist/
+build/
+bin/
+out/
+*.bun-build
+*.tsbuildinfo
+
+# Framework-specific
+.svelte-kit/
+.next/
+.nuxt/
+.turbo/
+.wrangler/
+.vercel/
+
+# Cache & Linting
+.cache/
+.biome/
+.eslintcache
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Database
+*.db
+*.db-journal
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temp directories
+.tmp/
+tmp/
+.temp/
+temp/
+.archive/
+
+# OS files
+.DS_Store
+._*
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+
+# IDE & Editor
+.vscode/
+.zed/
+.idea/
+
+# AI Agents (project-local)
+.claude/
+.codex/
+.gemini/
+.amp/
+
+# Husky internals
+.husky/_/
+
+# Supabase local
+supabase/.branches/
+supabase/.temp/
