@@ -32,7 +32,7 @@ Preferences that modify commit behavior:
 
 ## Commit Format
 
-Required: `type(scope): subject` (all lowercase, imperative, max 100 chars, no trailing punctuation). Optional body: dash-prefixed lists in sentence case.
+Required: `type(scope): description` (all lowercase, imperative, max 100 chars, no trailing punctuation). Required body: dash-prefixed lists in sentence case explaining the "why" behind changes.
 
 ## Batching Strategy
 
@@ -43,6 +43,7 @@ Required: `type(scope): subject` (all lowercase, imperative, max 100 chars, no t
 ## Quality Standards
 
 - Strict commitlint compliance.
+- Body required for all commits.
 - Atomic commits; no build artifacts.
 - Clean staging before each commit.
-- Descriptive, specific subjects; bodies for non-trivial changes.
+- Descriptive, specific subjects.
