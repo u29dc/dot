@@ -160,6 +160,9 @@
 			"WebFetch(domain:developer.mozilla.org)",
 			"WebFetch(domain:stackoverflow.com)",
 
+			"WebFetch(domain:notion.com)",
+			"WebFetch(domain:developers.notion.com)",
+
 			"WebFetch(domain:anthropic.com)",
 			"WebFetch(domain:docs.anthropic.com)",
 			"WebFetch(domain:openai.com)",
