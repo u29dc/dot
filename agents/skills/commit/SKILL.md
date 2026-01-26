@@ -3,6 +3,7 @@ name: commit
 description: Analyze changes and create commitlint-compliant commits with intelligent batching
 argument-hint: [preferences]
 allowed-tools: Bash, Read
+disable-model-invocation: true
 ---
 
 # Commit Command
@@ -16,8 +17,9 @@ Self-contained git commit workflow that analyzes changes, intelligently batches 
 Optional: `$ARGUMENTS`
 
 Preferences that modify commit behavior:
+
 - **Path scope**: "only src/lib" - limit to specific folder
-- **File filter**: "*.ts only" - limit to file patterns
+- **File filter**: "\*.ts only" - limit to file patterns
 - **Grouping hint**: "single commit" or "separate commits"
 - **Message hint**: any text to incorporate into commit message context
 

@@ -3,6 +3,7 @@ name: align
 description: Bootstrap or align projects to strict quality standards
 argument-hint: [project-type or preferences]
 allowed-tools: Bash, Read, Write, Glob
+disable-model-invocation: true
 ---
 
 # Align Command
@@ -14,6 +15,7 @@ Bootstrap new projects or align existing projects to the user's strict quality s
 ## Reference (for agents without filesystem access to dot repo)
 
 Example config files to use as templates:
+
 - https://github.com/u29dc/dot/blob/main/commitlint.config.js
 - https://github.com/u29dc/dot/blob/main/.gitignore
 - https://github.com/u29dc/dot/blob/main/biome.json
@@ -34,13 +36,13 @@ Optional: `$ARGUMENTS`
 1. **Detect Project Type**: Check for go.mod (Go), workspaces in package.json (monorepo), svelte.config.js (SvelteKit), next.config.js (Next.js), or plain TypeScript/JavaScript.
 
 2. **Audit Existing Configs**: Read and compare against standards:
-   - package.json: field order, util:* scripts, prepare hook
-   - commitlint.config.js: rules, type/scope enums
-   - lint-staged.config.js: util:check trigger
-   - .husky/: pre-commit and commit-msg hooks
-   - biome.json: extends global config
-   - tsconfig.json: strict flags
-   - .gitignore: standard patterns
+    - package.json: field order, util:\* scripts, prepare hook
+    - commitlint.config.js: rules, type/scope enums
+    - lint-staged.config.js: util:check trigger
+    - .husky/: pre-commit and commit-msg hooks
+    - biome.json: extends global config
+    - tsconfig.json: strict flags
+    - .gitignore: standard patterns
 
 3. **Report Misalignments**: List missing files, incorrect configurations, and deviations from standards.
 
@@ -55,37 +57,45 @@ Optional: `$ARGUMENTS`
 ## Standards Applied
 
 ### package.json
+
 - Field order: name, version, type, private, workspaces (if monorepo), repository, scripts, devDependencies, dependencies
 - Scripts: util:format, util:lint, util:types, util:check (chained with exit status), prepare (husky)
 - SvelteKit util:types: `bunx --bun svelte-kit sync && bunx --bun tsgo --noEmit && bunx svelte-check-rs --tsconfig ./tsconfig.svelte.json`
 - Standard util:types: `bunx tsgo --noEmit`
 
 ### commitlint.config.js
+
 - Extends: @commitlint/config-conventional
 - Types: feat, fix, refactor, docs, style, chore, test
 - Scopes: project-specific (infer from structure or ask)
 - Rules: scope-empty never, subject-case lower-case, subject-full-stop never, header-max-length 100, body-max-line-length 100
 
 ### lint-staged.config.js
+
 - Pattern: `'*': () => ['bun run util:check']`
 
 ### .husky/pre-commit
+
 - Content: `bunx lint-staged`
 
 ### .husky/commit-msg
+
 - Content: `bunx --no-install commitlint --edit "$1"`
 
 ### biome.json
+
 - Extends: /Users/han/.config/biome/biome.json
-- SvelteKit: add overrides disabling noUnusedVariables, noUnusedImports, useConst for *.svelte
+- SvelteKit: add overrides disabling noUnusedVariables, noUnusedImports, useConst for \*.svelte
 
 ### tsconfig.json
+
 - Strict flags: strict, alwaysStrict, noUncheckedIndexedAccess, noImplicitAny, noImplicitReturns, noUnusedLocals, noUnusedParameters, noImplicitThis, noFallthroughCasesInSwitch, exactOptionalPropertyTypes, noImplicitOverride, noPropertyAccessFromIndexSignature, verbatimModuleSyntax, isolatedModules, noEmit
 - SvelteKit: extends .svelte-kit/tsconfig.json
-- Paths: @/* -> ./src/*
+- Paths: @/_ -> ./src/_
 
 ### .gitignore
-- Standard: node_modules/, dist/, build/, *.tsbuildinfo, .biome, .svelte-kit/, .DS_Store, ._*, .vscode/, .zed/, .idea/, *.log, .tmp/, .env, .env.* (!.env.example), .husky/_/, .claude/, .wrangler/
+
+- Standard: node*modules/, dist/, build/, \*.tsbuildinfo, .biome, .svelte-kit/, .DS_Store, .*_, .vscode/, .zed/, .idea/, _.log, .tmp/, .env, .env.\* (!.env.example), .husky/\_/, .claude/, .wrangler/
 
 ## Quality Standards
 

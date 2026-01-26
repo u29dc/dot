@@ -94,7 +94,8 @@ echo "Terminal configurations:"
 link_file "$DOTFILES_DIR/terminal/ssh" "$HOME/.ssh/config"
 link_file "$DOTFILES_DIR/terminal/neofetch" "$HOME/.config/neofetch/config.conf"
 link_file "$DOTFILES_DIR/terminal/statusline" "$HOME/.config/ccstatusline/settings.json"
-link_file "$DOTFILES_DIR/terminal/starship.toml" "$HOME/.config/starship/starship.toml"
+link_file "$DOTFILES_DIR/terminal/starship-dark.toml" "$HOME/.config/starship/starship-dark.toml"
+link_file "$DOTFILES_DIR/terminal/starship-light.toml" "$HOME/.config/starship/starship-light.toml"
 link_file "$DOTFILES_DIR/terminal/bottom.toml" "$HOME/.config/bottom/bottom.toml"
 link_file "$DOTFILES_DIR/terminal/atuin.toml" "$HOME/.config/atuin/config.toml"
 link_file "$DOTFILES_DIR/terminal/ghostty" "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
@@ -120,15 +121,12 @@ echo "Agent configurations:"
 # Claude Code
 link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.claude/CLAUDE.md"
 link_file "$DOTFILES_DIR/agents/claude.json" "$HOME/.claude/settings.json"
-link_file "$DOTFILES_DIR/agents/commands" "$HOME/.claude/agents"
-link_file "$DOTFILES_DIR/agents/commands" "$HOME/.claude/commands"
+link_file "$DOTFILES_DIR/agents/skills" "$HOME/.claude/skills"
 # Codex CLI
 link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.codex/AGENTS.md"
-link_file "$DOTFILES_DIR/agents/commands" "$HOME/.codex/commands"
 link_file "$DOTFILES_DIR/agents/codex.toml" "$HOME/.codex/config.toml"
 # AMP CLI
 link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.config/amp/AGENTS.md"
-link_file "$DOTFILES_DIR/agents/commands" "$HOME/.config/amp/commands"
 link_file "$DOTFILES_DIR/agents/amp.settings.json" "$HOME/.config/amp/settings.json"
 
 echo

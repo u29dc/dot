@@ -2,6 +2,7 @@
 name: pr
 description: Automate dev→main PR workflow with checks and branch sync
 allowed-tools: Bash, Read
+disable-model-invocation: true
 ---
 
 # PR Command
