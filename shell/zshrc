@@ -60,8 +60,15 @@ setopt GLOB_DOTS            # Include dotfiles in globs
 export BAT_PAGER=""
 export BAT_STYLE="numbers,changes"
 
-# Starship prompt configuration path
-export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
+# Starship theme switching based on macOS appearance
+starship_theme() {
+    if [[ "$(defaults read -g AppleInterfaceStyle 2>/dev/null)" == "Dark" ]]; then
+        export STARSHIP_CONFIG="$HOME/.config/starship/starship-dark.toml"
+    else
+        export STARSHIP_CONFIG="$HOME/.config/starship/starship-light.toml"
+    fi
+}
+starship_theme
 
 # ------------------------------------------------------------------------------
 # ALIASES
@@ -69,7 +76,7 @@ export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
 # ------------------------------------------------------------------------------
 
 # System & Shell Aliases
-alias cls='clear && echo "" > ~/.zsh_history && fc -p /dev/null && exec zsh'
+alias cls='clear && echo "" > ~/.zsh_history && fc -p /dev/null && starship_theme && exec zsh'
 
 # Modern CLI Tool Replacements
 alias ls="eza -I $'Icon\r'"
@@ -82,6 +89,7 @@ alias htop='btm'
 alias top='btm'
 alias scc='scc --no-cocomo'
 alias b='bun run'
+alias bup='bun update --latest'
 
 # ------------------------------------------------------------------------------
 # FUNCTIONS
@@ -145,3 +153,6 @@ fi
 if [ -f ~/.zshrc.local ]; then
   source ~/.zshrc.local
 fi
+
+# Added by git-ai installer on Sun Jan 25 14:27:52 GMT 2026
+export PATH="/Users/han/.git-ai/bin:$PATH"

@@ -1,0 +1,236 @@
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Light theme - subtle gradient (stays light for black text readability)
+format = """
+[](color_segment1)\
+$os\
+[](fg:color_segment1 bg:color_segment2)\
+$directory\
+[](fg:color_segment2 bg:color_segment3)\
+$bun\
+$rust\
+$golang\
+$zig\
+$python\
+[](fg:color_segment3 bg:color_segment4)\
+$git_branch\
+$git_commit\
+$git_state\
+$git_status\
+[](fg:color_segment4)\
+$line_break$character"""
+
+palette = 'light'
+
+[palettes.light]
+color_fg = '#1a1a1a'
+color_segment1 = '#e8e8e8'
+color_segment2 = '#e0e0e0'
+color_segment3 = '#d8d8d8'
+color_segment4 = '#d0d0d0'
+color_error = '#c00000'
+
+[os]
+disabled = false
+style = "fg:color_fg bg:color_segment1"
+format = "[  $symbol  ]($style)"
+
+[os.symbols]
+Macos = "󰀵"
+Windows = "󰍲"
+Linux = "󰌽"
+Ubuntu = "󰕈"
+Arch = "󰣇"
+Debian = "󰣚"
+
+[time]
+disabled = true
+
+[directory]
+truncation_length = 3
+truncate_to_repo = false
+format = "[  $path  ]($style)"
+style = "fg:color_fg bg:color_segment2"
+home_symbol = "~"
+read_only = " [ro]"
+
+[bun]
+format = "[  bun:$version  ]($style)"
+symbol = ""
+style = "fg:color_fg bg:color_segment3"
+detect_files = ["bun.lock", "bun.lockb", "bunfig.toml"]
+disabled = false
+
+[nodejs]
+disabled = true
+
+[rust]
+format = "[  rs:$version  ]($style)"
+symbol = ""
+style = "fg:color_fg bg:color_segment3"
+disabled = false
+
+[golang]
+format = "[  go:$version  ]($style)"
+symbol = ""
+style = "fg:color_fg bg:color_segment3"
+disabled = false
+
+[zig]
+format = "[  zig:$version  ]($style)"
+symbol = ""
+style = "fg:color_fg bg:color_segment3"
+disabled = false
+
+[python]
+format = "[  py:$version  ]($style)"
+symbol = ""
+style = "fg:color_fg bg:color_segment3"
+detect_extensions = ["py"]
+detect_files = ["requirements.txt", "pyproject.toml", "Pipfile", ".python-version"]
+detect_folders = ["venv", ".venv", "__pycache__"]
+disabled = false
+
+[git_branch]
+format = "[  git:$branch(:$remote_branch)  ]($style)"
+style = "fg:color_fg bg:color_segment4"
+truncation_length = 20
+truncation_symbol = "..."
+
+[git_commit]
+format = "[  @$hash  ]($style)"
+style = "fg:color_fg bg:color_segment4"
+commit_hash_length = 7
+only_detached = true
+
+[git_state]
+format = "[  $state( $progress_current/$progress_total)  ]($style)"
+style = "fg:color_fg bg:color_segment4"
+
+[git_status]
+format = "[  $all_status$ahead_behind  ]($style)"
+style = "fg:color_fg bg:color_segment4"
+conflicted = "!${count}"
+ahead = "^${count}"
+behind = "v${count}"
+diverged = "^${ahead_count}v${behind_count}"
+untracked = "?${count}"
+stashed = "*${count}"
+modified = "~${count}"
+staged = "+${count}"
+renamed = "r${count}"
+deleted = "x${count}"
+
+[jobs]
+disabled = true
+
+[cmd_duration]
+disabled = true
+
+[status]
+disabled = true
+
+[character]
+success_symbol = "[>](color_fg)"
+error_symbol = "[>](bold color_error)"
+vimcmd_symbol = "[<](color_fg)"
+vimcmd_visual_symbol = "[<](dimmed color_fg)"
+
+[username]
+disabled = true
+
+[hostname]
+disabled = true
+
+[package]
+disabled = true
+
+[ruby]
+disabled = true
+
+[java]
+disabled = true
+
+[php]
+disabled = true
+
+[dotnet]
+disabled = true
+
+[swift]
+disabled = true
+
+[nim]
+disabled = true
+
+[lua]
+disabled = true
+
+[perl]
+disabled = true
+
+[elixir]
+disabled = true
+
+[erlang]
+disabled = true
+
+[haskell]
+disabled = true
+
+[julia]
+disabled = true
+
+[kotlin]
+disabled = true
+
+[scala]
+disabled = true
+
+[dart]
+disabled = true
+
+[deno]
+disabled = true
+
+[ocaml]
+disabled = true
+
+[crystal]
+disabled = true
+
+[vlang]
+disabled = true
+
+[vagrant]
+disabled = true
+
+[nix_shell]
+disabled = true
+
+[conda]
+disabled = true
+
+[aws]
+disabled = true
+
+[gcloud]
+disabled = true
+
+[azure]
+disabled = true
+
+[kubernetes]
+disabled = true
+
+[terraform]
+disabled = true
+
+[docker_context]
+disabled = true
+
+[battery]
+disabled = true
+
+[memory_usage]
+disabled = true

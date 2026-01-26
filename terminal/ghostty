@@ -7,8 +7,8 @@ auto-update-channel = tip
 # -----------------------------------------------------------------------------
 # Font & Rendering
 # -----------------------------------------------------------------------------
-# Use Apple's SF Mono for clean native macOS look
-font-family = "SF Mono"
+# Use JetBrains Mono Nerd Font for powerline glyphs and devicons
+font-family = "JetBrainsMono Nerd Font"
 font-size = 12
 
 # Use a corrected blending mode for cleaner text rendering.
