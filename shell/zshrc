@@ -79,10 +79,10 @@ starship_theme
 alias cls='clear && echo "" > ~/.zsh_history && fc -p /dev/null && starship_theme && exec zsh'
 
 # Modern CLI Tool Replacements
-alias ls="eza -I $'Icon\r'"
-alias ll='eza -la'
-alias lt='eza --tree'
-alias tree='eza -T'
+alias ls="eza --icons -I $'Icon\r'"
+alias ll='eza --icons -la'
+alias lt='eza --icons --tree'
+alias tree='eza --icons -T'
 alias cat='bat --paging=never'
 alias find='fd'
 alias htop='btm'
@@ -104,10 +104,10 @@ eza() {
     # Check if --tree or -T flag is present
     if [[ "$*" == *"--tree"* ]] || [[ "$*" == *"-T"* ]]; then
         # Apply default ignore patterns and git-ignore for tree view
-        command eza --git-ignore -I "$EZA_DEFAULT_IGNORE" "$@"
+        command eza --icons --git-ignore -I "$EZA_DEFAULT_IGNORE" "$@"
     else
         # Run eza normally for non-tree commands
-        command eza "$@"
+        command eza --icons "$@"
     fi
 }
 
