@@ -83,6 +83,7 @@ alias ls="eza --icons -I $'Icon\r'"
 alias ll='eza --icons -la'
 alias lt='eza --icons --tree'
 alias tree='eza --icons -T'
+alias treed='eza --icons -T --only-dirs'
 alias cat='bat --paging=never'
 alias find='fd'
 alias htop='btm'
@@ -156,3 +157,6 @@ fi
 
 # Added by git-ai installer on Sun Jan 25 14:27:52 GMT 2026
 export PATH="/Users/han/.git-ai/bin:$PATH"
+
+# bun completions
+[ -s "/Users/han/.bun/_bun" ] && source "/Users/han/.bun/_bun"
