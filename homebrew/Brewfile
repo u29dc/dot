@@ -11,8 +11,8 @@ brew "neovim"
 brew "node"               # JavaScript runtime
 brew "oven-sh/bun/bun"    # Fast JavaScript runtime & bundler
 brew "deno"               # Secure JavaScript/TypeScript runtime
-brew "rust"               # Systems programming language
 brew "zig"                # Programming language for robustness
+# brew "rust"             # Installed via rustup
 
 # Modern CLI Tools
 brew "starship"           # Fast shell prompt
@@ -85,7 +85,6 @@ cask "notion"             # Note-taking and productivity
 cask "notion-calendar"    # Calendar app
 cask "notion-mail"        # Email client
 cask "raycast"            # Launcher and productivity
-cask "mochi"              # Spaced repetition learning
 cask "cursor"             # AI-powered code editor
 
 # Development
