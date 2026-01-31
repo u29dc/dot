@@ -26,7 +26,7 @@
 # Style components to display
 # - numbers: show line numbers
 # - changes: show git modification markers (+/-/~)
---style=numbers,changes
+--style=changes
 
 # Display options
 --wrap=never
