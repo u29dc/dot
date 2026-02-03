@@ -6,11 +6,15 @@ allowed-tools: Bash, Read, Write, Glob
 disable-model-invocation: true
 ---
 
-# Align Command
-
-## Purpose
+# Align
 
 Bootstrap new projects or align existing projects to the user's strict quality standards defined in AGENTS.md. Ensures consistent tooling, scripts, commit hooks, and configurations across all projects.
+
+## How to Use
+
+- `/align` - audit and align current project to quality standards
+- `/align <project-type>` - align with project type override (svelte, next, monorepo, go, cli)
+- `/align dry-run` - report misalignments without applying changes
 
 ## Reference (for agents without filesystem access to dot repo)
 
