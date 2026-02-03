@@ -1,0 +1,42 @@
+agents/skills/align/SKILL.md
+  3ed5d81695b2365a 13-17
+agents/skills/ship/SKILL.md
+  3ed5d81695b2365a 1-30,32-73
+agents/skills/compose/SKILL.md
+  3ed5d81695b2365a 2-3,6,8,10,12-16,24,27,35
+agents/skills/craft/SKILL.md
+  3ed5d81695b2365a 2-3,6,12-14,27,41,55,59,65,75,86,92,98,112,125,135,144,166,207,217,228,235,242,254,260,265,270,281,292,299,306,316,324,344,351,358,365,374,384,391,398,408,418,425,432,438,444,453,462,482,488,500,513,528,537,548,554,581,609,633,651,655,659,663,667,671,673,686,695,704,713,722,729,744,756,769,781,789,798,807
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.0.42",
+  "base_commit_sha": "74fa9017feeb978b35fca603753f1041cb07ff06",
+  "prompts": {
+    "3ed5d81695b2365a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0859866e-43a7-4ba8-8b8a-51092248e9f4",
+        "model": "claude-opus-4-5-20251101"
+      },
+      "human_author": "Han <han@u29dc.com>",
+      "messages": [],
+      "total_additions": 194,
+      "total_deletions": 189,
+      "accepted_lines": 173,
+      "overriden_lines": 1
+    },
+    "ca487d5293be522d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d8c6239c-9275-4d3c-88a3-b96b205b2cd5",
+        "model": "claude-opus-4-5-20251101"
+      },
+      "human_author": "Han <han@u29dc.com>",
+      "messages": [],
+      "total_additions": 891,
+      "total_deletions": 15,
+      "accepted_lines": 886,
+      "overriden_lines": 0
+    }
+  }
+}
