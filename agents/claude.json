@@ -1,4 +1,7 @@
 {
+	"env": {
+		"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+	},
 	"includeCoAuthoredBy": false,
 	"permissions": {
 		"allow": [
@@ -299,6 +302,7 @@
 		"defaultMode": "acceptEdits",
 		"outputStyle": "Explanatory"
 	},
+	"model": "opus",
 	"statusLine": {
 		"type": "command",
 		"command": "bunx -y ccstatusline@latest",
@@ -306,5 +310,6 @@
 	},
 	"spinnerTipsEnabled": false,
 	"alwaysThinkingEnabled": true,
-	"model": "opus"
+	"autoUpdatesChannel": "latest",
+	"teammateMode": "in-process"
 }
