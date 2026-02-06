@@ -1,6 +1,40 @@
 #!/usr/bin/env bash
 set -e
 
+# ==============================================================================
+# DOTFILES SETUP
+# ==============================================================================
+#
+# NEW MACHINE SETUP
+# -----------------
+# On a fresh macOS install, run these commands:
+#
+#   # 1. Install Xcode CLI tools (provides git, compilers)
+#   xcode-select --install
+#
+#   # 2. Clone dotfiles (git is now available from step 1)
+#   git clone https://github.com/u29dc/dot.git ~/Git/dot
+#
+#   # 3. Run setup (auto-installs Homebrew if missing, then all packages + symlinks)
+#   bash ~/Git/dot/scripts/setup.sh
+#
+#   # 4. Reload shell
+#   source ~/.zshrc
+#
+#   # 5. Configure local secrets (API keys, machine-specific settings)
+#   cp ~/Git/dot/shell/zshrc.local.example ~/.zshrc.local
+#   # Edit ~/.zshrc.local to add your keys
+#
+#   # 6. Log in to AI coding agents
+#   claude login
+#   codex login
+#   amp login
+#
+#   # 7. (Optional) Apply macOS system preferences
+#   ~/.macos
+#
+# ==============================================================================
+
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # Parse command line arguments
