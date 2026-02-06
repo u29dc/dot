@@ -155,8 +155,8 @@ if [ -f ~/.zshrc.local ]; then
   source ~/.zshrc.local
 fi
 
-# Added by git-ai installer on Sun Jan 25 14:27:52 GMT 2026
-export PATH="/Users/han/.git-ai/bin:$PATH"
+# git-ai
+export PATH="$HOME/.git-ai/bin:$PATH"
 
 # bun completions
-[ -s "/Users/han/.bun/_bun" ] && source "/Users/han/.bun/_bun"
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
