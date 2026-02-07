@@ -140,6 +140,7 @@ link_file "$DOTFILES_DIR/terminal/ignore" "$HOME/.ignore"
 link_file "$DOTFILES_DIR/biome.json" "$HOME/.config/biome/biome.json"
 link_file "$DOTFILES_DIR/tsconfig.json" "$HOME/.config/typescript/tsconfig.json"
 link_file "$DOTFILES_DIR/bunfig.toml" "$HOME/.bunfig.toml"
+link_file "$DOTFILES_DIR/uv.toml" "$HOME/.config/uv/uv.toml"
 
 # System configs
 echo

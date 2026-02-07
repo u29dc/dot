@@ -107,6 +107,12 @@
 			"Bash(rustfmt:*)",
 			"Bash(clippy:*)",
 
+			"Bash(uv:*)",
+			"Bash(uvx:*)",
+			"Bash(ruff:*)",
+			"Bash(python:*)",
+			"Bash(python3:*)",
+
 			"Bash(xcodebuild:*)",
 			"Bash(codesign:*)",
 
@@ -193,6 +199,9 @@
 			"WebFetch(domain:typescriptlang.org)",
 			"WebFetch(domain:vitejs.dev)",
 			"WebFetch(domain:turbo.build)",
+
+			"WebFetch(domain:astral.sh)",
+			"WebFetch(domain:docs.astral.sh)",
 
 			"WebFetch(domain:nextjs.org)",
 			"WebFetch(domain:react.dev)",
@@ -287,6 +296,9 @@
 			"WebFetch(domain:zed.dev)",
 			"WebFetch(domain:cursor.com)",
 			"WebFetch(domain:ghostty.org)",
+
+			"WebFetch(domain:starship.rs)",
+			"WebFetch(domain:nerdfonts.com)",
 
 			"WebFetch(domain:swift.org)",
 			"WebFetch(domain:docs.swift.org)",

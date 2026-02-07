@@ -92,6 +92,11 @@ alias scc='scc --no-cocomo'
 alias b='bun run'
 alias bup='bun update --latest'
 
+# Python Tool Replacements (uv)
+alias python='uv run python'
+alias python3='uv run python3'
+alias virtualenv='uv venv'
+
 # ------------------------------------------------------------------------------
 # FUNCTIONS
 # Custom shell functions for enhanced functionality
@@ -121,6 +126,10 @@ zed() {
     fi
 }
 
+# pip -> uv pip (function for subcommand forwarding)
+pip() { uv pip "$@"; }
+pip3() { uv pip "$@"; }
+
 # Load external functions
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/Git/dot}"
 source "$DOTFILES_DIR/shell/functions/update.sh"
@@ -138,6 +147,9 @@ eval "$(atuin init zsh)"
 
 # Initialize Starship prompt
 eval "$(starship init zsh)"
+
+# Initialize uv completions
+eval "$(uv generate-shell-completion zsh)"
 
 # Broot launcher integration
 if [ -f "$HOME/.config/broot/launcher/bash/br" ]; then

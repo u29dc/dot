@@ -48,7 +48,8 @@ brew "blueutil"           # Bluetooth control
 brew "gnupg"              # GPG encryption
 brew "hyperfine"          # Command benchmarking
 brew "neofetch"           # System info display
-brew "pipx"               # Python app installer
+brew "uv"                 # Python package manager (replaces pip, pipx, venv)
+brew "ruff"               # Python linter & formatter (replaces flake8, black, isort)
 brew "poppler"            # PDF text extraction (pdftotext)
 brew "scc"                # Code statistics
 brew "tokei"              # Fast code statistics

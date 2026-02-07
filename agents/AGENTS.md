@@ -15,13 +15,14 @@ Applies to all agents (Claude Code, Codex CLI, AMP) unless an agent-specific not
 
 1. Built-in Tools Priority: Always leverage agent built-in tools first (Glob, Grep, Read, Edit, Write) instead of bash commands. Use bash only when built-ins are insufficient.
 2. Runtime & Package Management: `bun` > `npm`/`yarn` (2-3x faster), `bunx` > `npx`, always use lockfiles, never commit `node_modules`.
-3. Linting & Formatting: `biome` > `eslint`/`prettier`, pre-commit hooks mandatory via `husky + lint-staged + commitlint`.
-4. Type Checking: `tsgo --noEmit` for speed (faster than tsc), SvelteKit adds `svelte-check`.
-5. File Operations (Bash): Prefer modern tools: `eza` > `ls`, `bat` > `cat`, `fd` > `find`, `rg` > `grep`, `sd` > `sed`, `broot/br` for tree navigation.
-6. System Monitoring: `btm` > `htop`, `dust/dua` > `du`, `procs` > `ps`, `tokei` for code stats.
-7. Git Operations: `gitui` for staging, `lazygit` for rebasing/cherry-picking, `delta` for diffs.
-8. Performance Testing: `hyperfine` for benchmarking; favor Rust-based tools.
-9. Repository Analysis: Use `gitingest` with `-o -` to avoid local files; scale from root scan to targeted paths.
+3. Python Package Management: `uv` > `pip`, always prefer uv for Python dependency management.
+4. Linting & Formatting: `biome` > `eslint`/`prettier`, pre-commit hooks mandatory via `husky + lint-staged + commitlint`.
+5. Type Checking: `tsgo --noEmit` for speed (faster than tsc), SvelteKit adds `svelte-check`.
+6. File Operations (Bash): Prefer modern tools: `eza` > `ls`, `bat` > `cat`, `fd` > `find`, `rg` > `grep`, `sd` > `sed`, `broot/br` for tree navigation.
+7. System Monitoring: `btm` > `htop`, `dust/dua` > `du`, `procs` > `ps`, `tokei` for code stats.
+8. Git Operations: `gitui` for staging, `lazygit` for rebasing/cherry-picking, `delta` for diffs.
+9. Performance Testing: `hyperfine` for benchmarking; favor Rust-based tools.
+10. Repository Analysis: Use `gitingest` with `-o -` to avoid local files; scale from root scan to targeted paths.
 
 ## 2. Communication Standards
 

@@ -1,0 +1,8 @@
+# Use uv-managed Python installs over system Python
+python-preference = "managed"
+
+# Compile .py -> .pyc on install (faster startup, marginal install cost)
+compile-bytecode = true
+
+# Use macOS system certificate store instead of bundled certs
+native-tls = true
