@@ -37,6 +37,9 @@ brew "broot"              # Interactive tree navigation
 # Media & Files
 brew "ffmpeg"             # Media processing framework
 brew "imagemagick"        # Image manipulation toolkit
+brew "graphicsmagick"     # Image processing (lighter ImageMagick)
+brew "exiftool"           # Image metadata reader/writer
+brew "libraw"             # Raw image decoder
 brew "gifsicle"           # GIF optimizer
 brew "sox"                # Sound processing
 brew "webp"               # WebP tools
@@ -51,6 +54,9 @@ brew "neofetch"           # System info display
 brew "uv"                 # Python package manager (replaces pip, pipx, venv)
 brew "ruff"               # Python linter & formatter (replaces flake8, black, isort)
 brew "poppler"            # PDF text extraction (pdftotext)
+brew "ghostscript"        # PostScript/PDF interpreter
+brew "qpdf"               # PDF transformation tool
+brew "parallel"           # GNU parallel execution
 brew "scc"                # Code statistics
 brew "tokei"              # Fast code statistics
 brew "wget"               # Web downloader
