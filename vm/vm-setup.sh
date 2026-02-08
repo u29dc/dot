@@ -10,7 +10,7 @@ set -euo pipefail
 #
 # After this script completes, manually run:
 #   gh auth login
-#   claude login
+#   command claude login
 #   codex login
 #   amp login
 #   # Append API keys to ~/.zshrc.local
@@ -69,6 +69,22 @@ else
     cat "$HOME/.ssh/id_ed25519.pub"
 fi
 
+# 5b. Authorize host SSH access (key-based)
+echo "[5b/10] Setting up sandbox SSH key for host access..."
+if [ ! -f "$DOTFILES_MOUNT/vm/sandbox_key" ]; then
+    SANDBOX_KEY="/tmp/sandbox_key"
+    ssh-keygen -t ed25519 -f "$SANDBOX_KEY" -N "" -C "sandbox-host"
+    mkdir -p "$HOME/.ssh"
+    cat "${SANDBOX_KEY}.pub" >> "$HOME/.ssh/authorized_keys"
+    chmod 700 "$HOME/.ssh"
+    chmod 600 "$HOME/.ssh/authorized_keys"
+    cp "$SANDBOX_KEY" "$DOTFILES_MOUNT/vm/sandbox_key"
+    chmod 600 "$DOTFILES_MOUNT/vm/sandbox_key"
+    rm "$SANDBOX_KEY" "${SANDBOX_KEY}.pub"
+else
+    echo "  Sandbox SSH key already provisioned"
+fi
+
 # 6. Configure git credential helper for HTTPS
 echo "[6/10] Setting up git credential helper..."
 if gh auth status &>/dev/null; then
@@ -121,7 +137,7 @@ echo "VM provisioning complete."
 echo
 echo "Next steps (manual):"
 echo "  1. gh auth login"
-echo "  2. claude login / codex login / amp login"
+echo "  2. command claude login / codex login / amp login"
 echo "  3. Append API keys to ~/.zshrc.local"
 echo "  4. Grant Full Disk Access to Terminal.app in System Settings"
 echo "  5. sudo shutdown -h now"
