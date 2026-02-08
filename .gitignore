@@ -20,6 +20,9 @@ build/
 !.env.example
 .husky/_/
 
+# vm
+vm/sandbox_key
+
 # project
 .zshrc.local
 .bashrc.local

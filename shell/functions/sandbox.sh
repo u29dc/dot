@@ -117,8 +117,16 @@ sandbox() {
         ACTION="start"
     fi
 
-    # SSH options: ephemeral host key, no known_hosts pollution, quiet
-    local -a SSH_OPTS=(-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR)
+    # SSH key and options
+    local SANDBOX_KEY="$HOME/Git/dot/vm/sandbox_key"
+    local -a SSH_OPTS=(-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -i "$SANDBOX_KEY")
+
+    # Verify sandbox SSH key exists
+    if [ ! -f "$SANDBOX_KEY" ]; then
+        echo -e "${RED}[ERROR] Sandbox SSH key not found at ${SANDBOX_KEY}${RESET}"
+        echo -e "${DIM}Re-provision base image or run vm-setup.sh to generate it${RESET}"
+        return 1
+    fi
 
     # Verify base image exists
     if ! tart list 2>/dev/null | grep -qw "$BASE_IMAGE"; then
@@ -170,10 +178,15 @@ sandbox() {
 
     # Wait for VM to become reachable
     echo -e "${DIM}Waiting for VM to boot...${RESET}"
-    local MAX_WAIT=60
+    local MAX_WAIT=120
     local ELAPSED=0
     local VM_IP=""
     while [ "$ELAPSED" -lt "$MAX_WAIT" ]; do
+        # Early exit if tart process died
+        if ! kill -0 "$VM_PID" 2>/dev/null; then
+            echo -e "${RED}[ERROR] VM process exited unexpectedly${RESET}"
+            break
+        fi
         VM_IP=$(tart ip "$VM_NAME" 2>/dev/null || true)
         if [ -n "$VM_IP" ]; then
             # Test SSH connectivity
