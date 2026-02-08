@@ -141,6 +141,7 @@
 			"Bash(cwebp:*)",
 			"Bash(dwebp:*)",
 
+			"Bash(tart:*)",
 			"Bash(xcodebuild:*)",
 			"Bash(codesign:*)",
 
@@ -336,6 +337,7 @@
 			"WebFetch(domain:swift.org)",
 			"WebFetch(domain:docs.swift.org)",
 			"WebFetch(domain:developer.apple.com)",
+			"WebFetch(domain:tart.run)",
 
 			"WebFetch(domain:google.com)",
 			"WebFetch(domain:developers.google.com)",
@@ -347,7 +349,6 @@
 		"defaultMode": "acceptEdits",
 		"outputStyle": "Explanatory"
 	},
-	"model": "opus",
 	"statusLine": {
 		"type": "command",
 		"command": "bunx -y ccstatusline@latest",
