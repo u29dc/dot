@@ -39,9 +39,13 @@ DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # Parse command line arguments
 LINK_ONLY=false
-if [[ "$1" == "--link-only" ]]; then
-    LINK_ONLY=true
-fi
+VM_MODE=false
+for arg in "$@"; do
+    case "$arg" in
+        --link-only) LINK_ONLY=true ;;
+        --vm) VM_MODE=true ;;
+    esac
+done
 
 # Function to create symlink with backup and verification
 link_file() {
@@ -114,27 +118,18 @@ echo
 echo "Shell configurations:"
 link_file "$DOTFILES_DIR/shell/zshrc" "$HOME/.zshrc"
 link_file "$DOTFILES_DIR/shell/zprofile" "$HOME/.zprofile"
-link_file "$DOTFILES_DIR/shell/zshrc.local" "$HOME/.zshrc.local"
+if [ "$VM_MODE" = false ]; then
+    link_file "$DOTFILES_DIR/shell/zshrc.local" "$HOME/.zshrc.local"
+fi
 
-# Editor configs (Zed)
-echo
-echo "Editor configurations:"
-link_file "$DOTFILES_DIR/editor/settings.json" "$HOME/.config/zed/settings.json"
-link_file "$DOTFILES_DIR/editor/keymap.json" "$HOME/.config/zed/keymap.json"
-
-# Terminal configs
+# Terminal configs (shared between host and VM)
 echo
 echo "Terminal configurations:"
-link_file "$DOTFILES_DIR/terminal/ssh" "$HOME/.ssh/config"
-link_file "$DOTFILES_DIR/terminal/neofetch" "$HOME/.config/neofetch/config.conf"
-link_file "$DOTFILES_DIR/terminal/statusline" "$HOME/.config/ccstatusline/settings.json"
 link_file "$DOTFILES_DIR/terminal/starship-dark.toml" "$HOME/.config/starship/starship-dark.toml"
 link_file "$DOTFILES_DIR/terminal/starship-light.toml" "$HOME/.config/starship/starship-light.toml"
 link_file "$DOTFILES_DIR/terminal/bottom.toml" "$HOME/.config/bottom/bottom.toml"
 link_file "$DOTFILES_DIR/terminal/atuin.toml" "$HOME/.config/atuin/config.toml"
-link_file "$DOTFILES_DIR/terminal/ghostty" "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
 link_file "$DOTFILES_DIR/terminal/bat" "$HOME/.config/bat/config"
-link_file "$DOTFILES_DIR/terminal/yt-dlp" "$HOME/.config/yt-dlp/config"
 link_file "$DOTFILES_DIR/terminal/ignore" "$HOME/.ignore"
 
 link_file "$DOTFILES_DIR/biome.json" "$HOME/.config/biome/biome.json"
@@ -142,13 +137,34 @@ link_file "$DOTFILES_DIR/tsconfig.json" "$HOME/.config/typescript/tsconfig.json"
 link_file "$DOTFILES_DIR/bunfig.toml" "$HOME/.bunfig.toml"
 link_file "$DOTFILES_DIR/uv.toml" "$HOME/.config/uv/uv.toml"
 
-# System configs
-echo
-echo "System configurations:"
-link_file "$DOTFILES_DIR/system/gitconfig" "$HOME/.gitconfig"
-link_file "$DOTFILES_DIR/system/karabiner" "$HOME/.config/karabiner/karabiner.json"
-link_file "$DOTFILES_DIR/system/1password" "$HOME/.config/1Password/ssh/agent.toml"
-link_file "$DOTFILES_DIR/macos/.macos" "$HOME/.macos"
+if [ "$VM_MODE" = false ]; then
+    # Host-only: editor, 1Password, karabiner, macOS, ghostty, yt-dlp
+    echo
+    echo "Editor configurations:"
+    link_file "$DOTFILES_DIR/editor/settings.json" "$HOME/.config/zed/settings.json"
+    link_file "$DOTFILES_DIR/editor/keymap.json" "$HOME/.config/zed/keymap.json"
+
+    echo
+    echo "Host-only terminal configurations:"
+    link_file "$DOTFILES_DIR/terminal/ssh" "$HOME/.ssh/config"
+    link_file "$DOTFILES_DIR/terminal/neofetch" "$HOME/.config/neofetch/config.conf"
+    link_file "$DOTFILES_DIR/terminal/statusline" "$HOME/.config/ccstatusline/settings.json"
+    link_file "$DOTFILES_DIR/terminal/ghostty" "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
+    link_file "$DOTFILES_DIR/terminal/yt-dlp" "$HOME/.config/yt-dlp/config"
+
+    echo
+    echo "System configurations:"
+    link_file "$DOTFILES_DIR/system/gitconfig" "$HOME/.gitconfig"
+    link_file "$DOTFILES_DIR/system/karabiner" "$HOME/.config/karabiner/karabiner.json"
+    link_file "$DOTFILES_DIR/system/1password" "$HOME/.config/1Password/ssh/agent.toml"
+    link_file "$DOTFILES_DIR/macos/.macos" "$HOME/.macos"
+else
+    # VM-specific: no 1Password, no editor, no karabiner, no macOS prefs
+    echo
+    echo "VM configurations:"
+    link_file "$DOTFILES_DIR/vm/ssh-config" "$HOME/.ssh/config"
+    link_file "$DOTFILES_DIR/vm/gitconfig" "$HOME/.gitconfig"
+fi
 
 # Agent configurations
 echo
@@ -162,7 +178,11 @@ link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.codex/AGENTS.md"
 link_file "$DOTFILES_DIR/agents/codex.toml" "$HOME/.codex/config.toml"
 # AMP CLI
 link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.config/amp/AGENTS.md"
-link_file "$DOTFILES_DIR/agents/amp.settings.json" "$HOME/.config/amp/settings.json"
+if [ "$VM_MODE" = false ]; then
+    link_file "$DOTFILES_DIR/agents/amp.settings.json" "$HOME/.config/amp/settings.json"
+else
+    link_file "$DOTFILES_DIR/vm/amp.settings.json" "$HOME/.config/amp/settings.json"
+fi
 
 echo
 echo "Symlinks created successfully."

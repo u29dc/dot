@@ -133,6 +133,7 @@ pip3() { uv pip "$@"; }
 # Load external functions
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/Git/dot}"
 source "$DOTFILES_DIR/shell/functions/update.sh"
+command -v tart &>/dev/null && source "$DOTFILES_DIR/shell/functions/sandbox.sh"
 
 # ------------------------------------------------------------------------------
 # SHELL INTEGRATIONS

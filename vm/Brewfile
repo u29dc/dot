@@ -1,0 +1,63 @@
+# VM Brewfile -- Headless CLI-only packages (no casks needed)
+
+# Taps
+tap "stripe/stripe-cli"
+tap "supabase/tap"
+tap "oven-sh/bun"
+tap "arbourd/tap"
+
+# Core Development Tools
+brew "git"
+brew "gh"                 # GitHub CLI
+brew "neovim"
+brew "node"               # JavaScript runtime
+brew "oven-sh/bun/bun"    # Fast JavaScript runtime & bundler
+brew "deno"               # Secure JavaScript/TypeScript runtime
+brew "zig"                # Programming language for robustness
+# brew "rust"             # Installed via rustup
+
+# Modern CLI Tools
+brew "starship"           # Fast shell prompt
+brew "eza"                # Modern ls replacement
+brew "bat"                # Cat with syntax highlighting
+brew "fd"                 # Fast find alternative
+brew "bottom"             # System monitor
+brew "zoxide"             # Smarter cd
+brew "ripgrep"            # Fast grep alternative
+
+# Git Tools
+brew "git-delta"          # Better git diffs
+brew "gitui"              # Fast git TUI
+brew "lazygit"            # Complex git operations
+brew "git-open"           # Open repo in browser
+brew "gitingest"          # Lightweight repository analysis
+
+# Shell Enhancements
+brew "atuin"              # Magic shell history search
+brew "broot"              # Interactive tree navigation
+
+# Utilities
+brew "gnupg"              # GPG encryption
+brew "hyperfine"          # Command benchmarking
+brew "uv"                 # Python package manager (replaces pip, pipx, venv)
+brew "ruff"               # Python linter & formatter (replaces flake8, black, isort)
+brew "parallel"           # GNU parallel execution
+brew "scc"                # Code statistics
+brew "tokei"              # Fast code statistics
+brew "wget"               # Web downloader
+brew "sd"                 # Modern sed replacement
+brew "dust"               # Intuitive disk usage
+brew "procs"              # Modern ps replacement
+brew "jq"                 # JSON processor
+brew "yq"                 # YAML processor
+brew "just"               # Command runner
+brew "direnv"             # Per-directory environments
+brew "tldr"               # Simplified man pages
+brew "shellcheck"         # Shell script linter
+brew "shfmt"              # Shell script formatter
+
+# AI & Cloud CLIs
+brew "gemini-cli"         # Gemini API CLI
+brew "stripe"             # Stripe CLI tools
+brew "supabase"           # Supabase CLI
+brew "vercel-cli"         # Vercel deployment CLI

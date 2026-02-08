@@ -3,6 +3,7 @@ tap "stripe/stripe-cli"
 tap "supabase/tap"
 tap "oven-sh/bun"
 tap "arbourd/tap"
+tap "cirruslabs/cli"
 
 # Core Development Tools
 brew "git"
@@ -70,6 +71,7 @@ brew "direnv"             # Per-directory environments
 brew "tldr"               # Simplified man pages
 brew "shellcheck"         # Shell script linter
 brew "shfmt"              # Shell script formatter
+brew "cirruslabs/cli/tart" # macOS VM sandbox
 
 # AI & Cloud CLIs
 cask "codex"              # AI code assistant
