@@ -1,11 +1,13 @@
 ---
 name: craft
-description: Frontend/design engineering constraints for accessible, performant, delightful interfaces
+description: Apply frontend and design engineering constraints for accessible, performant interfaces
+argument-hint: [file or review]
+allowed-tools: Bash, Read, Write, Glob, Grep, Edit
 ---
 
 # Craft
 
-Opinionated constraints for building accessible, fast, delightful interfaces. Use MUST/SHOULD/NEVER to guide decisions. Every rule exists because its violation creates measurable user harm or perceivable quality degradation.
+Opinionated constraints for building accessible, fast, delightful interfaces where every rule prevents measurable user harm or perceivable quality degradation.
 
 ## How to Use
 

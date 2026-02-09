@@ -1,11 +1,13 @@
 ---
 name: compose
-description: Agent-native architecture patterns for composable, atomic tools usable by AI agents
+description: Apply agent-native architecture patterns for composable, atomic tools
+argument-hint: [file or audit]
+allowed-tools: Bash, Read, Write, Glob, Grep, Edit
 ---
 
 # Compose
 
-Agent-native software engineering: design every tool, CLI, and service so AI agents can discover, compose, and loop over it to achieve outcomes nobody explicitly coded.
+Design every tool, CLI, and service so AI agents can discover, compose, and loop over it to achieve outcomes nobody explicitly coded.
 
 ## How to Use
 
@@ -13,7 +15,16 @@ Agent-native software engineering: design every tool, CLI, and service so AI age
 - `/compose <file>` - evaluate a CLI/tool against agent-native principles
 - `/compose audit` - full parity, granularity, and CRUD audit of a codebase
 
-Use when: building new CLI tools or services, refactoring for composability, evaluating whether a tool follows agent-native principles, designing how multiple tools interact, reviewing architecture through an agent-native lens, or planning any software where an AI agent is a first-class user.
+## When to Apply
+
+Reference these guidelines when:
+
+- Building new CLI tools or services
+- Refactoring for composability
+- Evaluating whether a tool follows agent-native principles
+- Designing how multiple tools interact
+- Reviewing architecture through an agent-native lens
+- Planning any software where an AI agent is a first-class user
 
 ## Role
 

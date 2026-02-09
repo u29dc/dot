@@ -1,20 +1,28 @@
 ---
 name: ship
-description: Git workflow - commit changes and ship PRs
-argument-hint: [pr] or [preferences]
-allowed-tools: Bash, Read
-disable-model-invocation: true
+description: Commit changes and ship pull requests
+argument-hint: [commit, pr, or preferences]
+allowed-tools: Bash, Read, Write, Glob, Grep, Edit
 ---
 
 # Ship
 
-Git workflow: commit changes and ship PRs.
+Commit changes with intelligent batching and create pull requests.
 
 ## How to Use
 
 - `/ship` - commit staged/unstaged changes with intelligent batching
 - `/ship pr` - create and merge PR from dev to main
-- `/ship [preferences]` - commit with scope/grouping hints (e.g., "single commit", "only src/lib")
+- `/ship <preferences>` - commit with scope/grouping hints (e.g., "single commit", "only src/lib")
+
+## Arguments
+
+Optional: `$ARGUMENTS`
+
+- **Path scope**: "only src/lib" - limit to specific folder
+- **File filter**: "\*.ts only" - limit to file patterns
+- **Grouping hint**: "single commit" or "separate commits"
+- **Message hint**: any text to incorporate into commit message context
 
 ## Commit Workflow
 
@@ -24,13 +32,6 @@ Git workflow: commit changes and ship PRs.
 4. **Group Commits**: Cluster files by type and scope; separate unrelated changes into distinct commits.
 5. **Execute**: For each group: unstage all, stage group, generate message, commit, validate.
 6. **Report**: Display commit SHAs, messages, and file counts.
-
-### Commit Arguments
-
-- **Path scope**: "only src/lib" - limit to specific folder
-- **File filter**: "\*.ts only" - limit to file patterns
-- **Grouping hint**: "single commit" or "separate commits"
-- **Message hint**: any text to incorporate into commit message context
 
 ### Commit Format
 

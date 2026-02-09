@@ -2,30 +2,18 @@
 name: align
 description: Bootstrap or align projects to strict quality standards
 argument-hint: [project-type or preferences]
-allowed-tools: Bash, Read, Write, Glob
-disable-model-invocation: true
+allowed-tools: Bash, Read, Write, Glob, Grep, Edit
 ---
 
 # Align
 
-Bootstrap new projects or align existing projects to the user's strict quality standards defined in AGENTS.md. Ensures consistent tooling, scripts, commit hooks, and configurations across all projects.
+Bootstrap or align projects to the quality standards defined in AGENTS.md.
 
 ## How to Use
 
 - `/align` - audit and align current project to quality standards
 - `/align <project-type>` - align with project type override (svelte, next, monorepo, go, cli)
 - `/align dry-run` - report misalignments without applying changes
-
-## Reference (for agents without filesystem access to dot repo)
-
-Example config files to use as templates:
-
-- https://github.com/u29dc/dot/blob/main/commitlint.config.js
-- https://github.com/u29dc/dot/blob/main/.gitignore
-- https://github.com/u29dc/dot/blob/main/biome.json
-- https://github.com/u29dc/dot/blob/main/tsconfig.json
-
-Note: AGENTS.md defines the standards to follow - it is NOT a file to copy into projects. The align command creates actual config files based on those standards.
 
 ## Arguments
 
@@ -57,6 +45,17 @@ Optional: `$ARGUMENTS`
 6. **Initialize Husky**: Run `bunx husky init` if .husky/ missing; create hooks.
 
 7. **Report**: Summary of changes made, files created/updated.
+
+## Reference
+
+Example config files to use as templates (for agents without filesystem access to dot repo):
+
+- https://github.com/u29dc/dot/blob/main/commitlint.config.js
+- https://github.com/u29dc/dot/blob/main/.gitignore
+- https://github.com/u29dc/dot/blob/main/biome.json
+- https://github.com/u29dc/dot/blob/main/tsconfig.json
+
+Note: AGENTS.md defines the standards to follow - it is NOT a file to copy into projects. The align command creates actual config files based on those standards.
 
 ## Standards Applied
 
