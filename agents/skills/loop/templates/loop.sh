@@ -7,7 +7,7 @@ set -euo pipefail
 PROMPT_FILE="PROMPT.md"
 LOG_DIR="agent_logs"
 MAX_ITERATIONS=0
-MODEL="sonnet"
+MODEL=""
 AUTO_PUSH=true
 BACKOFF_BASE=5
 BACKOFF_MAX=60
@@ -70,7 +70,7 @@ try_push() {
 echo "=========================================="
 echo " Agent Loop Starting"
 echo " Branch: $CURRENT_BRANCH"
-echo " Model: $MODEL"
+echo " Model: ${MODEL:-default}"
 echo " Max iterations: ${MAX_ITERATIONS:-unlimited}"
 echo " Auto-push: $AUTO_PUSH"
 echo "=========================================="
@@ -96,7 +96,7 @@ while true; do
   set +e
   claude -p "$(cat "$PROMPT_FILE")" \
     --dangerously-skip-permissions \
-    --model "$MODEL" \
+    ${MODEL:+--model "$MODEL"} \
     --verbose \
     2>&1 | tee "$LOG_FILE"
   EXIT_CODE=${PIPESTATUS[0]}

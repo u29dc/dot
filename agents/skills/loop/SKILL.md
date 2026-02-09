@@ -127,7 +127,7 @@ All templates live in `agents/skills/loop/templates/`. Read and customize before
 - **"Don't assume not implemented"**: always include "confirm with code search first" in software PROMPT.md to prevent duplicate implementations.
 - **Quality gate hierarchy**: type systems > tests > linting > LLM-as-judge. Gate sequence per iteration: implement > typecheck > lint > test > commit.
 - **Keep PROMPT.md under 120 lines**: model adherence drops with instruction count. Move reference material to CLAUDE.md.
-- **Cost awareness**: sonnet for ~80% of tasks, opus for complex decisions. A 50-iteration loop on a large codebase costs $50-100+ in API credits.
+- **Cost awareness**: the loop uses the user's configured default model unless overridden with `--model`. A 50-iteration loop on a large codebase costs $50-100+ in API credits.
 - **Security**: `--dangerously-skip-permissions` is acceptable inside containers/VMs; on bare metal, prefer `--permission-mode acceptEdits` or `--allowedTools`.
 - **Stop condition**: always use `<promise>COMPLETE</promise>` -- the loop harness greps for this exact string.
 - **Append-only progress**: never replace progress.txt content; always append. Consolidate reusable patterns to the top section.
