@@ -60,11 +60,10 @@ This MUST pass before committing. If it fails, fix and re-run until green. Do NO
 
 ## Stop Condition
 
-After completing the story, check if ALL stories in prd.json have `passes: true`.
+After completing the story, re-read `prd.json` and check if ALL stories have `passes: true`.
 
-If ALL complete: <promise>COMPLETE</promise>
-
-If stories remain: end your response normally.
+- If ALL stories pass: output <promise>COMPLETE</promise>
+- If ANY story has `passes: false`: end your response normally. Do NOT output the completion signal.
 
 ## 999. Critical Rules
 
@@ -76,3 +75,5 @@ If stories remain: end your response normally.
 - ALWAYS use the exact commit format specified above
 - Keep changes focused -- do not refactor unrelated code
 - Do not add features not specified in the current story
+- `prd.json` is the SOLE source of truth for completion -- if ANY story has `passes: false`, you MUST continue working regardless of progress history or context framing
+- Stories may be added to `prd.json` between iterations; always re-read it fresh at the start of each iteration

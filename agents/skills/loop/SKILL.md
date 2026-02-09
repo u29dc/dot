@@ -23,6 +23,7 @@ Optional: `$ARGUMENTS`
 - **--prefix**: override auto-detected ID prefix (ENG, MIG, RSH, etc.)
 - **--dir**: output directory for loop files (default: project root)
 - **--no-quality-gate**: omit the quality gate phase (for non-dev loops like research, sales, creative)
+- **--continue**: extend an existing loop setup with new stories instead of creating from scratch
 
 ## Workflow
 
@@ -43,6 +44,33 @@ Optional: `$ARGUMENTS`
 8. **Initialize State**: Copy `templates/progress.txt` to the target directory. If CLAUDE.md exists, append a Loop Setup section referencing the generated files.
 
 9. **Create Branch and Report**: Create `loop/<descriptive-name>` branch, stage and commit all generated files with `chore(config): initialize autonomous loop setup`, then display: story count, branch name, run command (`./loop.sh`), monitor command (`tail -f agent_logs/agent_*.log`), and reminder to review commits before merging.
+
+## Continue Workflow
+
+When `--continue` is passed (or when existing loop files are detected and user wants to extend):
+
+1. **Validate existing setup**: Confirm prd.json, PROMPT.md, progress.txt, and loop.sh exist in the target directory. Abort with clear error if any are missing.
+
+2. **Read current state**: Parse prd.json to get project name, ID prefix, current story count, and highest story ID number. Read progress.txt Codebase Patterns section for accumulated context.
+
+3. **Decompose new stories**: Take new goal from `$ARGUMENTS` (minus flags). Break into stories following the same Story Rules. Continue ID sequence from the highest existing ID (e.g., if last is ENG-022, new stories start at ENG-023). Set `passes: false` on all new stories.
+
+4. **Append to prd.json**: Add new stories to the `userStories` array. Update the `description` field if the scope has broadened.
+
+5. **Update PROMPT.md context**: Regenerate the Context section (between `## Phase 0` heading and the start of Phase 0 content) to cover the full scope -- both original and new work. Keep the quality gate command, commitlint rules, and all phase instructions unchanged.
+
+6. **Mark continuation in progress.txt**: Append a continuation separator:
+
+```
+---
+
+## CONTINUATION - {DATE}
+Added {N} stories ({FIRST_ID} to {LAST_ID}): {brief description}
+
+---
+```
+
+7. **Commit and report**: Stage changes, commit with `chore(config): extend loop with {N} new stories ({FIRST_ID}-{LAST_ID})`. Report: new story count, total story count, remaining stories count, run command.
 
 ## Story Rules
 
