@@ -82,4 +82,4 @@ sudo shutdown -h now
 - `Brewfile` -- headless CLI packages (no casks, no media tools)
 - `gitconfig` -- git config without 1Password signing
 - `ssh-config` -- SSH config without 1Password agent
-- `amp.settings.json` -- AMP with full auto-approve permissions
+

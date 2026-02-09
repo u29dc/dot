@@ -178,11 +178,7 @@ link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.codex/AGENTS.md"
 link_file "$DOTFILES_DIR/agents/codex.toml" "$HOME/.codex/config.toml"
 # AMP CLI
 link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.config/amp/AGENTS.md"
-if [ "$VM_MODE" = false ]; then
-    link_file "$DOTFILES_DIR/agents/amp.settings.json" "$HOME/.config/amp/settings.json"
-else
-    link_file "$DOTFILES_DIR/vm/amp.settings.json" "$HOME/.config/amp/settings.json"
-fi
+link_file "$DOTFILES_DIR/agents/amp.settings.json" "$HOME/.config/amp/settings.json"
 
 echo
 echo "Symlinks created successfully."
