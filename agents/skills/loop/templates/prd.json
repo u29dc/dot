@@ -1,0 +1,18 @@
+{
+	"project": "{PROJECT_NAME}",
+	"description": "{ONE_LINE_GOAL}",
+	"branchName": "loop/{BRANCH_NAME}",
+	"idPrefix": "{ID_PREFIX}",
+	"userStories": [
+		{
+			"id": "{ID_PREFIX}-001",
+			"category": "setup",
+			"title": "{STORY_TITLE}",
+			"description": "As a {ROLE}, I need {THING} so that {OUTCOME}",
+			"acceptanceCriteria": ["{SPECIFIC_CRITERION_1}", "{SPECIFIC_CRITERION_2}", "Quality gate passes"],
+			"priority": 1,
+			"passes": false,
+			"notes": ""
+		}
+	]
+}
