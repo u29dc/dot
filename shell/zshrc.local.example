@@ -22,9 +22,16 @@ export OPENROUTER_API_KEY="sk-or-v1-..."
 # export FIN_HOME="$HOME/path/to/fin"
 
 # ------------------------------------------------------------------------------
+# CLAUDE CODE PLUGINS (private)
+# ------------------------------------------------------------------------------
+
+# Refresh plugin cache after editing skills
+# alias claude-refresh="claude plugin update plugin-name@marketplace-name --scope user"
+
+# ------------------------------------------------------------------------------
 # PERSONAL ALIASES
 # ------------------------------------------------------------------------------
 
-# Cloud storage shortcuts (customize paths for your setup)
+# Cloud storage shortcuts (private)
 # alias gdrive='cd "folder_path"'
 # alias dropbox='cd "folder_path"'
