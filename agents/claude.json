@@ -357,5 +357,8 @@
 	"spinnerTipsEnabled": false,
 	"alwaysThinkingEnabled": true,
 	"autoUpdatesChannel": "latest",
-	"teammateMode": "in-process"
+	"teammateMode": "in-process",
+	"enabledPlugins": {
+		"u29dc@u29dc": true
+	}
 }
