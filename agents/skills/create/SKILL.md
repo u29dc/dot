@@ -1,19 +1,19 @@
 ---
-name: newskill
+name: create
 description: Create new Claude Code skills following established conventions
 argument-hint: [skill name or description]
 allowed-tools: Bash, Read, Write, Glob, Grep, Edit
 ---
 
-# Newskill
+# Create
 
 Create or update skills with strict frontmatter, compact instructions, and progressive-disclosure structure.
 
 ## How to Use
 
-- `/newskill` - interactive creation (name + purpose + style)
-- `/newskill <name>` - create named skill and infer remaining metadata
-- `/newskill <name> <description>` - create with explicit purpose line
+- `/create` - interactive creation (name + purpose + style)
+- `/create <name>` - create named skill and infer remaining metadata
+- `/create <name> <description>` - create with explicit purpose line
 
 ## Arguments
 

@@ -166,3 +166,14 @@ Applies to Claude Code, Codex CLI, and AMP unless an agent-specific override exp
 - Remote fallback for agents without local reference access:
   `https://github.com/u29dc/dot/tree/main/agents/skills/align/references`.
 - This file is the policy layer; `/align` owns template instantiation and project-level conformance.
+
+## 13. Skills
+
+- Selection rule:
+  when a request explicitly names a skill or clearly matches a skill scope, use that skill; if multiple match, choose the minimal set and state sequence.
+- `align`: use for project bootstrap, config drift correction, template alignment, and quality-gate baseline enforcement.
+- `compose`: use for CLI/tooling design or refactors that require agent-native primitives, JSON contracts, and capability discovery.
+- `craft`: use for frontend UI/UX implementation or review where accessibility, motion, layout, interaction, and performance quality must be enforced.
+- `loop`: use to scaffold autonomous execution loops (`prd.json`, `PROMPT.md`, `loop.sh`, `progress.txt`) for multi-story goals.
+- `create`: use to create or update local skill definitions with required frontmatter, structure, and compact operational guidance.
+- `ship`: use for deterministic commit batching, commitlint-compliant messaging, and `dev -> main` pull request flow.
