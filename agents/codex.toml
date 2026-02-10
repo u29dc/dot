@@ -4,7 +4,7 @@
 # https://developers.openai.com/codex/config-reference
 
 # CORE SETTINGS
-model = "gpt-5.2-codex"
+model = "gpt-5.3-codex"
 model_reasoning_effort = "xhigh"
 model_reasoning_summary = "detailed"
 model_verbosity = "high"
@@ -49,6 +49,9 @@ args = ["@sveltejs/mcp"]
 command = "bunx"
 args = ["-y", "@modelcontextprotocol/server-github"]
 env_vars = ["GITHUB_TOKEN"]
+
+[mcp_servers.notion]
+url = "https://mcp.notion.com/mcp"
 
 # HISTORY
 [history]

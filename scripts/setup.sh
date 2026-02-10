@@ -176,6 +176,7 @@ link_file "$DOTFILES_DIR/agents/skills" "$HOME/.claude/skills"
 # Codex CLI
 link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.codex/AGENTS.md"
 link_file "$DOTFILES_DIR/agents/codex.toml" "$HOME/.codex/config.toml"
+link_file "$DOTFILES_DIR/agents/skills" "$HOME/.agents/skills"
 # AMP CLI
 link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.config/amp/AGENTS.md"
 link_file "$DOTFILES_DIR/agents/amp.settings.json" "$HOME/.config/amp/settings.json"
