@@ -13,6 +13,7 @@ set -euo pipefail
 #   command claude login
 #   codex login
 #   amp login
+#   # Add ~/.ssh/id_ed25519_signing_agent.pub as a GitHub SSH signing key
 #   # Append API keys to ~/.zshrc.local
 #   # Grant Full Disk Access to Terminal.app in System Settings
 # ==============================================================================
@@ -85,6 +86,19 @@ else
     echo "  Sandbox SSH key already provisioned"
 fi
 
+# 5c. Generate SSH signing key for non-interactive verified commits
+echo "[5c/10] Generating SSH signing key..."
+SIGNING_KEY="$HOME/.ssh/id_ed25519_signing_agent"
+if [ -f "$SIGNING_KEY" ]; then
+    echo "  Signing key already exists"
+else
+    mkdir -p "$HOME/.ssh"
+    ssh-keygen -t ed25519 -f "$SIGNING_KEY" -N "" -C "sandbox-signing@vm"
+fi
+echo "  Signing public key:"
+cat "${SIGNING_KEY}.pub"
+echo "  Add this key in GitHub: Settings -> SSH and GPG keys -> New SSH signing key"
+
 # 6. Configure git credential helper for HTTPS
 echo "[6/10] Setting up git credential helper..."
 if gh auth status &>/dev/null; then
@@ -138,6 +152,7 @@ echo
 echo "Next steps (manual):"
 echo "  1. gh auth login"
 echo "  2. command claude login / codex login / amp login"
-echo "  3. Append API keys to ~/.zshrc.local"
-echo "  4. Grant Full Disk Access to Terminal.app in System Settings"
-echo "  5. sudo shutdown -h now"
+echo "  3. Add ~/.ssh/id_ed25519_signing_agent.pub as GitHub SSH signing key"
+echo "  4. Append API keys to ~/.zshrc.local"
+echo "  5. Grant Full Disk Access to Terminal.app in System Settings"
+echo "  6. sudo shutdown -h now"

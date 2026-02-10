@@ -9,11 +9,25 @@ sandbox() {
     local RESET='\x1b[0m'
 
     local BASE_IMAGE="sandbox-dev"
+    local SANDBOX_KEY="$HOME/Git/dot/vm/sandbox_key"
     local VM_NAME=""
     local TARGET_PATH=""
     local EXEC_CMD=""
     local READ_ONLY=false
+    local READ_ONLY_WITH_GIT=false
     local ACTION="start"
+    local DOCTOR_FAIL=0
+
+    _doctor_check() {
+        local name="$1"
+        shift
+        if "$@" >/dev/null 2>&1; then
+            echo -e "${BLUE}[OK]${RESET} ${name}"
+        else
+            echo -e "${RED}[FAIL]${RESET} ${name}"
+            DOCTOR_FAIL=1
+        fi
+    }
 
     # Parse arguments
     while [[ $# -gt 0 ]]; do
@@ -50,6 +64,15 @@ sandbox() {
                 READ_ONLY=true
                 shift
                 ;;
+            --ro-git)
+                READ_ONLY=true
+                READ_ONLY_WITH_GIT=true
+                shift
+                ;;
+            --doctor)
+                ACTION="doctor"
+                shift
+                ;;
             -h | --help)
                 echo "Usage: sandbox [path] [options]"
                 echo ""
@@ -60,6 +83,8 @@ sandbox() {
                 echo "  -n NAME         Use custom VM name (for concurrent runs)"
                 echo "  -e CMD          Run command then auto-cleanup"
                 echo "  --ro            Read-only mount (rsync to VM-local)"
+                echo "  --ro-git        Read-only mount + include .git in VM-local rsync (slower)"
+                echo "  --doctor        Run host + VM health checks"
                 echo "  -h, --help      Show this help"
                 return 0
                 ;;
@@ -91,6 +116,44 @@ sandbox() {
         VM_NAME="sandbox-${PATH_HASH}"
     fi
 
+    # Handle doctor action
+    if [ "$ACTION" = "doctor" ]; then
+        echo -e "${BLUE}Running sandbox doctor...${RESET}"
+        _doctor_check "tart installed" command -v tart
+        _doctor_check "ssh installed" command -v ssh
+        _doctor_check "gh installed" command -v gh
+        _doctor_check "base image exists (${BASE_IMAGE})" sh -c "tart list 2>/dev/null | grep -qw '${BASE_IMAGE}'"
+        _doctor_check "sandbox key exists (${SANDBOX_KEY})" test -f "$SANDBOX_KEY"
+        _doctor_check "sandbox key permissions are 600" sh -c "[ \"\$(stat -f '%Lp' '${SANDBOX_KEY}' 2>/dev/null)\" = '600' ]"
+
+        if [ "$DOCTOR_FAIL" -ne 0 ]; then
+            echo -e "${RED}Sandbox doctor failed on host checks.${RESET}"
+            return 1
+        fi
+
+        echo -e "${BLUE}Running in-VM smoke test...${RESET}"
+        local VM_CHECK_CMD
+        # shellcheck disable=SC2016
+        VM_CHECK_CMD='set -euo pipefail;
+            export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH";
+            gh auth status >/dev/null;
+            [ "$(git config --global --get commit.gpgsign)" = "true" ];
+            [ "$(git config --global --get gpg.format)" = "ssh" ];
+            KEY="$(git config --global --get user.signingkey)";
+            [ "$KEY" = "~/.ssh/id_ed25519_signing_agent.pub" ] || [ "$KEY" = "$HOME/.ssh/id_ed25519_signing_agent.pub" ];
+            [ -f "$HOME/.ssh/id_ed25519_signing_agent.pub" ];
+            SSH_OUT="$(ssh -T git@github.com 2>&1 || true)";
+            echo "$SSH_OUT" | grep -qi "successfully authenticated"'
+
+        if sandbox "$TARGET_PATH" -e "$VM_CHECK_CMD"; then
+            echo -e "${BLUE}Sandbox doctor passed.${RESET}"
+            return 0
+        fi
+
+        echo -e "${RED}Sandbox doctor failed in VM smoke test.${RESET}"
+        return 1
+    fi
+
     # Handle stop action
     if [ "$ACTION" = "stop" ]; then
         echo -e "${BLUE}Stopping ${VM_NAME}...${RESET}"
@@ -118,7 +181,6 @@ sandbox() {
     fi
 
     # SSH key and options
-    local SANDBOX_KEY="$HOME/Git/dot/vm/sandbox_key"
     local -a SSH_OPTS=(-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -i "$SANDBOX_KEY")
 
     # Verify sandbox SSH key exists
@@ -174,7 +236,7 @@ sandbox() {
         kill "$VM_PID" 2>/dev/null || true
         wait "$VM_PID" 2>/dev/null || true
     }
-    trap _sandbox_cleanup INT TERM
+    trap _sandbox_cleanup INT TERM HUP
 
     # Wait for VM to become reachable
     echo -e "${DIM}Waiting for VM to boot...${RESET}"
@@ -201,7 +263,7 @@ sandbox() {
     if [ -z "$VM_IP" ] || [ "$ELAPSED" -ge "$MAX_WAIT" ]; then
         echo -e "${RED}[ERROR] VM failed to become reachable within ${MAX_WAIT}s${RESET}"
         _sandbox_cleanup
-        trap - INT TERM
+        trap - INT TERM HUP
         unset -f _sandbox_cleanup
         return 1
     fi
@@ -249,10 +311,17 @@ REMOTE_SETUP
     # Read-only mode: rsync project to VM-local
     if [ "$READ_ONLY" = true ]; then
         echo -e "${BLUE}Syncing project to VM-local storage...${RESET}"
-        ssh "${SSH_OPTS[@]}" "admin@${VM_IP}" bash <<'REMOTE_RO'
-            mkdir -p "$HOME/local/workspace"
-            rsync -a --exclude='.git' --exclude='node_modules' --exclude='.next' --exclude='.svelte-kit' --exclude='.venv' --exclude='target' "$HOME/workspace/" "$HOME/local/workspace/"
+        if [ "$READ_ONLY_WITH_GIT" = true ]; then
+            ssh "${SSH_OPTS[@]}" "admin@${VM_IP}" bash <<'REMOTE_RO_WITH_GIT'
+                mkdir -p "$HOME/local/workspace"
+                rsync -a --exclude='node_modules' --exclude='.next' --exclude='.svelte-kit' --exclude='.venv' --exclude='target' "$HOME/workspace/" "$HOME/local/workspace/"
+REMOTE_RO_WITH_GIT
+        else
+            ssh "${SSH_OPTS[@]}" "admin@${VM_IP}" bash <<'REMOTE_RO'
+                mkdir -p "$HOME/local/workspace"
+                rsync -a --exclude='.git' --exclude='node_modules' --exclude='.next' --exclude='.svelte-kit' --exclude='.venv' --exclude='target' "$HOME/workspace/" "$HOME/local/workspace/"
 REMOTE_RO
+        fi
     fi
 
     # Determine working directory inside VM
@@ -269,7 +338,7 @@ REMOTE_RO
         # shellcheck disable=SC2029
         ssh "${SSH_OPTS[@]}" "admin@${VM_IP}" "cd ${WORK_DIR} && ${EXEC_CMD}" || EXIT_CODE=$?
         _sandbox_cleanup
-        trap - INT TERM
+        trap - INT TERM HUP
         unset -f _sandbox_cleanup
         return "$EXIT_CODE"
     else
@@ -279,7 +348,7 @@ REMOTE_RO
         echo ""
         ssh "${SSH_OPTS[@]}" -t "admin@${VM_IP}" "cd ${WORK_DIR} && exec zsh -l"
         _sandbox_cleanup
-        trap - INT TERM
+        trap - INT TERM HUP
         unset -f _sandbox_cleanup
     fi
 }

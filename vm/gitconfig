@@ -3,12 +3,16 @@
 [user]
 	name = Han
 	email = han@u29dc.com
+	signingkey = ~/.ssh/id_ed25519_signing_agent.pub
 
 [init]
 	defaultBranch = main
 
 [commit]
-	gpgsign = false
+	gpgsign = true
+
+[gpg]
+	format = ssh
 
 [core]
 	pager = delta
