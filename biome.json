@@ -30,7 +30,8 @@
 			"!**/.tmp",
 			"!**/temp",
 			"!**/.temp",
-			"!**/.archive"
+			"!**/.archive",
+			"!**/references/templates"
 		]
 	},
 	"formatter": {

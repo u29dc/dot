@@ -1,0 +1,11 @@
+{
+	"workspaces": ["packages/*"],
+	"dependencies": {
+		"@scope/core": "workspace:*"
+	},
+	"exports": {
+		".": "./src/index.ts",
+		"./config": "./src/config/index.ts",
+		"./utils/logger": "./src/utils/logger.ts"
+	}
+}

@@ -7,103 +7,75 @@ allowed-tools: Bash, Read, Write, Glob, Grep, Edit
 
 # Align
 
-Bootstrap or align projects to the quality standards defined in AGENTS.md.
+Audit and enforce project baseline standards from `agents/AGENTS.md` using canonical templates under `agents/skills/align/references/`.
 
 ## How to Use
 
-- `/align` - audit and align current project to quality standards
-- `/align <project-type>` - align with project type override (svelte, next, monorepo, go, cli)
-- `/align dry-run` - report misalignments without applying changes
+- `/align` - full audit + fix pass for current project
+- `/align <project-type>` - enforce variant-specific rules (`svelte`, `next`, `monorepo`, `go`, `cli`)
+- `/align dry-run` - report only, no file mutations
 
 ## Arguments
 
 Optional: `$ARGUMENTS`
 
-- **Project type override**: "svelte", "next", "monorepo", "go", "cli"
-- **Scope limit**: "only scripts" - align only package.json scripts
-- **Dry run**: "dry-run" - report changes without applying
+- project type override: `svelte | next | monorepo | go | cli`
+- scope limiter: `only scripts`
+- dry run: `dry-run`
 
 ## Workflow
 
-1. **Detect Project Type**: Check for go.mod (Go), workspaces in package.json (monorepo), svelte.config.js (SvelteKit), next.config.js (Next.js), or plain TypeScript/JavaScript.
+1. Detect project type and package/runtime context.
+2. Load canonical references from `references/index.md`.
+3. Audit existing config files against policy and templates.
+4. Report drift (missing files, invalid patterns, rule violations).
+5. Apply minimal corrective edits while preserving valid project-specific intent.
+6. Install missing tooling dependencies required by configured scripts.
+7. Initialize `.husky` hooks when absent.
+8. Run available quality checks.
+9. Report changed files, unresolved gaps, and next actions.
 
-2. **Audit Existing Configs**: Read and compare against standards:
-    - package.json: field order, util:\* scripts, prepare hook
-    - commitlint.config.js: rules, type/scope enums
-    - lint-staged.config.js: util:check trigger
-    - .husky/: pre-commit and commit-msg hooks
-    - biome.json: extends global config
-    - tsconfig.json: strict flags
-    - .gitignore: standard patterns
+## Canonical Sources
 
-3. **Report Misalignments**: List missing files, incorrect configurations, and deviations from standards.
+- Primary: `agents/skills/align/references/index.md`
+- Templates: `agents/skills/align/references/templates/`
+- Variants: `agents/skills/align/references/variants/`
+- Remote fallback: `https://github.com/u29dc/dot/tree/main/agents/skills/align/references`
 
-4. **Apply Fixes**: Create missing files, update misaligned configs. For existing files, preserve project-specific values (like scope-enum) while enforcing structure.
-
-5. **Install Dependencies**: If missing, add devDependencies: @biomejs/biome, @commitlint/cli, @commitlint/config-conventional, husky, lint-staged, @typescript/native-preview, bun-types.
-
-6. **Initialize Husky**: Run `bunx husky init` if .husky/ missing; create hooks.
-
-7. **Report**: Summary of changes made, files created/updated.
-
-## Reference
-
-Example config files to use as templates (for agents without filesystem access to dot repo):
-
-- https://github.com/u29dc/dot/blob/main/commitlint.config.js
-- https://github.com/u29dc/dot/blob/main/.gitignore
-- https://github.com/u29dc/dot/blob/main/biome.json
-- https://github.com/u29dc/dot/blob/main/tsconfig.json
-
-Note: AGENTS.md defines the standards to follow - it is NOT a file to copy into projects. The align command creates actual config files based on those standards.
-
-## Standards Applied
+## Standards Contract
 
 ### package.json
 
-- Field order: name, version, type, private, workspaces (if monorepo), repository, scripts, devDependencies, dependencies
-- Scripts: util:format, util:lint, util:types, util:check (chained with exit status), prepare (husky)
-- SvelteKit util:types: `bunx --bun svelte-kit sync && bunx --bun tsgo --noEmit && bunx svelte-check-rs --tsconfig ./tsconfig.svelte.json`
-- Standard util:types: `bunx tsgo --noEmit`
+- MUST enforce field order:
+  `name > version > type > private > workspaces > repository > scripts > devDependencies > dependencies`
+- MUST enforce script namespace `util:*`.
+- MUST include `prepare` hook for husky when hooks are used.
+- MUST set typecheck script:
+  - default: `bunx tsgo --noEmit`
+  - svelte default: `bunx svelte-kit sync && bunx tsgo --noEmit && bunx svelte-check --tsconfig ./tsconfig.json`
+- SHOULD preserve existing compatible variants (`svelte-check-rs`, custom tsconfig).
 
-### commitlint.config.js
+### Core config files
 
-- Extends: @commitlint/config-conventional
-- Types: feat, fix, refactor, docs, style, chore, test
-- Scopes: project-specific (infer from structure or ask)
-- Rules: scope-empty never, subject-case lower-case, subject-full-stop never, header-max-length 100, body-max-line-length 100
+- MUST align `commitlint.config.js` with conventional base + scoped rules.
+- MUST align `lint-staged.config.js` to run full quality gate.
+- MUST align `biome.json` to extend global config.
+- MUST align `tsconfig.json` strict-mode baseline and alias contract.
+- MUST align `.gitignore` baseline patterns.
+- MUST align `.husky/pre-commit` and `.husky/commit-msg` hooks.
 
-### lint-staged.config.js
+## Safety Rules
 
-- Pattern: `'*': () => ['bun run util:check']`
-
-### .husky/pre-commit
-
-- Content: `bunx lint-staged`
-
-### .husky/commit-msg
-
-- Content: `bunx --no-install commitlint --edit "$1"`
-
-### biome.json
-
-- Extends: /Users/han/.config/biome/biome.json
-- SvelteKit: add overrides disabling noUnusedVariables, noUnusedImports, useConst for \*.svelte
-
-### tsconfig.json
-
-- Strict flags: strict, alwaysStrict, noUncheckedIndexedAccess, noImplicitAny, noImplicitReturns, noUnusedLocals, noUnusedParameters, noImplicitThis, noFallthroughCasesInSwitch, exactOptionalPropertyTypes, noImplicitOverride, noPropertyAccessFromIndexSignature, verbatimModuleSyntax, isolatedModules, noEmit
-- SvelteKit: extends .svelte-kit/tsconfig.json
-- Paths: @/_ -> ./src/_
-
-### .gitignore
-
-- Standard: node*modules/, dist/, build/, \*.tsbuildinfo, .biome, .svelte-kit/, .DS_Store, .*_, .vscode/, .zed/, .idea/, _.log, .tmp/, .env, .env.\* (!.env.example), .husky/\_/, .claude/, .wrangler/
+- MUST preserve valid project-specific configuration unless explicitly overridden.
+- MUST avoid destructive resets and unrelated file rewrites.
+- MUST report before/after intent in dry-run mode.
+- SHOULD infer scope enums from repository structure and commit history.
+- SHOULD prefer small, reviewable edits over full-file replacement when practical.
 
 ## Quality Standards
 
-- Never overwrite project-specific values without confirmation
-- Preserve existing valid configurations
-- Infer scope-enum from project structure (packages/, src/ folders, existing commits)
-- Report all changes before applying in interactive mode
-- Support dry-run for audit-only
+- No unresolved template placeholders.
+- No broken config syntax after updates.
+- All aligned files trace back to canonical references.
+- Drift report includes exact file-level diffs or rule-level findings.
+- Skill text remains policy-focused; template payloads stay in `references/`.

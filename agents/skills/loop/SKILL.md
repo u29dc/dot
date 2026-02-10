@@ -7,166 +7,134 @@ allowed-tools: Bash, Read, Write, Glob, Grep, Edit
 
 # Loop
 
-Generate production-ready autonomous agent loop setups for any project type.
+Generate deterministic autonomous-loop scaffolding (`prd.json`, `PROMPT.md`, `loop.sh`, `progress.txt`) with strict story decomposition and quality-gate wiring.
 
 ## How to Use
 
-- `/loop` - scan project and interactively build loop setup
-- `/loop <goal>` - generate loop setup for stated goal
-- `/loop <goal> --prefix MIG` - generate with explicit ID prefix
+- `/loop` - detect project context and scaffold a new loop setup
+- `/loop <goal>` - scaffold setup for explicit objective
+- `/loop <goal> --prefix MIG --dir ./automation` - scaffold with explicit ID prefix and output path
 
 ## Arguments
 
 Optional: `$ARGUMENTS`
 
-- **Goal**: free text describing what the loop should accomplish
-- **--prefix**: override auto-detected ID prefix (ENG, MIG, RSH, etc.)
-- **--dir**: output directory for loop files (default: project root)
-- **--no-quality-gate**: omit the quality gate phase (for non-dev loops like research, sales, creative)
-- **--continue**: extend an existing loop setup with new stories instead of creating from scratch
+- `goal` (free text): target outcome for loop execution
+- `--prefix <ID>`: override story ID prefix (`ENG`, `MIG`, `RSH`, etc.)
+- `--dir <path>`: output directory (default project root)
+- `--no-quality-gate`: non-dev loops where compile/test/lint gate is not applicable
+- `--continue`: append new stories to existing loop setup
 
-## Workflow
+## Generated Outputs
 
-1. **Scan Project**: Read package.json / Cargo.toml / pyproject.toml, CLAUDE.md, AGENTS.md, commitlint config, biome/eslint config, tsconfig. Run `git log --oneline -10`. Identify the quality gate command (e.g., `bun run util:check`, `cargo check && cargo test && cargo clippy`, `uv run pytest && uv run ruff check`). Extract commitlint rules (allowed types, scopes, formatting).
+- `prd.json`: source of truth for story queue and completion state
+- `PROMPT.md`: agent instruction protocol for one-story-per-iteration execution
+- `loop.sh`: harness for repeated `claude -p` runs and completion detection
+- `progress.txt`: append-only execution log + codebase patterns
 
-2. **Determine Scope**: Infer goal from `$ARGUMENTS` or ask the user for: goal, deliverables, constraints, done criteria. Determine whether this is a software or non-software loop.
+Templates live in `agents/skills/loop/templates/`.
 
-3. **Select ID Prefix**: Choose from the prefix table based on project type, or use `--prefix` override.
+## New Setup Workflow
 
-4. **Decompose Stories**: Break requirements into right-sized stories per the story rules below. Order by dependency: setup > core > integration > polish. Add `dependsOn` for complex dependency graphs.
+1. Detect project and toolchain context.
+2. Derive quality-gate command and commit format rules.
+3. Clarify scope, deliverables, constraints, and done criteria.
+4. Choose ID prefix from rules or explicit override.
+5. Decompose into right-sized stories in dependency order.
+6. Generate `prd.json` from template with populated stories.
+7. Generate `PROMPT.md` with concrete `{QUALITY_CMD}` and `{COMMITLINT_RULES}` substitution.
+8. Copy `loop.sh`, mark executable.
+9. Copy `progress.txt`; add setup note to `CLAUDE.md` if present.
+10. Create branch `loop/<descriptive-name>`, commit scaffold, report run commands.
 
-5. **Generate prd.json**: Read `templates/prd.json`, replace placeholders, populate with decomposed stories, write to target directory.
+## Continue Workflow (`--continue`)
 
-6. **Generate PROMPT.md**: Read `templates/prompt.md` and replace `{QUALITY_CMD}` with the actual quality gate command and `{COMMITLINT_RULES}` with the project's commit format rules. For non-dev loops (research, sales, creative): adapt the prompt -- replace Phase 2 (Implement) with task-appropriate instructions (e.g., "research and save output", "draft content to specified path"), replace Phase 3 (Verify) with self-check against acceptance criteria instead of a quality gate command, and adjust Phase 1 and critical rules to fit the domain. Keep the Phase 0/4/Stop Condition/progress structure intact. Write to target directory.
-
-7. **Generate loop.sh**: Copy `templates/loop.sh` to the target directory and make it executable (`chmod +x`).
-
-8. **Initialize State**: Copy `templates/progress.txt` to the target directory. If CLAUDE.md exists, append a Loop Setup section referencing the generated files.
-
-9. **Create Branch and Report**: Create `loop/<descriptive-name>` branch, stage and commit all generated files with `chore(config): initialize autonomous loop setup`, then display: story count, branch name, run command (`./loop.sh`), monitor command (`tail -f agent_logs/agent_*.log`), and reminder to review commits before merging.
-
-## Continue Workflow
-
-When `--continue` is passed (or when existing loop files are detected and user wants to extend):
-
-1. **Validate existing setup**: Confirm prd.json, PROMPT.md, progress.txt, and loop.sh exist in the target directory. Abort with clear error if any are missing.
-
-2. **Read current state**: Parse prd.json to get project name, ID prefix, current story count, and highest story ID number. Read progress.txt Codebase Patterns section for accumulated context.
-
-3. **Decompose new stories**: Take new goal from `$ARGUMENTS` (minus flags). Break into stories following the same Story Rules. Continue ID sequence from the highest existing ID (e.g., if last is ENG-022, new stories start at ENG-023). Set `passes: false` on all new stories.
-
-4. **Append to prd.json**: Add new stories to the `userStories` array. Update the `description` field if the scope has broadened.
-
-5. **Update PROMPT.md context**: Regenerate the Context section (between `## Phase 0` heading and the start of Phase 0 content) to cover the full scope -- both original and new work. Keep the quality gate command, commitlint rules, and all phase instructions unchanged.
-
-6. **Mark continuation in progress.txt**: Append a continuation separator:
-
-```
----
-
-## CONTINUATION - {DATE}
-Added {N} stories ({FIRST_ID} to {LAST_ID}): {brief description}
-
----
-```
-
-7. **Commit and report**: Stage changes, commit with `chore(config): extend loop with {N} new stories ({FIRST_ID}-{LAST_ID})`. Report: new story count, total story count, remaining stories count, run command.
+1. Validate existing loop files exist in target directory.
+2. Parse existing `prd.json` and identify highest story ID.
+3. Decompose new goal into additional stories following same rules.
+4. Continue ID sequence; set new stories `passes: false`.
+5. Append stories to `prd.json`; update description if scope widened.
+6. Update `PROMPT.md` context scope only; keep phases and gates stable.
+7. Append continuation block to `progress.txt`.
+8. Commit extension with explicit ID range summary.
 
 ## Story Rules
 
 ### ID Prefixes
 
-| Project Type           | Prefix |
-| ---------------------- | ------ |
-| Engineering / features | `ENG-` |
-| Migration              | `MIG-` |
-| Research               | `RSH-` |
-| Sales                  | `SLS-` |
-| Creative               | `CRE-` |
-| Infrastructure         | `INF-` |
-| Documentation          | `DOC-` |
-| Refactoring            | `REF-` |
-| Testing                | `TST-` |
+| Project Type         | Prefix |
+| -------------------- | ------ |
+| Engineering/features | `ENG-` |
+| Migration            | `MIG-` |
+| Research             | `RSH-` |
+| Sales                | `SLS-` |
+| Creative             | `CRE-` |
+| Infrastructure       | `INF-` |
+| Documentation        | `DOC-` |
+| Refactor             | `REF-` |
+| Testing              | `TST-` |
 
-Format: `{PREFIX}{NNN}` zero-padded to 3 digits.
+Format: `{PREFIX}{NNN}` with 3-digit zero padding.
 
-### Sizing
+### Sizing and Scope
 
-Each story MUST fit within one context window (~20-30 minutes of agent work).
+- MUST size each story to one context window (~20-30 minutes).
+- MUST split oversized stories until independently completable.
+- MUST merge trivial micro-edits into meaningful stories.
+- MUST order categories: `setup -> core -> integration -> polish`.
 
-**Right-sized**: add a DB column with migration, add a UI component to an existing page, update a server action, create one API endpoint with validation, write tests for one module, create one CLI subcommand, research one company profile, draft one outreach email.
+### Acceptance Criteria Contract
 
-**Too large** (split further): "build the entire dashboard", "add authentication", "migrate the database layer", "implement the API".
-
-**Too small** (merge upward): "add a single CSS class", "fix a typo", "add one import statement".
-
-### Category Ordering
-
-1. **setup**: scaffolding, schemas, config, dependencies, project structure
-2. **core**: primary features, main business logic
-3. **integration**: connecting systems, API wiring, data flow
-4. **polish**: edge cases, UI refinements, error states, documentation
-
-Priority numbers within categories handle fine-grained ordering. Lower number = higher priority.
-
-### Acceptance Criteria
-
-Use the **Signal = State** pattern -- "X is Y", not vague verbs:
-
-- "Migration creates users table with id, email, password_hash columns"
-- "CLI exits with code 0 when given valid input"
-- "File exists at `src/lib/auth.ts` and exports `authenticate` function"
-- "Report saved to `research/acme-corp.md`"
-- "Contains sections: Overview, Key People, Recent News"
-- "Word count between 800-1500"
-
-Never use: "configured", "completed", "set up", "implemented", "working".
-
-Every software story MUST include "Quality gate passes" as the final criterion. Every non-software story MUST include "Output file saved to {specific path}" as the final criterion.
+- MUST use signal-as-state wording (`X is Y`, not vague verbs).
+- MUST avoid ambiguous verbs: `configured`, `done`, `implemented`, `working`.
+- MUST include final criterion:
+    - software loop: `Quality gate passes`
+    - non-software loop: `Output file saved to <path>`
 
 ### Dependencies
 
-For simple linear flows, priority ordering is sufficient. For complex graphs, add `dependsOn`:
+- Use `priority` for linear flows.
+- Use `dependsOn` for non-linear graphs.
+- `PROMPT.md` MUST instruct skipping blocked stories.
 
-```json
-{
-	"id": "ENG-005",
-	"dependsOn": ["ENG-001", "ENG-003"]
-}
-```
+## Prompt Adaptation Rules
 
-The PROMPT.md instructs the agent to skip stories whose dependencies have not passed yet.
+### Software loops
 
-## Templates
+- Keep full implement -> verify -> commit cycle.
+- Verify phase MUST run concrete quality gate command.
 
-All templates live in `agents/skills/loop/templates/`. Read and customize before writing to the target project.
+### Non-software loops (`--no-quality-gate`)
 
-| Template      | File                     | Placeholders to Replace                                                      |
-| ------------- | ------------------------ | ---------------------------------------------------------------------------- |
-| PRD           | `templates/prd.json`     | `{PROJECT_NAME}`, `{ONE_LINE_GOAL}`, `{BRANCH_NAME}`, `{ID_PREFIX}`, stories |
-| Prompt        | `templates/prompt.md`    | `{QUALITY_CMD}`, `{COMMITLINT_RULES}` -- adapt phases for non-dev loops      |
-| Loop harness  | `templates/loop.sh`      | (none -- copy verbatim, make executable)                                     |
-| Progress init | `templates/progress.txt` | (none -- copy verbatim)                                                      |
+- Replace verify phase with explicit acceptance-criteria self-check.
+- Keep one-story-per-iteration and completion signaling semantics unchanged.
+- Keep append-only progress and commit/update flow.
 
 ## Critical Rules
 
-- **Right-size stories**: oversized stories are the most expensive failure mode -- the agent exhausts context without completing, wasting an entire iteration.
-- **Embed real commands**: never leave `{QUALITY_CMD}` or `{COMMITLINT_RULES}` as placeholders in generated PROMPT.md -- substitute the actual values discovered in step 1.
-- **"Don't assume not implemented"**: always include "confirm with code search first" in software PROMPT.md to prevent duplicate implementations.
-- **Quality gate hierarchy**: type systems > tests > linting > LLM-as-judge. Gate sequence per iteration: implement > typecheck > lint > test > commit.
-- **Keep PROMPT.md under 120 lines**: model adherence drops with instruction count. Move reference material to CLAUDE.md.
-- **Cost awareness**: the loop uses the user's configured default model unless overridden with `--model`. A 50-iteration loop on a large codebase costs $50-100+ in API credits.
-- **Security**: `--dangerously-skip-permissions` is acceptable inside containers/VMs; on bare metal, prefer `--permission-mode acceptEdits` or `--allowedTools`.
-- **Stop condition**: always use `<promise>COMPLETE</promise>` -- the loop harness greps for this exact string.
-- **Append-only progress**: never replace progress.txt content; always append. Consolidate reusable patterns to the top section.
-- **No overcooking**: tightly scoped acceptance criteria and max iteration limits prevent the agent from adding unrequested features or refactoring working code.
+- MUST replace all template placeholders with concrete values.
+- MUST include explicit "search before assuming missing" instruction in generated prompt.
+- MUST keep `PROMPT.md` concise (target <=120 lines).
+- MUST use `<promise>COMPLETE</promise>` stop signal exactly.
+- MUST keep `progress.txt` append-only.
+- MUST keep iteration flow strict: implement -> verify -> commit -> update state.
+- SHOULD warn about runtime/model cost for long loops.
+- SHOULD use safer permission modes on bare metal; permissive mode is acceptable in isolated containers/VMs.
 
 ## Quality Standards
 
-- All generated files are syntactically valid (JSON parses, bash runs, markdown renders).
-- prd.json stories follow Signal = State acceptance criteria with no vague verbs.
-- PROMPT.md contains the actual quality gate command and commitlint rules, not placeholders.
-- loop.sh is executable and handles SIGINT/SIGTERM gracefully.
-- progress.txt is initialized with the Codebase Patterns header.
-- Branch created and initial commit made before reporting to user.
-- No references to external files that do not exist in the generated output.
+- Generated JSON is valid and parseable.
+- Generated shell harness is executable and signal-safe.
+- `PROMPT.md` contains concrete quality/commit rules, no unresolved placeholders.
+- Stories are right-sized and use signal-as-state acceptance criteria.
+- Continuations preserve historical state and ID sequencing.
+- Branch and initial commit are created before reporting completion.
+
+## Run Commands to Report
+
+After scaffold creation, report at minimum:
+
+- loop run: `./loop.sh`
+- log tail: `tail -f agent_logs/agent_*.log`
+- branch name
+- story count and first/last story IDs

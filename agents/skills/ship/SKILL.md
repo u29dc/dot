@@ -7,68 +7,77 @@ allowed-tools: Bash, Read, Write, Glob, Grep, Edit
 
 # Ship
 
-Commit changes with intelligent batching and create pull requests.
+Commit changes with deterministic batching and execute safe `dev -> main` pull request flow.
 
 ## How to Use
 
-- `/ship` - commit staged/unstaged changes with intelligent batching
-- `/ship pr` - create and merge PR from dev to main
-- `/ship <preferences>` - commit with scope/grouping hints (e.g., "single commit", "only src/lib")
+- `/ship` - analyze changes and create optimal commit batches
+- `/ship pr` - create, validate, and merge PR from `dev` to `main`
+- `/ship only src/lib single commit` - scope and batching override
 
 ## Arguments
 
 Optional: `$ARGUMENTS`
 
-- **Path scope**: "only src/lib" - limit to specific folder
-- **File filter**: "\*.ts only" - limit to file patterns
-- **Grouping hint**: "single commit" or "separate commits"
-- **Message hint**: any text to incorporate into commit message context
+- path scope: `only <path>`
+- file filter: `<glob> only`
+- batching override: `single commit` or `separate commits`
+- message context: free text hints for subject/body wording
 
 ## Commit Workflow
 
-1. **Inspect Status**: Run `git status --porcelain` and `git diff HEAD` to identify all modified files. If preferences are provided via `$ARGUMENTS`, filter or adjust scope accordingly.
-2. **Parse Config**: Read `commitlint.config.js` if present to extract allowed types/scopes; otherwise use conventional defaults.
-3. **Analyze Changes**: Review diffs to determine change type (feat/fix/refactor/docs/chore/style) and scope.
-4. **Group Commits**: Cluster files by type and scope; separate unrelated changes into distinct commits.
-5. **Execute**: For each group: unstage all, stage group, generate message, commit, validate.
-6. **Report**: Display commit SHAs, messages, and file counts.
+1. Read status and full diff (`git status --porcelain`, `git diff HEAD`).
+2. Load commit rules from `commitlint.config.js` if present; otherwise use conventional defaults.
+3. Classify changes by type/scope and detect unrelated clusters.
+4. Determine batching strategy (auto or argument override).
+5. For each batch: reset staging, stage exact files, generate compliant message, commit.
+6. Report commit SHAs, titles, scopes, and file counts.
 
-### Commit Format
+## Commit Message Contract
 
-Required: `type(scope): description` (all lowercase, imperative, max 100 chars, no trailing punctuation). Required body: dash-prefixed lists in sentence case explaining the "why" behind changes.
+- Header MUST be `type(scope): subject`.
+- Header MUST be lowercase, imperative, <=100 chars, no trailing period.
+- Body MUST be present and explain rationale, not only restate diff.
+- Body SHOULD use concise dash bullets when multiple reasons exist.
 
-### Batching Strategy
+## Batching Rules
 
-- Single commit when changes share type/scope and are tightly coupled.
-- Multiple commits when scopes/types differ or changes are separable.
-- Arguments can override: "single commit" forces one commit, "separate commits" forces splitting.
+- Single commit when changes share one type/scope and are tightly coupled.
+- Multiple commits when independent concerns can be reviewed/reverted separately.
+- Never mix docs/chore/refactor with feature/fix work unless tightly coupled.
 
-## PR Workflow
+## PR Workflow (`/ship pr`)
 
-Triggered when first argument is "pr".
+1. Validate environment: clean tree, on `dev`, remotes configured, `gh` authenticated.
+2. Sync local `dev` with remote before PR creation.
+3. Analyze `main..dev` commit range and derive PR title type/scope.
+4. Create PR `dev -> main` with summary body and risk/testing notes.
+5. Detect and watch required checks (CI, deployment, release workflows).
+6. Abort with actionable failure context if checks fail or timeout.
+7. Merge with merge commit (no squash) to preserve commit/release semantics.
+8. Keep `dev` branch; sync `main` back into `dev`; push both states.
+9. Report PR URL, merge commit SHA, and release tag if produced.
 
-1. **Validate Environment**: Confirm on dev with clean tree; verify main/dev branches and origin remote; ensure `gh` auth works.
-2. **Detect Tooling**: Check for semantic-release, Vercel, and workflows to decide which checks to monitor.
-3. **Push Dev**: Sync dev to origin; ensure no pending commits.
-4. **Create PR**: Analyze commits main..dev to choose type/scope; run `gh pr create --base main --head dev --title "type(scope): subject"` with summary body.
-5. **Wait for Checks**: If CI/Vercel detected, watch checks; abort with context on failures/timeouts.
-6. **Merge PR**: Merge (preserve history), do not delete dev; verify merged state.
-7. **Release Sync**: If semantic-release present, watch release workflow and tag; acceptable if none for non-feat/fix.
-8. **Sync Branches**: Pull main, merge main into dev, push dev; verify no drift.
-9. **Report**: Provide PR URL and latest tag if created.
+## PR Title Contract
 
-### PR Title Format
+- Format: `type(scope): subject`.
+- Type priority when mixed: `feat > fix > refactor > perf > docs > style > test > chore`.
+- Scope priority: derive from commits/paths; fallback `repo`.
 
-`type(scope): subject` (all lowercase, imperative, max 100 chars). Type priority: feat > fix > refactor > perf > docs > style > test > chore. Scope from commits or paths; fall back to repo/api/ui.
+## Safety Rules
+
+- MUST preserve unrelated staged work if outside requested scope.
+- MUST avoid force-push during normal ship flow.
+- MUST avoid deleting `dev`.
+- MUST avoid squash merges unless explicitly requested.
+- SHOULD block merge when required checks are missing or failing.
 
 ## Quality Standards
 
-- Strict commitlint compliance.
-- Body required for all commits.
-- Atomic commits; no build artifacts.
-- Clean staging before each commit.
-- Descriptive, specific subjects.
-- Wait for required checks before merge.
-- Merge commits only (never squash) to keep semantic-release history.
-- Never delete dev branch.
-- Clear progress reporting; abort with actionable guidance on errors.
+- Commitlint-compliant headers and scopes.
+- Commit bodies included for every commit.
+- Atomic commit grouping with clear review boundaries.
+- Clean staging boundaries between batches.
+- PR checks verified before merge.
+- Final branch sync complete (`main` merged back into `dev`).
+- Clear report with exact next-state verification commands.
