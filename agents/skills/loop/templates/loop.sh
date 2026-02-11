@@ -2,25 +2,189 @@
 set -euo pipefail
 
 # Autonomous Agent Loop Harness
-# Usage: ./loop.sh [max_iterations] [--model MODEL] [--no-push]
+# Usage:
+#   ./loop.sh [max_iterations] [--model MODEL] [--no-push] [--timeout MINUTES] [--heartbeat MINUTES]
+#   LOOP_TIMEOUT_MINUTES=30 LOOP_HEARTBEAT_MINUTES=1 ./loop.sh
+# Defaults:
+#   DEFAULT_ITERATION_TIMEOUT_MINUTES=0 means unlimited (no timeout watchdog)
+#   DEFAULT_HEARTBEAT_INTERVAL_MINUTES=1 controls progress heartbeat cadence
 
 PROMPT_FILE="PROMPT.md"
 LOG_DIR="agent_logs"
+
+DEFAULT_ITERATION_TIMEOUT_MINUTES=0
+DEFAULT_HEARTBEAT_INTERVAL_MINUTES=1
+
 MAX_ITERATIONS=0
 MODEL=""
 AUTO_PUSH=true
 BACKOFF_BASE=5
 BACKOFF_MAX=60
 CONSECUTIVE_FAILURES=0
+ITERATION_TIMEOUT_MINUTES="${LOOP_TIMEOUT_MINUTES:-$DEFAULT_ITERATION_TIMEOUT_MINUTES}"
+HEARTBEAT_INTERVAL_MINUTES="${LOOP_HEARTBEAT_MINUTES:-$DEFAULT_HEARTBEAT_INTERVAL_MINUTES}"
+ITERATION_TIMEOUT_SECONDS=0
+HEARTBEAT_INTERVAL_SECONDS=0
+CURRENT_CLAUDE_PID=""
+HEARTBEAT_PID=""
+TIMEOUT_GUARD_PID=""
+CLAUDE_SUPPORTS_STREAM_JSON=false
+CLAUDE_SUPPORTS_INCLUDE_PARTIAL_MESSAGES=false
+
+is_uint() {
+  [[ "$1" =~ ^[0-9]+$ ]]
+}
+
+stop_pid() {
+  local pid="${1:-}"
+  if [[ -z "$pid" ]]; then
+    return
+  fi
+
+  kill "$pid" 2>/dev/null || true
+  wait "$pid" 2>/dev/null || true
+}
+
+start_heartbeat() {
+  local target_pid="$1"
+  local iteration="$2"
+  local iteration_started_at="$3"
+  local log_file="$4"
+
+  HEARTBEAT_PID=""
+  if [[ "$HEARTBEAT_INTERVAL_SECONDS" -le 0 ]]; then
+    return
+  fi
+
+  (
+    while kill -0 "$target_pid" 2>/dev/null; do
+      sleep "$HEARTBEAT_INTERVAL_SECONDS"
+      if ! kill -0 "$target_pid" 2>/dev/null; then
+        break
+      fi
+
+      local elapsed
+      elapsed=$(( $(date +%s) - iteration_started_at ))
+      local msg="Heartbeat: iteration ${iteration} still running (${elapsed}s elapsed)"
+      echo "$msg" | tee -a "$log_file"
+    done
+  ) &
+  HEARTBEAT_PID=$!
+}
+
+start_timeout_guard() {
+  local target_pid="$1"
+  local log_file="$2"
+  local timeout_flag_file="$3"
+
+  TIMEOUT_GUARD_PID=""
+  if [[ "$ITERATION_TIMEOUT_SECONDS" -le 0 ]]; then
+    return
+  fi
+
+  (
+    sleep "$ITERATION_TIMEOUT_SECONDS"
+    if ! kill -0 "$target_pid" 2>/dev/null; then
+      exit 0
+    fi
+
+    local msg="Timeout: iteration exceeded ${ITERATION_TIMEOUT_MINUTES}m (${ITERATION_TIMEOUT_SECONDS}s); sending SIGTERM to claude process ${target_pid}"
+    echo "$msg" | tee -a "$log_file"
+    echo "1" > "$timeout_flag_file"
+    kill "$target_pid" 2>/dev/null || true
+
+    sleep 5
+    if kill -0 "$target_pid" 2>/dev/null; then
+      local force_msg="Timeout: claude process ${target_pid} still running; sending SIGKILL"
+      echo "$force_msg" | tee -a "$log_file"
+      kill -9 "$target_pid" 2>/dev/null || true
+    fi
+  ) &
+  TIMEOUT_GUARD_PID=$!
+}
+
+detect_claude_capabilities() {
+  local help_output
+  help_output="$(claude --help 2>&1 || true)"
+
+  if [[ "$help_output" == *"--output-format"* ]]; then
+    CLAUDE_SUPPORTS_STREAM_JSON=true
+  fi
+
+  if [[ "$help_output" == *"--include-partial-messages"* ]]; then
+    CLAUDE_SUPPORTS_INCLUDE_PARTIAL_MESSAGES=true
+  fi
+}
+
+run_claude_iteration() {
+  local log_file="$1"
+  local timeout_flag_file="$2"
+  local iteration="$3"
+  local iteration_started_at="$4"
+  local exit_code=0
+
+  exec 3> >(tee "$log_file")
+  exec 4> >(tee -a "$log_file" >&2)
+
+  local -a claude_args
+  claude_args=(-p "$(cat "$PROMPT_FILE")" --dangerously-skip-permissions)
+
+  if [[ -n "$MODEL" ]]; then
+    claude_args+=(--model "$MODEL")
+  fi
+
+  if [[ "$CLAUDE_SUPPORTS_STREAM_JSON" == true ]]; then
+    claude_args+=(--output-format stream-json --verbose)
+    if [[ "$CLAUDE_SUPPORTS_INCLUDE_PARTIAL_MESSAGES" == true ]]; then
+      claude_args+=(--include-partial-messages)
+    fi
+  else
+    claude_args+=(--verbose)
+  fi
+
+  claude "${claude_args[@]}" 1>&3 2>&4 &
+  CURRENT_CLAUDE_PID=$!
+
+  start_heartbeat "$CURRENT_CLAUDE_PID" "$iteration" "$iteration_started_at" "$log_file"
+  start_timeout_guard "$CURRENT_CLAUDE_PID" "$log_file" "$timeout_flag_file"
+
+  wait "$CURRENT_CLAUDE_PID" || exit_code=$?
+
+  stop_pid "$HEARTBEAT_PID"
+  HEARTBEAT_PID=""
+  stop_pid "$TIMEOUT_GUARD_PID"
+  TIMEOUT_GUARD_PID=""
+  CURRENT_CLAUDE_PID=""
+
+  exec 3>&-
+  exec 4>&-
+
+  return "$exit_code"
+}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --model) MODEL="$2"; shift 2 ;;
     --no-push) AUTO_PUSH=false; shift ;;
+    --timeout) ITERATION_TIMEOUT_MINUTES="$2"; shift 2 ;;
+    --heartbeat) HEARTBEAT_INTERVAL_MINUTES="$2"; shift 2 ;;
     [0-9]*) MAX_ITERATIONS="$1"; shift ;;
     *) echo "Unknown argument: $1"; exit 1 ;;
   esac
 done
+
+if ! is_uint "$MAX_ITERATIONS"; then
+  echo "Error: max_iterations must be a non-negative integer"; exit 1
+fi
+if ! is_uint "$ITERATION_TIMEOUT_MINUTES"; then
+  echo "Error: --timeout must be a non-negative integer (minutes)"; exit 1
+fi
+if ! is_uint "$HEARTBEAT_INTERVAL_MINUTES"; then
+  echo "Error: --heartbeat must be a non-negative integer (minutes)"; exit 1
+fi
+
+ITERATION_TIMEOUT_SECONDS=$(( ITERATION_TIMEOUT_MINUTES * 60 ))
+HEARTBEAT_INTERVAL_SECONDS=$(( HEARTBEAT_INTERVAL_MINUTES * 60 ))
 
 # --- Prereq checks ---
 if [[ ! -f "$PROMPT_FILE" ]]; then
@@ -32,6 +196,7 @@ fi
 if ! command -v claude &>/dev/null; then
   echo "Error: claude not found in PATH"; exit 1
 fi
+detect_claude_capabilities
 if ! git rev-parse --is-inside-work-tree &>/dev/null; then
   echo "Error: not inside a git repository"; exit 1
 fi
@@ -46,6 +211,13 @@ START_TIME=$(date +%s)
 
 # --- Signal handling ---
 cleanup() {
+  stop_pid "$TIMEOUT_GUARD_PID"
+  TIMEOUT_GUARD_PID=""
+  stop_pid "$HEARTBEAT_PID"
+  HEARTBEAT_PID=""
+  stop_pid "$CURRENT_CLAUDE_PID"
+  CURRENT_CLAUDE_PID=""
+
   echo ""
   echo "Loop interrupted after $ITERATION iterations"
   echo "Duration: $(( $(date +%s) - START_TIME )) seconds"
@@ -53,7 +225,7 @@ cleanup() {
   echo "Logs: $LOG_DIR/"
   exit 0
 }
-trap cleanup SIGINT SIGTERM
+trap cleanup SIGINT SIGTERM SIGHUP
 
 # --- Auto-push safety ---
 try_push() {
@@ -67,12 +239,29 @@ try_push() {
   }
 }
 
+MAX_ITERATIONS_LABEL="$MAX_ITERATIONS"
+if [[ "$MAX_ITERATIONS" -eq 0 ]]; then
+  MAX_ITERATIONS_LABEL="unlimited"
+fi
+
+TIMEOUT_LABEL="${ITERATION_TIMEOUT_MINUTES}m"
+if [[ "$ITERATION_TIMEOUT_MINUTES" -eq 0 ]]; then
+  TIMEOUT_LABEL="unlimited"
+fi
+
+HEARTBEAT_LABEL="${HEARTBEAT_INTERVAL_MINUTES}m"
+if [[ "$HEARTBEAT_INTERVAL_MINUTES" -eq 0 ]]; then
+  HEARTBEAT_LABEL="disabled"
+fi
+
 echo "=========================================="
 echo " Agent Loop Starting"
 echo " Branch: $CURRENT_BRANCH"
 echo " Model: ${MODEL:-default}"
-echo " Max iterations: ${MAX_ITERATIONS:-unlimited}"
+echo " Max iterations: $MAX_ITERATIONS_LABEL"
 echo " Auto-push: $AUTO_PUSH"
+echo " Iteration timeout: $TIMEOUT_LABEL"
+echo " Heartbeat interval: $HEARTBEAT_LABEL"
 echo "=========================================="
 
 # --- Main loop ---
@@ -85,7 +274,9 @@ while true; do
   ITERATION=$((ITERATION + 1))
   TIMESTAMP=$(date +%Y%m%d_%H%M%S)
   COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo "no-commit")
-  LOG_FILE="$LOG_DIR/agent_${TIMESTAMP}_${COMMIT_HASH}.log"
+  LOG_FILE="$LOG_DIR/agent_${TIMESTAMP}_iter${ITERATION}_${COMMIT_HASH}.log"
+  TIMEOUT_FLAG_FILE="$LOG_DIR/.timeout_${TIMESTAMP}_iter${ITERATION}.flag"
+  rm -f "$TIMEOUT_FLAG_FILE"
 
   echo ""
   echo "================ ITERATION $ITERATION ================"
@@ -94,16 +285,21 @@ while true; do
 
   ITER_START=$(date +%s)
   set +e
-  claude -p "$(cat "$PROMPT_FILE")" \
-    --dangerously-skip-permissions \
-    ${MODEL:+--model "$MODEL"} \
-    --verbose \
-    2>&1 | tee "$LOG_FILE"
-  EXIT_CODE=${PIPESTATUS[0]}
+  run_claude_iteration "$LOG_FILE" "$TIMEOUT_FLAG_FILE" "$ITERATION" "$ITER_START"
+  EXIT_CODE=$?
   set -e
+
+  TIMED_OUT=false
+  if [[ -f "$TIMEOUT_FLAG_FILE" ]]; then
+    TIMED_OUT=true
+    rm -f "$TIMEOUT_FLAG_FILE"
+  fi
 
   ITER_DURATION=$(( $(date +%s) - ITER_START ))
   echo "Duration: ${ITER_DURATION}s | Exit: $EXIT_CODE" >> "$LOG_FILE"
+  if [[ "$TIMED_OUT" == true ]]; then
+    echo "Timed out: true" >> "$LOG_FILE"
+  fi
 
   # Check for completion
   if grep -q '<promise>COMPLETE</promise>' "$LOG_FILE" 2>/dev/null; then
@@ -119,6 +315,9 @@ while true; do
 
   # Handle failures with backoff
   if [[ $EXIT_CODE -ne 0 ]]; then
+    if [[ "$TIMED_OUT" == true ]]; then
+      echo "Iteration timed out after ${ITERATION_TIMEOUT_MINUTES}m."
+    fi
     CONSECUTIVE_FAILURES=$((CONSECUTIVE_FAILURES + 1))
     BACKOFF=$(( BACKOFF_BASE * (2 ** (CONSECUTIVE_FAILURES - 1)) ))
     if [[ $BACKOFF -gt $BACKOFF_MAX ]]; then

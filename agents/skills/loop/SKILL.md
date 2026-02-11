@@ -114,6 +114,8 @@ Format: `{PREFIX}{NNN}` with 3-digit zero padding.
 
 - MUST replace all template placeholders with concrete values.
 - MUST include explicit "search before assuming missing" instruction in generated prompt.
+- MUST keep generated `PROMPT.md` self-contained and avoid directives that require launching nested/secondary agent sessions.
+- MUST keep `loop.sh` Claude CLI flags compatibility-safe: if `--output-format stream-json` is used, include `--verbose`; optional flags must be capability-detected.
 - MUST keep `PROMPT.md` concise (target <=120 lines).
 - MUST use `<promise>COMPLETE</promise>` stop signal exactly.
 - MUST keep `progress.txt` append-only.

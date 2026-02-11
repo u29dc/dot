@@ -68,6 +68,7 @@ After completing the story, re-read `prd.json` and check if ALL stories have `pa
 ## 999. Critical Rules
 
 - Work on ONE story per iteration
+- Stay in the current session; do not launch nested or secondary agent sessions
 - NEVER commit code that fails the quality gate
 - NEVER edit tests as a shortcut to get green -- fix the code, not the tests (legitimate updates for coverage or adapting to real changes are fine)
 - NEVER assume functionality is missing without searching first
