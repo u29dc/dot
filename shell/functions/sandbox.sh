@@ -181,7 +181,18 @@ sandbox() {
     fi
 
     # SSH key and options
-    local -a SSH_OPTS=(-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -i "$SANDBOX_KEY")
+    local -a SSH_OPTS=(
+        -o StrictHostKeyChecking=no
+        -o UserKnownHostsFile=/dev/null
+        -o LogLevel=ERROR
+        -o ControlMaster=no
+        -o ControlPath=none
+        -o ControlPersist=no
+        -o ServerAliveInterval=30
+        -o ServerAliveCountMax=6
+        -o TCPKeepAlive=yes
+        -i "$SANDBOX_KEY"
+    )
 
     # Verify sandbox SSH key exists
     if [ ! -f "$SANDBOX_KEY" ]; then
@@ -346,9 +357,14 @@ REMOTE_RO
         echo -e "${BLUE}Connecting to sandbox...${RESET}"
         echo -e "${DIM}Type 'exit' to disconnect. VM will be cleaned up automatically.${RESET}"
         echo ""
-        ssh "${SSH_OPTS[@]}" -t "admin@${VM_IP}" "cd ${WORK_DIR} && exec zsh -l"
+        local SSH_EXIT_CODE=0
+        ssh "${SSH_OPTS[@]}" -t "admin@${VM_IP}" "cd ${WORK_DIR} && exec zsh -l" || SSH_EXIT_CODE=$?
+        if [ "$SSH_EXIT_CODE" -ne 0 ]; then
+            echo -e "${YELLOW}[WARN] SSH session ended unexpectedly (exit ${SSH_EXIT_CODE}).${RESET}"
+        fi
         _sandbox_cleanup
         trap - INT TERM HUP
         unset -f _sandbox_cleanup
+        return "$SSH_EXIT_CODE"
     fi
 }
