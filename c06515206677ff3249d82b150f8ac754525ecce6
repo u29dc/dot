@@ -1,0 +1,23 @@
+homebrew/Brewfile
+  5c4f6749d9e5a413 5,17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.1",
+  "base_commit_sha": "c06515206677ff3249d82b150f8ac754525ecce6",
+  "prompts": {
+    "5c4f6749d9e5a413": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "336985ea-49b5-43ec-9aaa-f16081729444",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Han <han@u29dc.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    }
+  }
+}
