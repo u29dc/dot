@@ -1,0 +1,38 @@
+scripts/setup.sh
+  9023b80323b3545c 113-115
+vm/Brewfile
+  5c4f6749d9e5a413 7,18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.1",
+  "base_commit_sha": "1e01621357280b7cdc215c6e28542a4f012b5849",
+  "prompts": {
+    "5c4f6749d9e5a413": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "336985ea-49b5-43ec-9aaa-f16081729444",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Han <han@u29dc.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    },
+    "9023b80323b3545c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1eac866c-1b4d-4dee-9cf3-6ee1493d8ad6",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Han <han@u29dc.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 40,
+      "overriden_lines": 0
+    }
+  }
+}
