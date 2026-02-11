@@ -2,6 +2,7 @@
 tap "stripe/stripe-cli"
 tap "supabase/tap"
 tap "oven-sh/bun"
+tap "ampcode/tap"
 tap "arbourd/tap"
 tap "cirruslabs/cli"
 
@@ -13,6 +14,7 @@ brew "node"               # JavaScript runtime
 brew "oven-sh/bun/bun"    # Fast JavaScript runtime & bundler
 brew "deno"               # Secure JavaScript/TypeScript runtime
 brew "zig"                # Programming language for robustness
+brew "zvelte-check"       # Fast Svelte diagnostics
 # brew "rust"             # Installed via rustup
 
 # Modern CLI Tools
