@@ -8,6 +8,28 @@ set -euo pipefail
 # Run inside the VM with dotfiles mounted via VirtioFS:
 #   bash "/Volumes/My Shared Files/dotfiles/vm/vm-setup.sh"
 #
+# BASE IMAGE UPDATE RUNBOOK (FULL RERUN, RECOMMENDED)
+# ----------------------------------------------------
+# From host terminal #1, boot the base image with dotfiles mounted:
+#   tart run sandbox-dev --no-graphics --dir=dotfiles:$HOME/Git/dot
+#
+# From host terminal #2, SSH into the running base image:
+#   ssh -i "$HOME/Git/dot/vm/sandbox_key" \
+#     -o StrictHostKeyChecking=no \
+#     -o UserKnownHostsFile=/dev/null \
+#     "admin@$(tart ip sandbox-dev)"
+#
+# Inside VM, refresh ~/Git/dot from mounted host copy, then rerun full setup:
+#   rsync -a --exclude='.git' "/Volumes/My Shared Files/dotfiles/" "$HOME/Git/dot/"
+#   bash "$HOME/Git/dot/vm/vm-setup.sh"
+#
+# Persist updated base image and stop VM:
+#   sudo shutdown -h now
+#
+# Notes:
+# - The full rerun is idempotent and safe as the default update path.
+# - If mount is unavailable, use: git -C "$HOME/Git/dot" pull --ff-only
+#
 # After this script completes, manually run:
 #   gh auth login
 #   command claude login
@@ -58,6 +80,19 @@ rsync -a --exclude='.git' "$DOTFILES_MOUNT/" "$HOME/Git/dot/"
 # 4. Run setup from clone (so symlinks point to ~/Git/dot/...)
 echo "[4/10] Linking dotfiles (VM mode)..."
 bash "$HOME/Git/dot/scripts/setup.sh" --vm --link-only
+
+# 4b. Verify Claude settings symlink points to VM config
+echo "[4b/10] Verifying Claude settings symlink..."
+EXPECTED_CLAUDE_SETTINGS="$HOME/Git/dot/vm/claude.json"
+ACTUAL_CLAUDE_SETTINGS="$(readlink "$HOME/.claude/settings.json" 2>/dev/null || true)"
+if [ "$ACTUAL_CLAUDE_SETTINGS" != "$EXPECTED_CLAUDE_SETTINGS" ]; then
+    echo "  fixing ~/.claude/settings.json -> $EXPECTED_CLAUDE_SETTINGS"
+    mkdir -p "$HOME/.claude"
+    rm -f "$HOME/.claude/settings.json"
+    ln -s "$EXPECTED_CLAUDE_SETTINGS" "$HOME/.claude/settings.json"
+else
+    echo "  Claude settings symlink is correct"
+fi
 
 # 5. Generate SSH key
 echo "[5/10] Generating SSH key..."

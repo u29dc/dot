@@ -110,6 +110,9 @@ if [ "$LINK_ONLY" = false ]; then
     fi
 fi
 
+# Create tool home directory
+mkdir -p "${TOOLS_HOME:-$HOME/.tools}"
+
 # Create symlinks (runs for both full setup and link-only mode)
 echo "Creating symlinks..."
 echo
@@ -171,7 +174,11 @@ echo
 echo "Agent configurations:"
 # Claude Code
 link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.claude/CLAUDE.md"
-link_file "$DOTFILES_DIR/agents/claude.json" "$HOME/.claude/settings.json"
+CLAUDE_SETTINGS_SRC="$DOTFILES_DIR/agents/claude.json"
+if [ "$VM_MODE" = true ]; then
+    CLAUDE_SETTINGS_SRC="$DOTFILES_DIR/vm/claude.json"
+fi
+link_file "$CLAUDE_SETTINGS_SRC" "$HOME/.claude/settings.json"
 link_file "$DOTFILES_DIR/agents/skills" "$HOME/.claude/skills"
 # Codex CLI
 link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.codex/AGENTS.md"
