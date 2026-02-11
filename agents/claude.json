@@ -1,24 +1,52 @@
 {
+	"$schema": "https://json.schemastore.org/claude-code-settings.json",
 	"env": {
 		"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
 	},
+	"autoUpdatesChannel": "latest",
+	"teammateMode": "in-process",
+	"alwaysThinkingEnabled": true,
+	"spinnerTipsEnabled": false,
 	"includeCoAuthoredBy": false,
+	"outputStyle": "Explanatory",
+	"statusLine": {
+		"type": "command",
+		"command": "bunx -y ccstatusline@latest",
+		"padding": 0
+	},
+	"enabledPlugins": {
+		"u29dc@u29dc": true
+	},
+	"hooks": {
+		"PreToolUse": [{ "matcher": "Write|Edit|MultiEdit", "hooks": [{ "type": "command", "command": "/Users/han/.git-ai/bin/git-ai checkpoint claude --hook-input stdin" }] }],
+		"PostToolUse": [{ "matcher": "Write|Edit|MultiEdit", "hooks": [{ "type": "command", "command": "/Users/han/.git-ai/bin/git-ai checkpoint claude --hook-input stdin" }] }]
+	},
 	"permissions": {
+		"defaultMode": "acceptEdits",
 		"allow": [
-			"Read(**)",
-			"Edit(**)",
-			"MultiEdit(**)",
-			"Write(**)",
-			"Glob(**)",
-			"Grep(**)",
-			"LS(**)",
+			"Read",
+			"Edit",
+			"MultiEdit",
+			"Write",
+			"Glob",
+			"Grep",
+			"LS",
 
-			"TodoWrite(**)",
-			"Task(**)",
-			"TodoRead",
+			"TodoWrite",
+			"Task",
+
+			"Skill(align)",
+			"Skill(compose)",
+			"Skill(craft)",
+			"Skill(create)",
+			"Skill(loop)",
+			"Skill(prompts)",
 
 			"mcp__next-devtools__*",
 			"mcp__svelte__*",
+
+			"Bash(:* | :*)",
+			"Bash(:* | :* | :*)",
 
 			"Bash(bun:*)",
 			"Bash(bun run:*)",
@@ -195,8 +223,18 @@
 			"Bash(pbpaste:*)",
 			"Bash(open:*)",
 
-			"Bash(:* | :*)",
-			"Bash(:* | :* | :*)",
+			"Bash(:fin:*)",
+			"Bash(:let:*)",
+			"Bash(:koe:*)",
+			"Bash(:ash:*)",
+			"Bash(:ebb:*)",
+			"Bash(:cho:*)",
+			"Bash(/Users/han/.tools/fin/fin:*)",
+			"Bash(/Users/han/.tools/let/let:*)",
+			"Bash(/Users/han/.tools/koe/koe:*)",
+			"Bash(/Users/han/.tools/ash/ash:*)",
+			"Bash(/Users/han/.tools/ebb/ebb:*)",
+			"Bash(/Users/han/.tools/cho/cho:*)",
 
 			"WebSearch",
 
@@ -344,21 +382,7 @@
 
 			"WebFetch(domain:nonstrict.eu)"
 		],
-		"deny": [],
 		"ask": ["Bash(rm:*)", "Bash(rm -rf:*)", "Bash(rm -r:*)", "Bash(sudo:*)"],
-		"defaultMode": "acceptEdits",
-		"outputStyle": "Explanatory"
-	},
-	"statusLine": {
-		"type": "command",
-		"command": "bunx -y ccstatusline@latest",
-		"padding": 0
-	},
-	"spinnerTipsEnabled": false,
-	"alwaysThinkingEnabled": true,
-	"autoUpdatesChannel": "latest",
-	"teammateMode": "in-process",
-	"enabledPlugins": {
-		"u29dc@u29dc": true
+		"deny": []
 	}
 }
