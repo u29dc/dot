@@ -1,7 +1,7 @@
 ---
 name: ship
 description: Commit changes and ship pull requests
-argument-hint: [commit, pr, or preferences]
+argument-hint: [commit or pr preferences]
 allowed-tools: Bash, Read, Write, Glob, Grep, Edit
 ---
 
