@@ -1,0 +1,23 @@
+shell/zshrc
+  a461b00662a0a3cc 9,158-160
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.2",
+  "base_commit_sha": "4f8adb0e7dac9380eb9f0918f552eed10a7212b4",
+  "prompts": {
+    "a461b00662a0a3cc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9e803c4d-7820-4e49-b944-a61d3ff862cd",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Han <han@u29dc.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    }
+  }
+}
