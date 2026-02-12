@@ -1,0 +1,36 @@
+agents/codex.toml
+  0fea131edddb2091 11-12,14-15,17,19,35,39-40,56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.2",
+  "base_commit_sha": "3d772e810762c0f4868848ea622e3d95b995904c",
+  "prompts": {
+    "0fea131edddb2091": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6c247b15-abca-42a7-a226-6aab6ed01fd9",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Han <han@u29dc.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 10,
+      "overriden_lines": 0
+    },
+    "a461b00662a0a3cc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9e803c4d-7820-4e49-b944-a61d3ff862cd",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Han <han@u29dc.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    }
+  }
+}
