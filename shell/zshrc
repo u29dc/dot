@@ -26,7 +26,14 @@ export CHO_HOME="$TOOLS_HOME/cho"
 :ash() { "$ASH_HOME/ash" "$@"; }
 :ebb() { "$EBB_HOME/ebb" "$@"; }
 :cho() { "$CHO_HOME/cho" "$@"; }
-:c() { claude "$@"; }
+:c() {
+    if [[ "$1" == "allow" ]]; then
+        shift
+        claude --dangerously-skip-permissions "$@"
+    else
+        claude "$@"
+    fi
+}
 
 # Silence Homebrew environment hints
 export HOMEBREW_NO_ENV_HINTS=1
