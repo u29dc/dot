@@ -28,11 +28,13 @@
 				"/Users/han/.cargo",
 				"/Users/han/.rustup",
 				"/Users/han/Library/Caches/Homebrew",
-				"/Users/han/Library/Group Containers/2BUA8C4S2C.com.1password"
+				"/Users/han/Library/Group Containers/2BUA8C4S2C.com.1password",
+				"/Users/han/.tools"
 			]
 		},
 		"network": {
 			"allowLocalBinding": true,
+			"allowUnixSockets": ["/Users/han/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"],
 			"allowedDomains": [
 				"github.com",
 				"api.github.com",
@@ -99,6 +101,8 @@
 				"epc.opendatacommunities.org",
 				"api.mapbox.com",
 				"api.notion.com",
+				"notion.com",
+				"developers.notion.com",
 
 				"duckduckgo.com"
 			]
@@ -127,6 +131,7 @@
 
 			"mcp__next-devtools__*",
 			"mcp__svelte__*",
+			"mcp__notion__*",
 
 			"Bash(bun *)",
 			"Bash(bunx *)",
@@ -202,6 +207,9 @@
 
 			"WebFetch(domain:developer.mozilla.org)",
 			"WebFetch(domain:stackoverflow.com)",
+
+			"WebFetch(domain:json.schemastore.org)",
+			"WebFetch(domain:www.schemastore.org)",
 
 			"WebFetch(domain:notion.com)",
 			"WebFetch(domain:developers.notion.com)",
