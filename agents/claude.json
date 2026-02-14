@@ -21,7 +21,15 @@
 		"enabled": true,
 		"autoAllowBashIfSandboxed": true,
 		"ignoreViolations": {
-			"*": ["/Users/han/.cache", "/Users/han/.bun", "/Users/han/.npm", "/Users/han/.cargo", "/Users/han/.rustup", "/Users/han/Library/Caches/Homebrew"]
+			"*": [
+				"/Users/han/.cache",
+				"/Users/han/.bun",
+				"/Users/han/.npm",
+				"/Users/han/.cargo",
+				"/Users/han/.rustup",
+				"/Users/han/Library/Caches/Homebrew",
+				"/Users/han/Library/Group Containers/2BUA8C4S2C.com.1password"
+			]
 		},
 		"network": {
 			"allowLocalBinding": true,

@@ -6,10 +6,26 @@
 # ------------------------------------------------------------------------------
 
 # Add user directories to PATH for custom scripts and tools
-export PATH="$HOME/.bun/bin:$HOME/.git-ai/bin:$HOME/bin:$HOME/.local/bin:$PATH"
+export PATH="$HOME/.bun/bin:$HOME/bin:$HOME/.local/bin:$PATH"
 
 # Canonical tool install directory (sourced early so zshrc.local can override)
 export TOOLS_HOME="${TOOLS_HOME:-$HOME/.tools}"
+
+# Per-tool home directories
+export FIN_HOME="$TOOLS_HOME/fin"
+export LET_HOME="$TOOLS_HOME/let"
+export KOE_HOME="$TOOLS_HOME/koe"
+export ASH_HOME="$TOOLS_HOME/ash"
+export EBB_HOME="$TOOLS_HOME/ebb"
+export CHO_HOME="$TOOLS_HOME/cho"
+
+# CLI tool functions (colon-prefix for namespace isolation)
+:fin() { "$FIN_HOME/fin" "$@"; }
+:let() { "$LET_HOME/let" "$@"; }
+:koe() { "$KOE_HOME/koe" "$@"; }
+:ash() { "$ASH_HOME/ash" "$@"; }
+:ebb() { "$EBB_HOME/ebb" "$@"; }
+:cho() { "$CHO_HOME/cho" "$@"; }
 
 # Silence Homebrew environment hints
 export HOMEBREW_NO_ENV_HINTS=1
