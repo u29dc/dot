@@ -19,6 +19,7 @@
 	},
 	"sandbox": {
 		"enabled": true,
+		"excludedCommands": ["git"],
 		"autoAllowBashIfSandboxed": true,
 		"ignoreViolations": {
 			"*": [
