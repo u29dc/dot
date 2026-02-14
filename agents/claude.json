@@ -59,17 +59,42 @@
 				"api.vercel.com",
 				"api.stripe.com",
 				"api.supabase.co",
+				"clerk.accounts.dev",
+				"img.clerk.com",
+				"convex.cloud",
 				"api.cloudflare.com",
+				"challenges.cloudflare.com",
+				"checkout.stripe.com",
 
 				"api.anthropic.com",
 				"api.openai.com",
-				"generativelanguage.googleapis.com"
+				"generativelanguage.googleapis.com",
+
+				"fonts.googleapis.com",
+				"fonts.gstatic.com",
+
+				"gmail.googleapis.com",
+				"oauth2.googleapis.com",
+				"accounts.google.com",
+				"www.googleapis.com",
+
+				"openrouter.ai",
+				"api.groq.com",
+				"huggingface.co",
+
+				"api.xero.com",
+				"identity.xero.com",
+				"login.xero.com",
+
+				"www.rightmove.co.uk",
+				"media.rightmove.co.uk",
+				"epc.opendatacommunities.org",
+				"api.mapbox.com",
+				"api.notion.com",
+
+				"duckduckgo.com"
 			]
 		}
-	},
-	"hooks": {
-		"PreToolUse": [{ "matcher": "Write|Edit|MultiEdit", "hooks": [{ "type": "command", "command": "/Users/han/.git-ai/bin/git-ai checkpoint claude --hook-input stdin" }] }],
-		"PostToolUse": [{ "matcher": "Write|Edit|MultiEdit", "hooks": [{ "type": "command", "command": "/Users/han/.git-ai/bin/git-ai checkpoint claude --hook-input stdin" }] }]
 	},
 	"permissions": {
 		"defaultMode": "acceptEdits",
@@ -90,7 +115,7 @@
 			"Skill(craft)",
 			"Skill(create)",
 			"Skill(loop)",
-			"Skill(prompts)",
+			"Skill(ship)",
 
 			"mcp__next-devtools__*",
 			"mcp__svelte__*",

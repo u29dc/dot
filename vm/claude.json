@@ -14,10 +14,6 @@
 		"command": "bunx -y ccstatusline@latest",
 		"padding": 0
 	},
-	"hooks": {
-		"PreToolUse": [{ "matcher": "Write|Edit|MultiEdit", "hooks": [{ "type": "command", "command": "/Users/admin/.git-ai/bin/git-ai checkpoint claude --hook-input stdin" }] }],
-		"PostToolUse": [{ "matcher": "Write|Edit|MultiEdit", "hooks": [{ "type": "command", "command": "/Users/admin/.git-ai/bin/git-ai checkpoint claude --hook-input stdin" }] }]
-	},
 	"permissions": {
 		"defaultMode": "acceptEdits",
 		"allow": [
