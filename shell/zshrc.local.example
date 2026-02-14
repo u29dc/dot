@@ -15,55 +15,9 @@ export OPENROUTER_API_KEY="sk-or-v1-..."
 # export ANTHROPIC_API_KEY="sk-ant-..."
 
 # ------------------------------------------------------------------------------
-# .TOOLS CONVENTION
-# ------------------------------------------------------------------------------
-#
-# All CLI tools install into $HOME/.tools/<tool>/ by default.
-# Each tool directory contains its compiled binary and data:
-#
-#   ~/.tools/
-#     fin/          -- fin binary + data/fin.config.toml, data/fin.db
-#     let/          -- let binary + data/
-#     koe/          -- koe binary + data/
-#     ash/          -- ash binary + data/
-#     ebb/          -- ebb binary + data/
-#     cho/          -- cho binary + data/
-#
-# Override the root with TOOLS_HOME:
-#   export TOOLS_HOME="$HOME/custom/tools"
-#
-# Override a single tool with its own env var:
-#   export FIN_HOME="/other/path/fin"
-#
-# Shell functions use colon-prefix for namespace isolation (:fin, :let, etc.)
-# so they don't collide with shell builtins or other commands.
-#
-
-# Uncomment to override the default tools root:
-# export TOOLS_HOME="$HOME/.tools"
-
-# Uncomment to override individual tool homes:
-# export FIN_HOME="$TOOLS_HOME/fin"
-
-# Uncomment to define colon-prefix tool functions:
-# :fin() { "$FIN_HOME/fin" "$@"; }
-# :let() { "$LET_HOME/let" "$@"; }
-# :koe() { "$KOE_HOME/koe" "$@"; }
-# :ash() { "$ASH_HOME/ash" "$@"; }
-# :ebb() { "$EBB_HOME/ebb" "$@"; }
-# :cho() { "$CHO_HOME/cho" "$@"; }
-
-# ------------------------------------------------------------------------------
-# CLAUDE CODE PLUGINS (private)
-# ------------------------------------------------------------------------------
-
-# Refresh plugin cache after editing skills
-# alias claude-refresh="claude plugin update plugin-name@marketplace-name --scope user"
-
-# ------------------------------------------------------------------------------
 # PERSONAL ALIASES
 # ------------------------------------------------------------------------------
 
 # Cloud storage shortcuts (private)
-# alias gdrive='cd "folder_path"'
-# alias dropbox='cd "folder_path"'
+alias gdrive='cd "folder_path"'
+alias dropbox='cd "folder_path"'

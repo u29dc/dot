@@ -84,6 +84,37 @@ link_file() {
     fi
 }
 
+# Merge skills from multiple source directories into a single target.
+# Creates target as real directory; symlinks each valid skill subdirectory.
+# Skips sources that don't exist (ctx repo may be absent on VMs).
+#
+# Usage: link_skills <target_dir> <source_dir> [<source_dir>...]
+link_skills() {
+    local target="$1"
+    shift
+
+    mkdir -p "$target"
+
+    for src_dir in "$@"; do
+        if [ ! -d "$src_dir" ]; then
+            echo "[SKIP] Skills source not found: $src_dir"
+            continue
+        fi
+
+        for skill in "$src_dir"/*/; do
+            [ -d "$skill" ] || continue
+            local name
+            name="$(basename "$skill")"
+            [[ "$name" == .* ]] && continue
+
+            # Only link directories containing SKILL.md
+            [ -f "$skill/SKILL.md" ] || continue
+
+            link_file "${skill%/}" "$target/$name"
+        done
+    done
+}
+
 # Full setup: Install Homebrew and packages
 if [ "$LINK_ONLY" = false ]; then
     echo "Starting dotfiles setup..."
@@ -179,11 +210,12 @@ if [ "$VM_MODE" = true ]; then
     CLAUDE_SETTINGS_SRC="$DOTFILES_DIR/vm/claude.json"
 fi
 link_file "$CLAUDE_SETTINGS_SRC" "$HOME/.claude/settings.json"
-link_file "$DOTFILES_DIR/agents/skills" "$HOME/.claude/skills"
+SKILLS_BASE="${SKILLS_BASE:-$DOTFILES_DIR/agents/skills}"
+link_skills "$HOME/.claude/skills" "$SKILLS_BASE" ${SKILLS_U29DC:+"$SKILLS_U29DC"}
 # Codex CLI
 link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.codex/AGENTS.md"
 link_file "$DOTFILES_DIR/agents/codex.toml" "$HOME/.codex/config.toml"
-link_file "$DOTFILES_DIR/agents/skills" "$HOME/.agents/skills"
+link_skills "$HOME/.agents/skills" "$SKILLS_BASE" ${SKILLS_U29DC:+"$SKILLS_U29DC"}
 # AMP CLI
 link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.config/amp/AGENTS.md"
 link_file "$DOTFILES_DIR/agents/amp.settings.json" "$HOME/.config/amp/settings.json"

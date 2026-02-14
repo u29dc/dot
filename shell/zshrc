@@ -8,7 +8,7 @@
 # Add user directories to PATH for custom scripts and tools
 export PATH="$HOME/.bun/bin:$HOME/bin:$HOME/.local/bin:$PATH"
 
-# Canonical tool install directory (sourced early so zshrc.local can override)
+# Canonical tool install directory
 export TOOLS_HOME="${TOOLS_HOME:-$HOME/.tools}"
 
 # Per-tool home directories
@@ -19,21 +19,9 @@ export ASH_HOME="$TOOLS_HOME/ash"
 export EBB_HOME="$TOOLS_HOME/ebb"
 export CHO_HOME="$TOOLS_HOME/cho"
 
-# CLI tool functions (colon-prefix for namespace isolation)
-:fin() { "$FIN_HOME/fin" "$@"; }
-:let() { "$LET_HOME/let" "$@"; }
-:koe() { "$KOE_HOME/koe" "$@"; }
-:ash() { "$ASH_HOME/ash" "$@"; }
-:ebb() { "$EBB_HOME/ebb" "$@"; }
-:cho() { "$CHO_HOME/cho" "$@"; }
-:c() {
-    if [[ "$1" == "allow" ]]; then
-        shift
-        claude --dangerously-skip-permissions "$@"
-    else
-        claude "$@"
-    fi
-}
+# Agent skill directories
+export SKILLS_BASE="$HOME/Git/dot/agents/skills"
+export SKILLS_U29DC="$HOME/Git/ctx/u29dc/skills"
 
 # Silence Homebrew environment hints
 export HOMEBREW_NO_ENV_HINTS=1
@@ -128,6 +116,22 @@ alias virtualenv='uv venv'
 # FUNCTIONS
 # Custom shell functions for enhanced functionality
 # ------------------------------------------------------------------------------
+
+# CLI tool functions (colon-prefix for namespace isolation)
+:fin() { "$FIN_HOME/fin" "$@"; }
+:let() { "$LET_HOME/let" "$@"; }
+:koe() { "$KOE_HOME/koe" "$@"; }
+:ash() { "$ASH_HOME/ash" "$@"; }
+:ebb() { "$EBB_HOME/ebb" "$@"; }
+:cho() { "$CHO_HOME/cho" "$@"; }
+:c() {
+    if [[ "$1" == "allow" ]]; then
+        shift
+        claude --dangerously-skip-permissions "$@"
+    else
+        claude "$@"
+    fi
+}
 
 # EZA configuration for better tree view defaults
 EZA_DEFAULT_IGNORE="node_modules|.cache|cache|dist|build|.next|.nuxt|.turbo|coverage|.pytest_cache|__pycache__|.venv|venv|.env"

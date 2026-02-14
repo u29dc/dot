@@ -14,9 +14,7 @@
 		"command": "bunx -y ccstatusline@latest",
 		"padding": 0
 	},
-	"enabledPlugins": {
-		"u29dc@u29dc": true
-	},
+	"enabledPlugins": {},
 	"sandbox": {
 		"enabled": true,
 		"excludedCommands": ["git"],
@@ -80,6 +78,7 @@
 
 				"api.anthropic.com",
 				"api.openai.com",
+				"developers.openai.com",
 				"generativelanguage.googleapis.com",
 
 				"fonts.googleapis.com",
@@ -130,6 +129,13 @@
 			"Skill(create)",
 			"Skill(loop)",
 			"Skill(ship)",
+
+			"Skill(u29dc-cco)",
+			"Skill(u29dc-cfo)",
+			"Skill(u29dc-cio)",
+			"Skill(u29dc-cso)",
+			"Skill(u29dc-cto)",
+			"Skill(u29dc-protocols)",
 
 			"mcp__next-devtools__*",
 			"mcp__svelte__*",
@@ -220,6 +226,7 @@
 			"WebFetch(domain:docs.anthropic.com)",
 			"WebFetch(domain:openai.com)",
 			"WebFetch(domain:platform.openai.com)",
+			"WebFetch(domain:developers.openai.com)",
 			"WebFetch(domain:ai.google.dev)",
 
 			"WebFetch(domain:modelcontextprotocol.io)",
