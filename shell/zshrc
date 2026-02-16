@@ -8,6 +8,9 @@
 # Add user directories to PATH for custom scripts and tools
 export PATH="$HOME/.bun/bin:$HOME/bin:$HOME/.local/bin:$PATH"
 
+# Obsidian CLI
+export PATH="$PATH:/Applications/Obsidian.app/Contents/MacOS"
+
 # Canonical tool install directory
 export TOOLS_HOME="${TOOLS_HOME:-$HOME/.tools}"
 
@@ -124,13 +127,16 @@ alias virtualenv='uv venv'
 :ash() { "$ASH_HOME/ash" "$@"; }
 :ebb() { "$EBB_HOME/ebb" "$@"; }
 :cho() { "$CHO_HOME/cho" "$@"; }
-:c() {
+cc() {
     if [[ "$1" == "allow" ]]; then
         shift
         claude --dangerously-skip-permissions "$@"
     else
         claude "$@"
     fi
+}
+co() {
+    codex "$@"
 }
 
 # EZA configuration for better tree view defaults
