@@ -34,8 +34,7 @@
 			"Skill(compose)",
 			"Skill(craft)",
 			"Skill(create)",
-			"Skill(loop)",
-			"Skill(prompts)"
+			"Skill(loop)"
 		],
 		"ask": [],
 		"deny": []

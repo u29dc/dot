@@ -3,114 +3,8 @@
 	"env": {
 		"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
 	},
-	"autoUpdatesChannel": "latest",
-	"teammateMode": "in-process",
-	"alwaysThinkingEnabled": true,
-	"spinnerTipsEnabled": false,
 	"includeCoAuthoredBy": false,
-	"outputStyle": "Explanatory",
-	"statusLine": {
-		"type": "command",
-		"command": "bunx -y ccstatusline@latest",
-		"padding": 0
-	},
-	"enabledPlugins": {},
-	"sandbox": {
-		"enabled": true,
-		"excludedCommands": ["git"],
-		"autoAllowBashIfSandboxed": true,
-		"ignoreViolations": {
-			"*": [
-				"/Users/han/.cache",
-				"/Users/han/.bun",
-				"/Users/han/.npm",
-				"/Users/han/.cargo",
-				"/Users/han/.rustup",
-				"/Users/han/Library/Caches/Homebrew",
-				"/Users/han/Library/Group Containers/2BUA8C4S2C.com.1password",
-				"/Users/han/.tools"
-			]
-		},
-		"network": {
-			"allowLocalBinding": true,
-			"allowAllUnixSockets": true,
-			"allowUnixSockets": ["/Users/han/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"],
-			"allowedDomains": [
-				"github.com",
-				"api.github.com",
-				"raw.githubusercontent.com",
-				"objects.githubusercontent.com",
-				"gist.githubusercontent.com",
-
-				"registry.npmjs.org",
-				"registry.yarnpkg.com",
-
-				"crates.io",
-				"index.crates.io",
-				"static.crates.io",
-				"static.rust-lang.org",
-
-				"pypi.org",
-				"files.pythonhosted.org",
-
-				"deno.land",
-				"dl.deno.land",
-				"jsr.io",
-				"esm.sh",
-
-				"ziglang.org",
-
-				"formulae.brew.sh",
-				"ghcr.io",
-
-				"json.schemastore.org",
-				"www.schemastore.org",
-
-				"api.vercel.com",
-				"api.stripe.com",
-				"api.supabase.co",
-				"clerk.accounts.dev",
-				"img.clerk.com",
-				"convex.cloud",
-				"api.cloudflare.com",
-				"challenges.cloudflare.com",
-				"checkout.stripe.com",
-
-				"api.anthropic.com",
-				"api.openai.com",
-				"developers.openai.com",
-				"generativelanguage.googleapis.com",
-
-				"fonts.googleapis.com",
-				"fonts.gstatic.com",
-
-				"gmail.googleapis.com",
-				"oauth2.googleapis.com",
-				"accounts.google.com",
-				"www.googleapis.com",
-
-				"openrouter.ai",
-				"api.groq.com",
-				"huggingface.co",
-
-				"api.xero.com",
-				"identity.xero.com",
-				"login.xero.com",
-
-				"www.rightmove.co.uk",
-				"media.rightmove.co.uk",
-				"epc.opendatacommunities.org",
-				"api.mapbox.com",
-				"api.notion.com",
-				"notion.com",
-				"developers.notion.com",
-
-				"duckduckgo.com"
-			]
-		}
-	},
 	"permissions": {
-		"defaultMode": "acceptEdits",
 		"allow": [
 			"Read",
 			"Edit",
@@ -181,6 +75,7 @@
 			"Bash(wrangler *)",
 			"Bash(turbo *)",
 			"Bash(just *)",
+			"Bash(obsidian *)",
 
 			"Bash(sh *)",
 
@@ -350,7 +245,116 @@
 
 			"WebFetch(domain:nonstrict.eu)"
 		],
+		"deny": [],
 		"ask": ["Bash(rm *)", "Bash(rm -rf *)", "Bash(rm -r *)", "Bash(sudo *)"],
-		"deny": []
-	}
+		"defaultMode": "acceptEdits"
+	},
+	"statusLine": {
+		"type": "command",
+		"command": "bunx -y ccstatusline@latest",
+		"padding": 0
+	},
+	"enabledPlugins": {},
+	"outputStyle": "Explanatory",
+	"sandbox": {
+		"enabled": true,
+		"autoAllowBashIfSandboxed": true,
+		"network": {
+			"allowedDomains": [
+				"github.com",
+				"api.github.com",
+				"raw.githubusercontent.com",
+				"objects.githubusercontent.com",
+				"gist.githubusercontent.com",
+
+				"registry.npmjs.org",
+				"registry.yarnpkg.com",
+
+				"crates.io",
+				"index.crates.io",
+				"static.crates.io",
+				"static.rust-lang.org",
+
+				"pypi.org",
+				"files.pythonhosted.org",
+
+				"deno.land",
+				"dl.deno.land",
+				"jsr.io",
+				"esm.sh",
+
+				"ziglang.org",
+
+				"formulae.brew.sh",
+				"ghcr.io",
+
+				"json.schemastore.org",
+				"www.schemastore.org",
+
+				"api.vercel.com",
+				"api.stripe.com",
+				"api.supabase.co",
+				"clerk.accounts.dev",
+				"img.clerk.com",
+				"convex.cloud",
+				"api.cloudflare.com",
+				"challenges.cloudflare.com",
+				"checkout.stripe.com",
+
+				"api.anthropic.com",
+				"api.openai.com",
+				"developers.openai.com",
+				"generativelanguage.googleapis.com",
+
+				"fonts.googleapis.com",
+				"fonts.gstatic.com",
+
+				"gmail.googleapis.com",
+				"oauth2.googleapis.com",
+				"accounts.google.com",
+				"www.googleapis.com",
+
+				"openrouter.ai",
+				"api.groq.com",
+				"huggingface.co",
+
+				"api.xero.com",
+				"identity.xero.com",
+				"login.xero.com",
+
+				"www.rightmove.co.uk",
+				"media.rightmove.co.uk",
+				"epc.opendatacommunities.org",
+				"api.mapbox.com",
+
+				"api.notion.com",
+				"notion.com",
+				"developers.notion.com",
+
+				"duckduckgo.com"
+			],
+			"allowUnixSockets": ["/Users/han/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"],
+			"allowAllUnixSockets": true,
+			"allowLocalBinding": true
+		},
+		"ignoreViolations": {
+			"*": [
+				"/Users/han/.cache",
+				"/Users/han/.bun",
+				"/Users/han/.npm",
+				"/Users/han/.cargo",
+				"/Users/han/.rustup",
+				"/Users/han/Library/Caches/Homebrew",
+				"/Users/han/Library/Group Containers/2BUA8C4S2C.com.1password",
+				"/Users/han/.tools",
+				"/Users/han/Dropbox (Personal)"
+			]
+		},
+		"excludedCommands": ["git"]
+	},
+	"spinnerTipsEnabled": false,
+	"alwaysThinkingEnabled": true,
+	"autoUpdatesChannel": "latest",
+	"teammateMode": "in-process",
+	"skipDangerousModePermissionPrompt": true
 }
