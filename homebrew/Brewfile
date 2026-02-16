@@ -104,7 +104,6 @@ cask "zed@preview"        # Fast code editor
 # Media & Utilities
 cask "iina"               # Modern media player
 cask "figma"              # Design tool
-cask "cleanmymac"         # System cleaner
 cask "cleanshot"          # Screenshot tool
 cask "clop"               # Image optimizer
 cask "coteditor"          # Plain text editor
