@@ -3,9 +3,11 @@ set -euo pipefail
 
 # Autonomous Agent Loop Harness
 # Usage:
-#   ./loop.sh [max_iterations] [--model MODEL] [--no-push] [--timeout MINUTES] [--heartbeat MINUTES]
+#   ./loop.sh [--agent claude|codex] [--max-iterations N] [--model MODEL] [--no-push] [--timeout MINUTES] [--heartbeat MINUTES]
 #   LOOP_TIMEOUT_MINUTES=30 LOOP_HEARTBEAT_MINUTES=1 ./loop.sh
 # Defaults:
+#   --agent claude
+#   --max-iterations 0 (unlimited)
 #   DEFAULT_ITERATION_TIMEOUT_MINUTES=0 means unlimited (no timeout watchdog)
 #   DEFAULT_HEARTBEAT_INTERVAL_MINUTES=1 controls progress heartbeat cadence
 
@@ -15,6 +17,7 @@ LOG_DIR="agent_logs"
 DEFAULT_ITERATION_TIMEOUT_MINUTES=0
 DEFAULT_HEARTBEAT_INTERVAL_MINUTES=1
 
+AGENT="claude"
 MAX_ITERATIONS=0
 MODEL=""
 AUTO_PUSH=true
@@ -25,14 +28,46 @@ ITERATION_TIMEOUT_MINUTES="${LOOP_TIMEOUT_MINUTES:-$DEFAULT_ITERATION_TIMEOUT_MI
 HEARTBEAT_INTERVAL_MINUTES="${LOOP_HEARTBEAT_MINUTES:-$DEFAULT_HEARTBEAT_INTERVAL_MINUTES}"
 ITERATION_TIMEOUT_SECONDS=0
 HEARTBEAT_INTERVAL_SECONDS=0
-CURRENT_CLAUDE_PID=""
+CURRENT_AGENT_PID=""
 HEARTBEAT_PID=""
 TIMEOUT_GUARD_PID=""
 CLAUDE_SUPPORTS_STREAM_JSON=false
 CLAUDE_SUPPORTS_INCLUDE_PARTIAL_MESSAGES=false
 
+print_usage() {
+  cat <<'EOF'
+Usage:
+  ./loop.sh [options]
+
+Options:
+  --agent <claude|codex>   Agent CLI to run (default: claude)
+  --max-iterations <N>     Number of iterations before exit (0 = unlimited)
+  --model <MODEL>          Model passed through to the selected agent
+  --no-push                Disable auto-push between successful iterations
+  --timeout <MINUTES>      Per-iteration timeout (0 = unlimited)
+  --heartbeat <MINUTES>    Heartbeat interval while agent is running (0 = disabled)
+  -h, --help               Show this help text
+EOF
+}
+
 is_uint() {
   [[ "$1" =~ ^[0-9]+$ ]]
+}
+
+is_supported_agent() {
+  case "$1" in
+    claude|codex) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+require_option_value() {
+  local option="$1"
+  local arg_count="$2"
+  if [[ "$arg_count" -lt 2 ]]; then
+    echo "Error: ${option} requires a value"
+    exit 1
+  fi
 }
 
 stop_pid() {
@@ -88,14 +123,14 @@ start_timeout_guard() {
       exit 0
     fi
 
-    local msg="Timeout: iteration exceeded ${ITERATION_TIMEOUT_MINUTES}m (${ITERATION_TIMEOUT_SECONDS}s); sending SIGTERM to claude process ${target_pid}"
+    local msg="Timeout: iteration exceeded ${ITERATION_TIMEOUT_MINUTES}m (${ITERATION_TIMEOUT_SECONDS}s); sending SIGTERM to ${AGENT} process ${target_pid}"
     echo "$msg" | tee -a "$log_file"
     echo "1" > "$timeout_flag_file"
     kill "$target_pid" 2>/dev/null || true
 
     sleep 5
     if kill -0 "$target_pid" 2>/dev/null; then
-      local force_msg="Timeout: claude process ${target_pid} still running; sending SIGKILL"
+      local force_msg="Timeout: ${AGENT} process ${target_pid} still running; sending SIGKILL"
       echo "$force_msg" | tee -a "$log_file"
       kill -9 "$target_pid" 2>/dev/null || true
     fi
@@ -103,7 +138,11 @@ start_timeout_guard() {
   TIMEOUT_GUARD_PID=$!
 }
 
-detect_claude_capabilities() {
+detect_agent_capabilities() {
+  if [[ "$AGENT" != "claude" ]]; then
+    return
+  fi
+
   local help_output
   help_output="$(claude --help 2>&1 || true)"
 
@@ -116,45 +155,84 @@ detect_claude_capabilities() {
   fi
 }
 
-run_claude_iteration() {
+should_stop_for_completion() {
+  local log_file="$1"
+  grep -Eq '^[[:space:]]*<promise>COMPLETE</promise>[[:space:]]*$' "$log_file"
+}
+
+run_agent_iteration() {
   local log_file="$1"
   local timeout_flag_file="$2"
   local iteration="$3"
   local iteration_started_at="$4"
   local exit_code=0
+  local codex_last_message_file=""
 
   exec 3> >(tee "$log_file")
   exec 4> >(tee -a "$log_file" >&2)
 
-  local -a claude_args
-  claude_args=(-p "$(cat "$PROMPT_FILE")" --dangerously-skip-permissions)
+  case "$AGENT" in
+    claude)
+      local -a claude_args
+      claude_args=(-p "$(cat "$PROMPT_FILE")" --dangerously-skip-permissions)
 
-  if [[ -n "$MODEL" ]]; then
-    claude_args+=(--model "$MODEL")
-  fi
+      if [[ -n "$MODEL" ]]; then
+        claude_args+=(--model "$MODEL")
+      fi
 
-  if [[ "$CLAUDE_SUPPORTS_STREAM_JSON" == true ]]; then
-    claude_args+=(--output-format stream-json --verbose)
-    if [[ "$CLAUDE_SUPPORTS_INCLUDE_PARTIAL_MESSAGES" == true ]]; then
-      claude_args+=(--include-partial-messages)
-    fi
-  else
-    claude_args+=(--verbose)
-  fi
+      if [[ "$CLAUDE_SUPPORTS_STREAM_JSON" == true ]]; then
+        claude_args+=(--output-format stream-json --verbose)
+        if [[ "$CLAUDE_SUPPORTS_INCLUDE_PARTIAL_MESSAGES" == true ]]; then
+          claude_args+=(--include-partial-messages)
+        fi
+      else
+        claude_args+=(--verbose)
+      fi
 
-  claude "${claude_args[@]}" 1>&3 2>&4 &
-  CURRENT_CLAUDE_PID=$!
+      claude "${claude_args[@]}" 1>&3 2>&4 &
+      ;;
+    codex)
+      codex_last_message_file="$LOG_DIR/.codex_last_message_iter${iteration}_$$.txt"
+      rm -f "$codex_last_message_file"
 
-  start_heartbeat "$CURRENT_CLAUDE_PID" "$iteration" "$iteration_started_at" "$log_file"
-  start_timeout_guard "$CURRENT_CLAUDE_PID" "$log_file" "$timeout_flag_file"
+      local -a codex_args
+      codex_args=(exec --dangerously-bypass-approvals-and-sandbox -C "$PWD" --output-last-message "$codex_last_message_file")
 
-  wait "$CURRENT_CLAUDE_PID" || exit_code=$?
+      if [[ -n "$MODEL" ]]; then
+        codex_args+=(--model "$MODEL")
+      fi
+
+      codex "${codex_args[@]}" - < "$PROMPT_FILE" 1>&3 2>&4 &
+      ;;
+    *)
+      echo "Error: unsupported agent '$AGENT'" >&2
+      exec 3>&-
+      exec 4>&-
+      return 1
+      ;;
+  esac
+
+  CURRENT_AGENT_PID=$!
+
+  start_heartbeat "$CURRENT_AGENT_PID" "$iteration" "$iteration_started_at" "$log_file"
+  start_timeout_guard "$CURRENT_AGENT_PID" "$log_file" "$timeout_flag_file"
+
+  wait "$CURRENT_AGENT_PID" || exit_code=$?
 
   stop_pid "$HEARTBEAT_PID"
   HEARTBEAT_PID=""
   stop_pid "$TIMEOUT_GUARD_PID"
   TIMEOUT_GUARD_PID=""
-  CURRENT_CLAUDE_PID=""
+  CURRENT_AGENT_PID=""
+
+  if [[ "$AGENT" == "codex" ]]; then
+    if [[ -s "$codex_last_message_file" ]]; then
+      printf '\n' 1>&3
+      cat "$codex_last_message_file" 1>&3
+      printf '\n' 1>&3
+    fi
+    rm -f "$codex_last_message_file"
+  fi
 
   exec 3>&-
   exec 4>&-
@@ -164,17 +242,42 @@ run_claude_iteration() {
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --model) MODEL="$2"; shift 2 ;;
+    --agent)
+      require_option_value "--agent" "$#"
+      AGENT="$2"
+      shift 2
+      ;;
+    --max-iterations)
+      require_option_value "--max-iterations" "$#"
+      MAX_ITERATIONS="$2"
+      shift 2
+      ;;
+    --model)
+      require_option_value "--model" "$#"
+      MODEL="$2"
+      shift 2
+      ;;
     --no-push) AUTO_PUSH=false; shift ;;
-    --timeout) ITERATION_TIMEOUT_MINUTES="$2"; shift 2 ;;
-    --heartbeat) HEARTBEAT_INTERVAL_MINUTES="$2"; shift 2 ;;
-    [0-9]*) MAX_ITERATIONS="$1"; shift ;;
-    *) echo "Unknown argument: $1"; exit 1 ;;
+    --timeout)
+      require_option_value "--timeout" "$#"
+      ITERATION_TIMEOUT_MINUTES="$2"
+      shift 2
+      ;;
+    --heartbeat)
+      require_option_value "--heartbeat" "$#"
+      HEARTBEAT_INTERVAL_MINUTES="$2"
+      shift 2
+      ;;
+    -h|--help) print_usage; exit 0 ;;
+    *) echo "Unknown argument: $1"; print_usage; exit 1 ;;
   esac
 done
 
+if ! is_supported_agent "$AGENT"; then
+  echo "Error: --agent must be one of: claude, codex"; exit 1
+fi
 if ! is_uint "$MAX_ITERATIONS"; then
-  echo "Error: max_iterations must be a non-negative integer"; exit 1
+  echo "Error: --max-iterations must be a non-negative integer"; exit 1
 fi
 if ! is_uint "$ITERATION_TIMEOUT_MINUTES"; then
   echo "Error: --timeout must be a non-negative integer (minutes)"; exit 1
@@ -193,10 +296,10 @@ fi
 if [[ ! -s "$PROMPT_FILE" ]]; then
   echo "Error: $PROMPT_FILE is empty"; exit 1
 fi
-if ! command -v claude &>/dev/null; then
-  echo "Error: claude not found in PATH"; exit 1
+if ! command -v "$AGENT" &>/dev/null; then
+  echo "Error: $AGENT not found in PATH"; exit 1
 fi
-detect_claude_capabilities
+detect_agent_capabilities
 if ! git rev-parse --is-inside-work-tree &>/dev/null; then
   echo "Error: not inside a git repository"; exit 1
 fi
@@ -215,8 +318,8 @@ cleanup() {
   TIMEOUT_GUARD_PID=""
   stop_pid "$HEARTBEAT_PID"
   HEARTBEAT_PID=""
-  stop_pid "$CURRENT_CLAUDE_PID"
-  CURRENT_CLAUDE_PID=""
+  stop_pid "$CURRENT_AGENT_PID"
+  CURRENT_AGENT_PID=""
 
   echo ""
   echo "Loop interrupted after $ITERATION iterations"
@@ -256,6 +359,7 @@ fi
 
 echo "=========================================="
 echo " Agent Loop Starting"
+echo " Agent: $AGENT"
 echo " Branch: $CURRENT_BRANCH"
 echo " Model: ${MODEL:-default}"
 echo " Max iterations: $MAX_ITERATIONS_LABEL"
@@ -285,7 +389,7 @@ while true; do
 
   ITER_START=$(date +%s)
   set +e
-  run_claude_iteration "$LOG_FILE" "$TIMEOUT_FLAG_FILE" "$ITERATION" "$ITER_START"
+  run_agent_iteration "$LOG_FILE" "$TIMEOUT_FLAG_FILE" "$ITERATION" "$ITER_START"
   EXIT_CODE=$?
   set -e
 
@@ -301,8 +405,10 @@ while true; do
     echo "Timed out: true" >> "$LOG_FILE"
   fi
 
-  # Check for completion
-  if grep -q '<promise>COMPLETE</promise>' "$LOG_FILE" 2>/dev/null; then
+  # Check for completion.
+  # Match only a standalone completion line so prompt text and quoted mentions
+  # do not terminate the loop early.
+  if should_stop_for_completion "$LOG_FILE"; then
     echo ""
     echo "=========================================="
     echo " ALL STORIES COMPLETE"

@@ -29,7 +29,7 @@ Optional: `$ARGUMENTS`
 
 - `prd.json`: source of truth for story queue and completion state
 - `PROMPT.md`: agent instruction protocol for one-story-per-iteration execution
-- `loop.sh`: harness for repeated `claude -p` runs and completion detection
+- `loop.sh`: harness for repeated agent runs (`claude` default, optional `codex`) and completion detection
 - `progress.txt`: append-only execution log + codebase patterns
 
 Templates live in `agents/skills/loop/templates/`.
@@ -115,9 +115,13 @@ Format: `{PREFIX}{NNN}` with 3-digit zero padding.
 - MUST replace all template placeholders with concrete values.
 - MUST include explicit "search before assuming missing" instruction in generated prompt.
 - MUST keep generated `PROMPT.md` self-contained and avoid directives that require launching nested/secondary agent sessions.
-- MUST keep `loop.sh` Claude CLI flags compatibility-safe: if `--output-format stream-json` is used, include `--verbose`; optional flags must be capability-detected.
+- MUST keep `loop.sh` agent launch semantics explicit: `claude` is default, `--agent codex` is supported, and permission modes are fully automated for both CLIs.
+- MUST keep Claude CLI flags compatibility-safe: if `--output-format stream-json` is used, include `--verbose`; optional flags must be capability-detected.
 - MUST keep `PROMPT.md` concise (target <=120 lines).
 - MUST use `<promise>COMPLETE</promise>` stop signal exactly.
+- MUST require completion emission as exactly one standalone line: `<promise>COMPLETE</promise>`.
+- MUST forbid token mentions in explanatory text to avoid parser false positives.
+- MUST implement completion detection in generated `loop.sh` as standalone-line matching, not substring search.
 - MUST keep `progress.txt` append-only.
 - MUST keep iteration flow strict: implement -> verify -> commit -> update state.
 - SHOULD warn about runtime/model cost for long loops.
@@ -127,6 +131,8 @@ Format: `{PREFIX}{NNN}` with 3-digit zero padding.
 
 - Generated JSON is valid and parseable.
 - Generated shell harness is executable and signal-safe.
+- Completion detector triggers only on standalone `<promise>COMPLETE</promise>` lines.
+- Completion detector does not trigger on prompt text or quoted token mentions.
 - `PROMPT.md` contains concrete quality/commit rules, no unresolved placeholders.
 - Stories are right-sized and use signal-as-state acceptance criteria.
 - Continuations preserve historical state and ID sequencing.
@@ -136,7 +142,9 @@ Format: `{PREFIX}{NNN}` with 3-digit zero padding.
 
 After scaffold creation, report at minimum:
 
-- loop run: `./loop.sh`
+- loop run (default Claude): `./loop.sh`
+- loop run (Codex): `./loop.sh --agent codex`
+- bounded run example: `./loop.sh --agent codex --max-iterations 10`
 - log tail: `tail -f agent_logs/agent_*.log`
 - branch name
 - story count and first/last story IDs

@@ -62,7 +62,8 @@ This MUST pass before committing. If it fails, fix and re-run until green. Do NO
 
 After completing the story, re-read `prd.json` and check if ALL stories have `passes: true`.
 
-- If ALL stories pass: output <promise>COMPLETE</promise>
+- If ALL stories pass: output exactly one standalone line: `<promise>COMPLETE</promise>`
+- Never include `<promise>COMPLETE</promise>` inside any explanatory sentence, bullet, or code block.
 - If ANY story has `passes: false`: end your response normally. Do NOT output the completion signal.
 
 ## 999. Critical Rules
@@ -78,3 +79,4 @@ After completing the story, re-read `prd.json` and check if ALL stories have `pa
 - Do not add features not specified in the current story
 - `prd.json` is the SOLE source of truth for completion -- if ANY story has `passes: false`, you MUST continue working regardless of progress history or context framing
 - Stories may be added to `prd.json` between iterations; always re-read it fresh at the start of each iteration
+- Emit `<promise>COMPLETE</promise>` only once, only when all stories pass, and only as a standalone line
