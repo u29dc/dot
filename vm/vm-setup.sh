@@ -111,7 +111,7 @@ if [ ! -f "$DOTFILES_MOUNT/vm/sandbox_key" ]; then
     SANDBOX_KEY="/tmp/sandbox_key"
     ssh-keygen -t ed25519 -f "$SANDBOX_KEY" -N "" -C "sandbox-host"
     mkdir -p "$HOME/.ssh"
-    cat "${SANDBOX_KEY}.pub" >> "$HOME/.ssh/authorized_keys"
+    cat "${SANDBOX_KEY}.pub" >>"$HOME/.ssh/authorized_keys"
     chmod 700 "$HOME/.ssh"
     chmod 600 "$HOME/.ssh/authorized_keys"
     cp "$SANDBOX_KEY" "$DOTFILES_MOUNT/vm/sandbox_key"
@@ -167,7 +167,7 @@ curl -fsSL https://claude.ai/install.sh | bash
 # 10. Write shell aliases and env vars to ~/.zshrc.local
 echo "[10/10] Writing sandbox shell config..."
 if ! grep -q "Sandbox VM aliases" "$HOME/.zshrc.local" 2>/dev/null; then
-    cat >> "$HOME/.zshrc.local" << 'EOF'
+    cat >>"$HOME/.zshrc.local" <<'EOF'
 
 # Sandbox VM aliases
 alias claude='claude --dangerously-skip-permissions'

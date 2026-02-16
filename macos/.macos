@@ -14,8 +14,6 @@ set -e
 
 # Color scheme (ANSI escape codes)
 BLUE='\x1b[34m'
-RED='\x1b[31m'
-YELLOW='\x1b[33m'
 DIM='\x1b[2m'
 RESET='\x1b[0m'
 
@@ -33,7 +31,11 @@ check_sudo_access() {
         exit 1
     fi
     # Keep sudo alive during script execution
-    while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+    while true; do
+        sudo -n true
+        sleep 60
+        kill -0 "$$" || exit
+    done 2>/dev/null &
 }
 
 # Call privilege check early (needed for sudo operations later)
@@ -76,13 +78,10 @@ defaults_write() {
         value="$4"
     fi
 
-    # Build command prefix
-    local cmd_prefix=""
-    [[ "$use_sudo" == true ]] && cmd_prefix="sudo "
-
     # Build defaults command arguments
-    local defaults_args="defaults"
-    [[ "$use_currentHost" == true ]] && defaults_args="$defaults_args -currentHost"
+    local -a defaults_cmd=("defaults")
+    [[ "$use_currentHost" == true ]] && defaults_cmd+=("-currentHost")
+    [[ "$use_sudo" == true ]] && defaults_cmd=("sudo" "${defaults_cmd[@]}")
 
     # In audit mode, show what would change
     if [[ "$AUDIT_MODE" == true ]]; then
@@ -132,9 +131,9 @@ defaults_write() {
 
     # Normal mode: execute the defaults write command
     if [[ "$dict_mode" == true ]]; then
-        ${cmd_prefix}${defaults_args} write "$domain" "$key" -dict-add "$dict_key" "$type_flag" "$value"
+        "${defaults_cmd[@]}" write "$domain" "$key" -dict-add "$dict_key" "$type_flag" "$value"
     else
-        ${cmd_prefix}${defaults_args} write "$domain" "$key" "$type_flag" "$value"
+        "${defaults_cmd[@]}" write "$domain" "$key" "$type_flag" "$value"
     fi
 }
 
@@ -457,7 +456,7 @@ else
         "Dock" \
         "Finder" \
         "SystemUIServer"; do
-        killall "${app}" &> /dev/null || true
+        killall "${app}" &>/dev/null || true
     done
 
     echo -e "${BLUE}Restarted applications.${RESET}"

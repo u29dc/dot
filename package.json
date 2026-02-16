@@ -2,6 +2,7 @@
 	"name": "dot",
 	"version": "1.0.0",
 	"type": "module",
+	"private": true,
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/u29dc/dot.git"
@@ -14,8 +15,8 @@
 		"check--------------------------------": "",
 		"util:format": "bunx biome format --write .",
 		"util:lint": "bunx biome check --write .",
-		"util:format:shell": "shfmt -w -i 4 -ci scripts/ shell/",
-		"util:lint:shell": "shellcheck scripts/*.sh shell/functions/*.sh",
+		"util:format:shell": "shfmt -w -i 4 -ci scripts/ shell/ vm/ macos/.macos",
+		"util:lint:shell": "shellcheck scripts/*.sh shell/functions/*.sh vm/*.sh macos/.macos",
 		"util:check": "STATUS=0; bun run util:format || STATUS=1; bun run util:format:shell || STATUS=1; bun run util:lint || STATUS=1; bun run util:lint:shell || STATUS=1; exit $STATUS"
 	},
 	"devDependencies": {
