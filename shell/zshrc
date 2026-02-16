@@ -24,7 +24,7 @@ export CHO_HOME="$TOOLS_HOME/cho"
 
 # Agent skill directories
 export SKILLS_BASE="$HOME/Git/dot/agents/skills"
-export SKILLS_U29DC="$HOME/Git/ctx/u29dc/skills"
+export SKILLS_U29DC="$HOME/Dropbox (Personal)/VAULT/WORK/15-STRATEGY/Skills"
 
 # Silence Homebrew environment hints
 export HOMEBREW_NO_ENV_HINTS=1
