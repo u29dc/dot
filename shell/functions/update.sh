@@ -14,7 +14,7 @@ upd() {
         return 1
     fi
 
-    format_time() {
+    upd__format_time() {
         local total_seconds="$1"
         local minutes=$((total_seconds / 60))
         local seconds=$((total_seconds % 60))
@@ -26,13 +26,13 @@ upd() {
         fi
     }
 
-    is_spinner_supported() {
+    upd__is_spinner_supported() {
         [ -t 1 ] || return 1
         [ "${TERM:-}" != "dumb" ] || return 1
         return 0
     }
 
-    locale_is_utf8() {
+    upd__locale_is_utf8() {
         local locale_value="${LC_ALL:-${LC_CTYPE:-${LANG:-}}}"
         case "$locale_value" in
             *[Uu][Tt][Ff]-8* | *[Uu][Tt][Ff]8*) return 0 ;;
@@ -40,9 +40,9 @@ upd() {
         esac
     }
 
-    spinner_frame() {
+    upd__spinner_frame() {
         local frame_index="$1"
-        if locale_is_utf8; then
+        if upd__locale_is_utf8; then
             case $((frame_index % 10)) in
                 0) printf '⠋' ;;
                 1) printf '⠙' ;;
@@ -66,7 +66,7 @@ upd() {
         fi
     }
 
-    terminal_columns() {
+    upd__terminal_columns() {
         local cols='80'
         if command -v tput >/dev/null 2>&1; then
             cols="$(tput cols 2>/dev/null || printf '80')"
@@ -77,7 +77,7 @@ upd() {
         printf '%s' "$cols"
     }
 
-    truncate_text() {
+    upd__truncate_text() {
         local text="$1"
         local max_length="$2"
         if [ "$max_length" -le 0 ]; then
@@ -98,7 +98,7 @@ upd() {
         printf '%s...' "${text:0:$((max_length - 3))}"
     }
 
-    render_spinner_line() {
+    upd__render_spinner_line() {
         local label="$1"
         local frame="$2"
         local elapsed="$3"
@@ -107,21 +107,21 @@ upd() {
         local max_label_width
         local display_label
 
-        cols="$(terminal_columns)"
+        cols="$(upd__terminal_columns)"
         max_label_width=$((cols - reserved_width))
         if [ "$max_label_width" -lt 10 ]; then
             max_label_width=10
         fi
 
-        display_label="$(truncate_text "$label" "$max_label_width")"
+        display_label="$(upd__truncate_text "$label" "$max_label_width")"
         printf '\r\033[2K%b[%s]%b %s (%s)' "$BLUE" "$frame" "$RESET" "$display_label" "$elapsed"
     }
 
-    clear_spinner_line() {
+    upd__clear_spinner_line() {
         printf '\r\033[2K'
     }
 
-    count_items() {
+    upd__count_items() {
         local items="$1"
         if [ -z "$items" ]; then
             echo "0"
@@ -130,14 +130,14 @@ upd() {
         printf '%s\n' "$items" | awk 'NF {count++} END {print count + 0}'
     }
 
-    summarize_items() {
+    upd__summarize_items() {
         local items="$1"
         local limit="${2:-6}"
         local total
         local sample
         local extra
 
-        total="$(count_items "$items")"
+        total="$(upd__count_items "$items")"
         if [ "$total" -eq 0 ]; then
             echo "none"
             return 0
@@ -159,51 +159,60 @@ upd() {
         echo "${sample}, and ${extra} more"
     }
 
-    is_manual_installer_only_failure() {
-        local output="$1"
-        [ -n "$output" ] || return 1
+    upd__json_outdated_casks() {
+        local json_payload="$1"
+        [ -n "$json_payload" ] || return 0
+        command -v ruby >/dev/null 2>&1 || return 0
 
-        printf '%s\n' "$output" | awk '
-            /^Error:/ {
-                has_error = 1
-                if ($0 !~ /^Error: Not upgrading [0-9]+ `installer manual` casks?\.$/) {
-                    bad_error = 1
-                }
-            }
-            END {
-                if (has_error && !bad_error) {
-                    exit 0
-                }
-                exit 1
-            }
-        '
+        printf '%s\n' "$json_payload" | ruby -rjson -e '
+            begin
+              data = JSON.parse(STDIN.read)
+              (data["casks"] || []).each do |cask|
+                name = cask["name"] || cask["token"] || cask["full_token"]
+                puts(name) if name.is_a?(String) && !name.empty?
+              end
+            rescue JSON::ParserError
+            end
+        ' 2>/dev/null
     }
 
-    extract_manual_installer_casks() {
-        local output="$1"
-        [ -n "$output" ] || return 0
+    upd__manual_casks_from_tokens() {
+        local tokens="$1"
+        local info_json=""
+        [ -n "$tokens" ] || return 0
+        command -v ruby >/dev/null 2>&1 || return 0
 
-        printf '%s\n' "$output" | awk '
-            /^Error: Not upgrading [0-9]+ `installer manual` casks?\.$/ {
-                collect = 1
-                next
-            }
-            collect {
-                if ($0 ~ /^==>/ || $0 ~ /^Error:/ || $0 ~ /^[[:space:]]*$/) {
-                    collect = 0
-                    next
-                }
-                if ($0 ~ /^[a-z0-9@._+-]+$/) {
-                    print $0
-                }
-            }
-        '
+        # shellcheck disable=SC2086
+        info_json="$(brew info --cask --json=v2 $tokens 2>/dev/null || true)"
+        [ -n "$info_json" ] || return 0
+
+        printf '%s\n' "$info_json" | ruby -rjson -e '
+            begin
+              data = JSON.parse(STDIN.read)
+              (data["casks"] || []).each do |cask|
+                token = cask["token"] || cask["name"] || cask["full_token"]
+                next unless token.is_a?(String) && !token.empty?
+                artifacts = cask["artifacts"]
+                next unless artifacts.is_a?(Array)
+
+                manual_installer = artifacts.any? do |artifact|
+                  next false unless artifact.is_a?(Hash)
+                  installers = artifact["installer"]
+                  next false unless installers.is_a?(Array)
+                  installers.any? { |entry| entry.is_a?(Hash) && entry.key?("manual") }
+                end
+
+                puts(token) if manual_installer
+              end
+            rescue JSON::ParserError
+            end
+        ' 2>/dev/null
     }
 
-    filter_ignored_items() {
+    upd__filter_excluded_items() {
         local items="$1"
-        local ignored="$2"
-        if [ -z "$ignored" ]; then
+        local excluded="$2"
+        if [ -z "$excluded" ]; then
             printf '%s' "$items"
             return 0
         fi
@@ -211,27 +220,22 @@ upd() {
         awk '
             NR == FNR {
                 if (NF) {
-                    ignored[$0] = 1
+                    excluded[$0] = 1
                 }
                 next
             }
-            NF && !($0 in ignored) {
+            NF && !($0 in excluded) {
                 print $0
             }
-        ' <(printf '%s\n' "$ignored") <(printf '%s\n' "$items")
+        ' <(printf '%s\n' "$excluded") <(printf '%s\n' "$items")
     }
 
-    run_step() {
+    upd__run_step() {
         local stream_mode=0
-        local allow_manual_cask=0
         while [ $# -gt 0 ]; do
             case "${1:-}" in
                 --stream)
                     stream_mode=1
-                    shift
-                    ;;
-                --allow-manual-cask)
-                    allow_manual_cask=1
                     shift
                     ;;
                 *)
@@ -253,45 +257,20 @@ upd() {
         local output_text=""
         local bash_monitor_was_on=0
         local interrupted_signal=0
-        local switched_to_stream=0
         local previous_int_trap=""
         local previous_term_trap=""
         local process_state=""
-        local downgraded_manual_cask=0
-        local manual_casks=""
+        local paused_for_tty=0
 
         if [ "$stream_mode" -eq 1 ]; then
-            output_file="$(mktemp "${TMPDIR:-/tmp}/upd-step-stream.XXXXXX" 2>/dev/null)"
             printf '%b[RUN ]%b %s...\n' "$BLUE" "$RESET" "$label"
-            if [ -n "$output_file" ]; then
-                "$@" > >(tee "$output_file") 2>&1 || step_status=$?
-                output_text="$(cat "$output_file" 2>/dev/null)"
-            else
-                "$@" || step_status=$?
-            fi
-
-            if [ "$allow_manual_cask" -eq 1 ] && [ "$step_status" -ne 0 ] && is_manual_installer_only_failure "$output_text"; then
-                downgraded_manual_cask=1
-                manual_casks="$(extract_manual_installer_casks "$output_text")"
-                if [ -n "$manual_casks" ]; then
-                    manual_casks_ignored="$(
-                        printf '%s\n%s\n' "$manual_casks_ignored" "$manual_casks" |
-                            awk 'NF && !seen[$0]++'
-                    )"
-                fi
-                step_status=0
-            fi
-
+            "$@" || step_status=$?
             elapsed=$((SECONDS - step_start))
             if [ "$step_status" -eq 0 ]; then
-                printf '%b[OK  ]%b %s (%s)\n' "$BLUE" "$RESET" "$label" "$(format_time "$elapsed")"
-                if [ "$downgraded_manual_cask" -eq 1 ]; then
-                    echo -e "${YELLOW}[WARN]${RESET} Installer-manual casks were skipped by Homebrew; continuing."
-                fi
+                printf '%b[OK  ]%b %s (%s)\n' "$BLUE" "$RESET" "$label" "$(upd__format_time "$elapsed")"
             else
-                printf '%b[FAIL]%b %s (%s)\n' "$RED" "$RESET" "$label" "$(format_time "$elapsed")"
+                printf '%b[FAIL]%b %s (%s)\n' "$RED" "$RESET" "$label" "$(upd__format_time "$elapsed")"
             fi
-            rm -f "$output_file"
             return "$step_status"
         fi
 
@@ -303,9 +282,9 @@ upd() {
 
             local elapsed_fallback=$((SECONDS - step_start))
             if [ "$step_status" -eq 0 ]; then
-                printf '%b[OK  ]%b %s (%s)\n' "$BLUE" "$RESET" "$label" "$(format_time "$elapsed_fallback")"
+                printf '%b[OK  ]%b %s (%s)\n' "$BLUE" "$RESET" "$label" "$(upd__format_time "$elapsed_fallback")"
             else
-                printf '%b[FAIL]%b %s (%s)\n' "$RED" "$RESET" "$label" "$(format_time "$elapsed_fallback")"
+                printf '%b[FAIL]%b %s (%s)\n' "$RED" "$RESET" "$label" "$(upd__format_time "$elapsed_fallback")"
                 if [ -n "$output" ]; then
                     printf '%b%s%b\n' "$DIM" "$output" "$RESET"
                 fi
@@ -313,7 +292,7 @@ upd() {
             return "$step_status"
         fi
 
-        if is_spinner_supported; then
+        if upd__is_spinner_supported; then
             # Prevent interactive job-control messages ([n] pid / done) from corrupting spinner output.
             if [ -n "${ZSH_VERSION:-}" ]; then
                 setopt localoptions nomonitor nonotify
@@ -328,7 +307,7 @@ upd() {
 
             previous_int_trap="$(trap -p INT || true)"
             previous_term_trap="$(trap -p TERM || true)"
-            trap 'interrupted_signal=1; [ -n "$command_pid" ] && kill "$command_pid" 2>/dev/null; clear_spinner_line' INT TERM
+            trap 'interrupted_signal=1; [ -n "$command_pid" ] && kill "$command_pid" 2>/dev/null; upd__clear_spinner_line' INT TERM
 
             "$@" >"$output_file" 2>&1 &
             command_pid=$!
@@ -342,31 +321,32 @@ upd() {
                     process_state="$(ps -o stat= -p "$command_pid" 2>/dev/null | awk '{print $1}')"
                     case "$process_state" in
                         T*)
-                            switched_to_stream=1
-                            kill "$command_pid" 2>/dev/null
-                            clear_spinner_line
-                            printf '%b[WARN]%b %s paused for terminal input; rerunning this command in foreground.\n' "$YELLOW" "$RESET" "$label"
-                            run_step --stream "$label" "$@"
-                            step_status=$?
+                            paused_for_tty=1
+                            kill "$command_pid" 2>/dev/null || true
+                            upd__clear_spinner_line
+                            printf '%b[WARN]%b %s paused waiting for terminal input. Not rerunning automatically to avoid duplicate changes.\n' "$YELLOW" "$RESET" "$label"
                             break
                             ;;
                     esac
                 fi
 
-                frame="$(spinner_frame "$frame_index")"
-                elapsed="$(format_time "$((SECONDS - step_start))")"
-                render_spinner_line "$label" "$frame" "$elapsed"
+                frame="$(upd__spinner_frame "$frame_index")"
+                elapsed="$(upd__format_time "$((SECONDS - step_start))")"
+                upd__render_spinner_line "$label" "$frame" "$elapsed"
                 frame_index=$((frame_index + 1))
                 sleep 0.1
             done
 
-            if [ "$interrupted_signal" -eq 0 ] && [ "$switched_to_stream" -eq 0 ]; then
+            if [ "$interrupted_signal" -eq 0 ] && [ "$paused_for_tty" -eq 0 ]; then
                 wait "$command_pid" || step_status=$?
             else
                 wait "$command_pid" 2>/dev/null || true
             fi
-            clear_spinner_line
+            upd__clear_spinner_line
 
+            if [ "$paused_for_tty" -ne 0 ] && [ "$step_status" -eq 0 ]; then
+                step_status=125
+            fi
             if [ "$interrupted_signal" -ne 0 ] && [ "$step_status" -eq 0 ]; then
                 step_status=130
             fi
@@ -392,9 +372,9 @@ upd() {
 
         elapsed=$((SECONDS - step_start))
         if [ "$step_status" -eq 0 ]; then
-            printf '%b[OK  ]%b %s (%s)\n' "$BLUE" "$RESET" "$label" "$(format_time "$elapsed")"
+            printf '%b[OK  ]%b %s (%s)\n' "$BLUE" "$RESET" "$label" "$(upd__format_time "$elapsed")"
         else
-            printf '%b[FAIL]%b %s (%s)\n' "$RED" "$RESET" "$label" "$(format_time "$elapsed")"
+            printf '%b[FAIL]%b %s (%s)\n' "$RED" "$RESET" "$label" "$(upd__format_time "$elapsed")"
             if [ -s "$output_file" ]; then
                 output_text="$(cat "$output_file")"
                 printf '%b%s%b\n' "$DIM" "$output_text" "$RESET"
@@ -407,7 +387,7 @@ upd() {
         return "$step_status"
     }
 
-    apply_step_result() {
+    upd__apply_step_result() {
         local step_result="$1"
         if [ "$step_result" -eq 130 ] || [ "$step_result" -eq 143 ]; then
             echo -e "${YELLOW}[WARN]${RESET} Update interrupted."
@@ -419,7 +399,7 @@ upd() {
         return 0
     }
 
-    ensure_sudo_session() {
+    upd__ensure_sudo_session() {
         local require_sudo="${1:-0}"
         local mode="${2:-prompt}"
         [ "$require_sudo" -gt 0 ] || return 0
@@ -460,19 +440,29 @@ upd() {
 
     local overall_start=$SECONDS
     local failed=0
-    local manual_casks_ignored=""
 
     # Include greedy cask checks so auto-updating casks can still be reported/upgraded.
     local formula_before
+    local cask_before_json
     local cask_before
+    local manual_casks_before
+    local actionable_casks_before
     formula_before="$(brew outdated --formula 2>/dev/null || true)"
-    cask_before="$(brew outdated --cask --greedy 2>/dev/null || true)"
+    cask_before_json="$(brew outdated --cask --greedy --json=v2 2>/dev/null || true)"
+    cask_before="$(upd__json_outdated_casks "$cask_before_json")"
+    if [ -z "$cask_before" ]; then
+        cask_before="$(brew outdated --cask --greedy 2>/dev/null || true)"
+    fi
+    manual_casks_before="$(upd__manual_casks_from_tokens "$cask_before")"
+    actionable_casks_before="$(upd__filter_excluded_items "$cask_before" "$manual_casks_before")"
 
     local formula_before_count
     local cask_before_count
+    local actionable_cask_before_count
     local total_before
-    formula_before_count="$(count_items "$formula_before")"
-    cask_before_count="$(count_items "$cask_before")"
+    formula_before_count="$(upd__count_items "$formula_before")"
+    cask_before_count="$(upd__count_items "$cask_before")"
+    actionable_cask_before_count="$(upd__count_items "$actionable_casks_before")"
     total_before=$((formula_before_count + cask_before_count))
 
     if [ "$total_before" -eq 0 ]; then
@@ -480,85 +470,95 @@ upd() {
     else
         echo -e "${BLUE}Outdated before update:${RESET} ${formula_before_count} formulae, ${cask_before_count} casks"
         if [ "$formula_before_count" -gt 0 ]; then
-            echo -e "${DIM}Formulae: $(summarize_items "$formula_before")${RESET}"
+            echo -e "${DIM}Formulae: $(upd__summarize_items "$formula_before")${RESET}"
         fi
         if [ "$cask_before_count" -gt 0 ]; then
-            echo -e "${DIM}Casks: $(summarize_items "$cask_before")${RESET}"
+            echo -e "${DIM}Casks: $(upd__summarize_items "$cask_before")${RESET}"
         fi
     fi
 
-    ensure_sudo_session "$cask_before_count" "prompt" || return 1
+    upd__ensure_sudo_session "$actionable_cask_before_count" "prompt" || return 1
 
     local step_result=0
 
-    run_step "Refreshing Homebrew metadata" brew update
+    upd__run_step "Refreshing Homebrew metadata" brew update
     step_result=$?
-    apply_step_result "$step_result" || return $?
+    upd__apply_step_result "$step_result" || return $?
 
     if [ "$formula_before_count" -gt 0 ]; then
-        run_step "Upgrading formulae" brew upgrade
+        upd__run_step "Upgrading formulae" brew upgrade
         step_result=$?
-        apply_step_result "$step_result" || return $?
+        upd__apply_step_result "$step_result" || return $?
     else
         echo -e "${YELLOW}[SKIP]${RESET} Upgrading formulae (none outdated)."
     fi
 
-    if [ "$cask_before_count" -gt 0 ]; then
+    if [ "$actionable_cask_before_count" -gt 0 ]; then
         # Refresh ticket right before cask upgrades to reduce chance of mid-step prompts.
-        ensure_sudo_session 1 "refresh" || return 1
-        run_step --stream --allow-manual-cask "Upgrading casks (greedy)" brew upgrade --cask --greedy
+        upd__ensure_sudo_session "$actionable_cask_before_count" "refresh" || return 1
+        # shellcheck disable=SC2086
+        upd__run_step --stream "Upgrading casks (greedy)" brew upgrade --cask --greedy $actionable_casks_before
         step_result=$?
-        apply_step_result "$step_result" || return $?
+        upd__apply_step_result "$step_result" || return $?
+    elif [ "$cask_before_count" -gt 0 ]; then
+        echo -e "${YELLOW}[SKIP]${RESET} Upgrading casks (all outdated casks are installer-manual)."
     else
         echo -e "${YELLOW}[SKIP]${RESET} Upgrading casks (none outdated)."
     fi
 
-    run_step "Removing stale dependencies" brew autoremove
+    upd__run_step "Removing stale dependencies" brew autoremove
     step_result=$?
-    apply_step_result "$step_result" || return $?
+    upd__apply_step_result "$step_result" || return $?
 
-    run_step "Cleaning old versions and cache" brew cleanup -s --prune=all
+    upd__run_step "Cleaning old versions and cache" brew cleanup -s --prune=all
     step_result=$?
-    apply_step_result "$step_result" || return $?
+    upd__apply_step_result "$step_result" || return $?
 
     local formula_after
+    local cask_after_json
     local cask_after
+    local manual_casks_after
     local cask_after_effective
     formula_after="$(brew outdated --formula 2>/dev/null || true)"
-    cask_after="$(brew outdated --cask --greedy 2>/dev/null || true)"
-    cask_after_effective="$(filter_ignored_items "$cask_after" "$manual_casks_ignored")"
+    cask_after_json="$(brew outdated --cask --greedy --json=v2 2>/dev/null || true)"
+    cask_after="$(upd__json_outdated_casks "$cask_after_json")"
+    if [ -z "$cask_after" ]; then
+        cask_after="$(brew outdated --cask --greedy 2>/dev/null || true)"
+    fi
+    manual_casks_after="$(upd__manual_casks_from_tokens "$cask_after")"
+    cask_after_effective="$(upd__filter_excluded_items "$cask_after" "$manual_casks_after")"
 
     local formula_after_count
     local cask_after_count
     local total_after
-    formula_after_count="$(count_items "$formula_after")"
-    cask_after_count="$(count_items "$cask_after_effective")"
+    formula_after_count="$(upd__count_items "$formula_after")"
+    cask_after_count="$(upd__count_items "$cask_after_effective")"
     total_after=$((formula_after_count + cask_after_count))
 
     local overall_elapsed=$((SECONDS - overall_start))
 
     if [ "$failed" -ne 0 ]; then
-        echo -e "${RED}[FAIL]${RESET} Homebrew update finished with errors in $(format_time "$overall_elapsed")."
+        echo -e "${RED}[FAIL]${RESET} Homebrew update finished with errors in $(upd__format_time "$overall_elapsed")."
         return 1
     fi
 
     if [ "$total_after" -eq 0 ]; then
-        if [ -n "$manual_casks_ignored" ]; then
-            echo -e "${YELLOW}[WARN]${RESET} Manual-install casks skipped by Homebrew: $(summarize_items "$manual_casks_ignored")"
+        if [ -n "$manual_casks_after" ]; then
+            echo -e "${YELLOW}[WARN]${RESET} Manual-install casks skipped by Homebrew: $(upd__summarize_items "$manual_casks_after")"
         fi
-        echo -e "${BLUE}Homebrew update complete in $(format_time "$overall_elapsed").${RESET}"
+        echo -e "${BLUE}Homebrew update complete in $(upd__format_time "$overall_elapsed").${RESET}"
         return 0
     fi
 
     echo -e "${YELLOW}[WARN]${RESET} ${total_after} package(s) remain outdated after update."
     if [ "$formula_after_count" -gt 0 ]; then
-        echo -e "${DIM}Remaining formulae: $(summarize_items "$formula_after")${RESET}"
+        echo -e "${DIM}Remaining formulae: $(upd__summarize_items "$formula_after")${RESET}"
     fi
     if [ "$cask_after_count" -gt 0 ]; then
-        echo -e "${DIM}Remaining casks: $(summarize_items "$cask_after_effective")${RESET}"
+        echo -e "${DIM}Remaining casks: $(upd__summarize_items "$cask_after_effective")${RESET}"
     fi
-    if [ -n "$manual_casks_ignored" ]; then
-        echo -e "${YELLOW}[WARN]${RESET} Manual-install casks skipped by Homebrew: $(summarize_items "$manual_casks_ignored")"
+    if [ -n "$manual_casks_after" ]; then
+        echo -e "${YELLOW}[WARN]${RESET} Manual-install casks skipped by Homebrew: $(upd__summarize_items "$manual_casks_after")"
     fi
     echo -e "${YELLOW}[WARN]${RESET} Review pinned/held packages or run commands manually."
     return 1
