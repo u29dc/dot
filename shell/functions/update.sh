@@ -2,172 +2,168 @@
 # System update function
 
 upd() {
-    # color scheme (ANSI escape codes)
+    # ANSI colors
     local RED='\x1b[31m'
     local BLUE='\x1b[34m'
     local YELLOW='\x1b[33m'
     local DIM='\x1b[2m'
     local RESET='\x1b[0m'
 
-    # Timing capture mechanism: EPOCHREALTIME provides microsecond precision (bash 5+)
-    # Fallback to date command for older bash versions
-    get_timestamp() {
-        if [ -n "$BASH_VERSION" ] && [ "${BASH_VERSINFO[0]}" -ge 5 ]; then
-            echo "$EPOCHREALTIME"
-        else
-            date +%s.%N
-        fi
-    }
-
-    # Format elapsed time: <1s shows ms, ≥1s shows s with 2 decimals
-    format_time() {
-        local elapsed=$1
-        local seconds=$(echo "$elapsed" | awk '{printf "%.3f", $1}')
-        if (($(echo "$seconds < 1" | bc -l 2>/dev/null || echo 0))); then
-            local ms=$(echo "$seconds * 1000" | awk '{printf "%.0f", $1}')
-            echo "${ms}ms"
-        else
-            echo "$(echo "$seconds" | awk '{printf "%.2f", $1}')s"
-        fi
-    }
-
-    # Simple dot animation: cycles through . .. ...
-    show_dots() {
-        local dots=""
-        while true; do
-            for i in 1 2 3; do
-                dots=$(printf '.%.0s' $(seq 1 "$i"))
-                printf "\r%s   " "$dots"
-                sleep 0.5
-            done
-        done
-    }
-
-    # Start dot animation and check what's outdated
-    set +m # Disable job control messages
-    show_dots &
-    local dots_pid=$!
-
-    local check_start=$(get_timestamp)
-    local outdated_formulae=$(brew outdated --formula 2>/dev/null)
-    local outdated_casks=$(brew outdated --cask 2>/dev/null)
-    local check_elapsed=$(echo "$(get_timestamp) - $check_start" | bc 2>/dev/null || echo "0")
-    local check_time=$(format_time "$check_elapsed")
-
-    # Stop animation and clear line
-    kill "$dots_pid" 2>/dev/null
-    wait "$dots_pid" 2>/dev/null
-    set -m # Re-enable job control
-    printf "\r\033[K"
-
-    # Count outdated packages and extract names
-    local formula_count=0
-    local cask_count=0
-    local -a package_names=()
-
-    if [ -n "$outdated_formulae" ]; then
-        formula_count=$(echo "$outdated_formulae" | wc -l | tr -d ' ')
-        while IFS= read -r pkg; do
-            [ -n "$pkg" ] && package_names+=("$pkg")
-        done <<<"$outdated_formulae"
-    fi
-    if [ -n "$outdated_casks" ]; then
-        cask_count=$(echo "$outdated_casks" | wc -l | tr -d ' ')
-        while IFS= read -r pkg; do
-            [ -n "$pkg" ] && package_names+=("$pkg")
-        done <<<"$outdated_casks"
-    fi
-
-    local total_outdated=$((formula_count + cask_count))
-
-    # No updates case
-    if [ "$total_outdated" -eq 0 ]; then
-        echo -e "${BLUE}Everything up to date (checked in ${check_time}).${RESET}"
-        return 0
-    fi
-
-    # Update Homebrew with dot animation
-    set +m # Disable job control messages
-    show_dots &
-    dots_pid=$!
-
-    local update_start=$(get_timestamp)
-    local update_output
-    local update_result
-
-    update_output=$(brew update 2>&1 && brew upgrade 2>&1 && brew upgrade --cask 2>&1)
-    update_result=$?
-
-    local update_elapsed=$(echo "$(get_timestamp) - $update_start" | bc 2>/dev/null || echo "0")
-    local update_time=$(format_time "$update_elapsed")
-
-    # Stop animation and clear line
-    kill "$dots_pid" 2>/dev/null
-    wait "$dots_pid" 2>/dev/null
-    set -m # Re-enable job control
-    printf "\r\033[K"
-
-    if [ "$update_result" -eq 0 ]; then
-        # Success case: format package list
-        local pkg_list=""
-        local pkg_count="${#package_names[@]}"
-        local array_offset=0
-
-        # zsh arrays start at index 1, bash arrays at 0. Offset keeps access correct.
-        if [ -n "$ZSH_VERSION" ]; then
-            array_offset=1
-        fi
-
-        if [ "$pkg_count" -eq 0 ]; then
-            pkg_list="${total_outdated} package(s)"
-        elif [ "$pkg_count" -eq 1 ]; then
-            pkg_list="${package_names[$((0 + array_offset))]}"
-        elif [ "$pkg_count" -eq 2 ]; then
-            pkg_list="${package_names[$((0 + array_offset))]} and ${package_names[$((1 + array_offset))]}"
-        else
-            for ((i = 0; i < pkg_count - 1; i++)); do
-                pkg_list+="${package_names[$((i + array_offset))]}, "
-            done
-            pkg_list+="and ${package_names[$((pkg_count - 1 + array_offset))]}"
-        fi
-
-        echo -e "${BLUE}Updated ${pkg_list} in ${update_time}.${RESET}"
-
-        # Cleanup old versions with dot animation
-        set +m # Disable job control messages
-        show_dots &
-        dots_pid=$!
-
-        local cleanup_start=$(get_timestamp)
-        local cleanup_output
-        local cleanup_result
-
-        cleanup_output=$(brew cleanup -s 2>&1)
-        cleanup_result=$?
-
-        local cleanup_elapsed=$(echo "$(get_timestamp) - $cleanup_start" | bc 2>/dev/null || echo "0")
-        local cleanup_time=$(format_time "$cleanup_elapsed")
-
-        # Stop animation and clear line
-        kill "$dots_pid" 2>/dev/null
-        wait "$dots_pid" 2>/dev/null
-        set -m # Re-enable job control
-        printf "\r\033[K"
-
-        if [ "$cleanup_result" -eq 0 ]; then
-            echo -e "${BLUE}Cleaned up in ${cleanup_time}.${RESET}"
-        else
-            echo -e "${RED}[FAIL]${RESET} Cleanup failed in ${cleanup_time}"
-            echo -e "${DIM}${cleanup_output}${RESET}"
-        fi
-    else
-        # Update error case: expand to multi-line with details
-        echo -e "${RED}[FAIL]${RESET} Update failed after ${update_time}"
-        echo -e "${DIM}Attempted to update ${total_outdated} packages (${formula_count} formulae, ${cask_count} casks)${RESET}"
-        echo -e "${DIM}${update_output}${RESET}"
-        echo ""
-        echo -e "${YELLOW}[WARN]${RESET} Run 'brew update && brew upgrade' manually to see full errors"
+    if ! command -v brew >/dev/null 2>&1; then
+        echo -e "${RED}[FAIL]${RESET} Homebrew is not installed or not in PATH."
         return 1
     fi
 
+    format_time() {
+        local total_seconds="$1"
+        local minutes=$((total_seconds / 60))
+        local seconds=$((total_seconds % 60))
+
+        if [ "$minutes" -gt 0 ]; then
+            printf '%sm %ss' "$minutes" "$seconds"
+        else
+            printf '%ss' "$seconds"
+        fi
+    }
+
+    count_items() {
+        local items="$1"
+        if [ -z "$items" ]; then
+            echo "0"
+            return 0
+        fi
+        printf '%s\n' "$items" | awk 'NF {count++} END {print count + 0}'
+    }
+
+    summarize_items() {
+        local items="$1"
+        local limit="${2:-6}"
+        local total
+        local sample
+        local extra
+
+        total="$(count_items "$items")"
+        if [ "$total" -eq 0 ]; then
+            echo "none"
+            return 0
+        fi
+
+        sample="$(
+            printf '%s\n' "$items" |
+                awk 'NF {print $1}' |
+                head -n "$limit" |
+                awk 'BEGIN { ORS = "" } { if (NR > 1) printf ", "; printf "%s", $0 } END { print "" }'
+        )"
+
+        if [ "$total" -le "$limit" ]; then
+            echo "$sample"
+            return 0
+        fi
+
+        extra=$((total - limit))
+        echo "${sample}, and ${extra} more"
+    }
+
+    run_step() {
+        local label="$1"
+        shift
+
+        local step_start=$SECONDS
+        local output=""
+        local status=0
+
+        printf '%b[RUN ]%b %s...\n' "$BLUE" "$RESET" "$label"
+        output="$("$@" 2>&1)" || status=$?
+
+        local elapsed=$((SECONDS - step_start))
+        if [ "$status" -eq 0 ]; then
+            printf '%b[OK  ]%b %s (%s)\n' "$BLUE" "$RESET" "$label" "$(format_time "$elapsed")"
+        else
+            printf '%b[FAIL]%b %s (%s)\n' "$RED" "$RESET" "$label" "$(format_time "$elapsed")"
+            if [ -n "$output" ]; then
+                printf '%b%s%b\n' "$DIM" "$output" "$RESET"
+            fi
+        fi
+
+        return "$status"
+    }
+
+    local overall_start=$SECONDS
+    local failed=0
+
+    # Include greedy cask checks so auto-updating casks can still be reported/upgraded.
+    local formula_before
+    local cask_before
+    formula_before="$(brew outdated --formula 2>/dev/null || true)"
+    cask_before="$(brew outdated --cask --greedy 2>/dev/null || true)"
+
+    local formula_before_count
+    local cask_before_count
+    local total_before
+    formula_before_count="$(count_items "$formula_before")"
+    cask_before_count="$(count_items "$cask_before")"
+    total_before=$((formula_before_count + cask_before_count))
+
+    if [ "$total_before" -eq 0 ]; then
+        echo -e "${BLUE}No outdated formulae/casks found before update.${RESET}"
+    else
+        echo -e "${BLUE}Outdated before update:${RESET} ${formula_before_count} formulae, ${cask_before_count} casks"
+        if [ "$formula_before_count" -gt 0 ]; then
+            echo -e "${DIM}Formulae: $(summarize_items "$formula_before")${RESET}"
+        fi
+        if [ "$cask_before_count" -gt 0 ]; then
+            echo -e "${DIM}Casks: $(summarize_items "$cask_before")${RESET}"
+        fi
+    fi
+
+    run_step "Refreshing Homebrew metadata" brew update || failed=1
+
+    if [ "$formula_before_count" -gt 0 ]; then
+        run_step "Upgrading formulae" brew upgrade || failed=1
+    else
+        echo -e "${YELLOW}[SKIP]${RESET} Upgrading formulae (none outdated)."
+    fi
+
+    if [ "$cask_before_count" -gt 0 ]; then
+        run_step "Upgrading casks (greedy)" brew upgrade --cask --greedy || failed=1
+    else
+        echo -e "${YELLOW}[SKIP]${RESET} Upgrading casks (none outdated)."
+    fi
+
+    run_step "Removing stale dependencies" brew autoremove || failed=1
+    run_step "Cleaning old versions and cache" brew cleanup -s --prune=all || failed=1
+
+    local formula_after
+    local cask_after
+    formula_after="$(brew outdated --formula 2>/dev/null || true)"
+    cask_after="$(brew outdated --cask --greedy 2>/dev/null || true)"
+
+    local formula_after_count
+    local cask_after_count
+    local total_after
+    formula_after_count="$(count_items "$formula_after")"
+    cask_after_count="$(count_items "$cask_after")"
+    total_after=$((formula_after_count + cask_after_count))
+
+    local overall_elapsed=$((SECONDS - overall_start))
+
+    if [ "$failed" -ne 0 ]; then
+        echo -e "${RED}[FAIL]${RESET} Homebrew update finished with errors in $(format_time "$overall_elapsed")."
+        return 1
+    fi
+
+    if [ "$total_after" -eq 0 ]; then
+        echo -e "${BLUE}Homebrew update complete in $(format_time "$overall_elapsed").${RESET}"
+        return 0
+    fi
+
+    echo -e "${YELLOW}[WARN]${RESET} ${total_after} package(s) remain outdated after update."
+    if [ "$formula_after_count" -gt 0 ]; then
+        echo -e "${DIM}Remaining formulae: $(summarize_items "$formula_after")${RESET}"
+    fi
+    if [ "$cask_after_count" -gt 0 ]; then
+        echo -e "${DIM}Remaining casks: $(summarize_items "$cask_after")${RESET}"
+    fi
+    echo -e "${YELLOW}[WARN]${RESET} Review pinned/held packages or run commands manually."
+    return 1
 }
