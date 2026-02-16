@@ -45,6 +45,7 @@ This MUST pass before committing. If it fails, fix and re-run until green. Do NO
 
 1. Stage all changed files: `git add -A`
 2. Commit with the exact format above
+   **Commit execution**: write the full commit message to `/tmp/claude/commit-msg.txt`, run `git commit -F /tmp/claude/commit-msg.txt`, then remove the temp file. Do NOT use heredoc syntax -- it fails under macOS sandbox.
 3. Update `prd.json`: set `passes: true` for the completed story
 4. Append progress report to `progress.txt` (never replace existing content):
 

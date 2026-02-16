@@ -40,6 +40,12 @@ Optional: `$ARGUMENTS`
 - Body MUST be present and explain rationale, not only restate diff.
 - Body SHOULD use concise dash bullets when multiple reasons exist.
 
+## Git Commit Execution
+
+- MUST write commit message to `/tmp/claude/commit-msg.txt` then commit with `git commit -F /tmp/claude/commit-msg.txt`.
+- MUST NOT use heredoc syntax (`<<EOF`) for commit messages; shell heredocs create temp files that fail under macOS sandbox.
+- MUST remove the temp file after successful commit.
+
 ## Batching Rules
 
 - Single commit when changes share one type/scope and are tightly coupled.
