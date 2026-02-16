@@ -24,7 +24,6 @@ bun run util:check         # Run all linting checks
 ```
 dot/
 ├── agents/                   # AI coding assistant configurations
-│   ├── commands/             # Self-contained commands (clean/execute/plan/research/review/troubleshoot/commit/pr)
 │   ├── AGENTS.md             # Main AI agent manifesto
 │   ├── claude.json           # Claude Code settings
 │   ├── amp.settings.json     # AMP CLI settings
@@ -55,35 +54,36 @@ Codex skills are invoked via `/skills` or by mentioning `$skill-name` in prompts
 
 ## 5. Configuration Mappings
 
-| Config       | Source                     | Destination                                                            |
-| ------------ | -------------------------- | ---------------------------------------------------------------------- |
-| **Shell**    |                            |                                                                        |
-| Zsh          | `shell/zshrc`              | `~/.zshrc`                                                             |
-| Zsh Profile  | `shell/zprofile`           | `~/.zprofile`                                                          |
-| **Editor**   |                            |                                                                        |
-| Zed Settings | `editor/settings.json`     | `~/.config/zed/settings.json`                                          |
-| Zed Keymap   | `editor/keymap.json`       | `~/.config/zed/keymap.json`                                            |
-| **Terminal** |                            |                                                                        |
-| SSH          | `terminal/ssh`             | `~/.ssh/config`                                                        |
-| Neofetch     | `terminal/neofetch`        | `~/.config/neofetch/config.conf`                                       |
-| Statusline   | `terminal/statusline`      | `~/.config/ccstatusline/settings.json`                                 |
-| Starship     | `terminal/starship.toml`   | `~/.config/starship/starship.toml`                                     |
-| Bottom       | `terminal/bottom.toml`     | `~/.config/bottom/bottom.toml`                                         |
-| Atuin        | `terminal/atuin.toml`      | `~/.config/atuin/config.toml`                                          |
-| Ghostty      | `terminal/ghostty`         | `~/Library/Application Support/com.mitchellh.ghostty/config`           |
-| Bat          | `terminal/bat`             | `~/.config/bat/config`                                                 |
-| Biome        | `biome.json`               | `~/.config/biome/biome.json`                                           |
-| **System**   |                            |                                                                        |
-| Git          | `system/gitconfig`         | `~/.gitconfig`                                                         |
-| Karabiner    | `system/karabiner`         | `~/.config/karabiner/karabiner.json`                                   |
-| 1Password    | `system/1password`         | `~/.config/1Password/ssh/agent.toml`                                   |
-| macOS        | `macos/.macos`             | `~/.macos`                                                             |
-| **Agents**   |                            |                                                                        |
-| AI Manifesto | `agents/AGENTS.md`         | `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, `~/.config/amp/AGENTS.md` |
-| Claude Code  | `agents/claude.json`       | `~/.claude/settings.json`                                              |
-| AMP CLI      | `agents/amp.settings.json` | `~/.config/amp/settings.json`                                          |
-| Codex        | `agents/codex.toml`        | `~/.codex/config.toml`                                                 |
-| Skills       | `agents/skills`            | `~/.claude/skills`, `~/.agents/skills`                                 |
+| Config           | Source                         | Destination                                                            |
+| ---------------- | ------------------------------ | ---------------------------------------------------------------------- |
+| **Shell**        |                                |                                                                        |
+| Zsh              | `shell/zshrc`                  | `~/.zshrc`                                                             |
+| Zsh Profile      | `shell/zprofile`               | `~/.zprofile`                                                          |
+| **Editor**       |                                |                                                                        |
+| Zed Settings     | `editor/settings.json`         | `~/.config/zed/settings.json`                                          |
+| Zed Keymap       | `editor/keymap.json`           | `~/.config/zed/keymap.json`                                            |
+| **Terminal**     |                                |                                                                        |
+| SSH              | `terminal/ssh`                 | `~/.ssh/config`                                                        |
+| Neofetch         | `terminal/neofetch`            | `~/.config/neofetch/config.conf`                                       |
+| Statusline       | `terminal/statusline`          | `~/.config/ccstatusline/settings.json`                                 |
+| Starship (Dark)  | `terminal/starship-dark.toml`  | `~/.config/starship/starship-dark.toml`                                |
+| Starship (Light) | `terminal/starship-light.toml` | `~/.config/starship/starship-light.toml`                               |
+| Bottom           | `terminal/bottom.toml`         | `~/.config/bottom/bottom.toml`                                         |
+| Atuin            | `terminal/atuin.toml`          | `~/.config/atuin/config.toml`                                          |
+| Ghostty          | `terminal/ghostty`             | `~/Library/Application Support/com.mitchellh.ghostty/config`           |
+| Bat              | `terminal/bat`                 | `~/.config/bat/config`                                                 |
+| Biome            | `biome.json`                   | `~/.config/biome/biome.json`                                           |
+| **System**       |                                |                                                                        |
+| Git              | `system/gitconfig`             | `~/.gitconfig`                                                         |
+| Karabiner        | `system/karabiner`             | `~/.config/karabiner/karabiner.json`                                   |
+| 1Password        | `system/1password`             | `~/.config/1Password/ssh/agent.toml`                                   |
+| macOS            | `macos/.macos`                 | `~/.macos`                                                             |
+| **Agents**       |                                |                                                                        |
+| AI Manifesto     | `agents/AGENTS.md`             | `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, `~/.config/amp/AGENTS.md` |
+| Claude Code      | `agents/claude.json`           | `~/.claude/settings.json`                                              |
+| AMP CLI          | `agents/amp.settings.json`     | `~/.config/amp/settings.json`                                          |
+| Codex            | `agents/codex.toml`            | `~/.codex/config.toml`                                                 |
+| Skills           | `agents/skills`                | `~/.claude/skills`, `~/.agents/skills`                                 |
 
 ## 6. Applications
 
@@ -93,12 +93,12 @@ Codex skills are invoked via `/skills` or by mentioning `$skill-name` in prompts
 - **CLI Shell**: Starship prompt, Atuin history, Broot file navigation
 - **CLI AI**: codex, gemini-cli
 - **CLI Media**: ffmpeg, ImageMagick, yt-dlp, gifsicle, sox, webp, openexr
-- **CLI Utilities**: jq, yq, just, direnv, shellcheck, shfmt, tldr, hyperfine, neofetch, pipx, scc, wget, gitingest, blueutil, gnupg, poppler, stripe, supabase
-- **GUI Productivity**: 1Password, Notion suite, Raycast, Cursor, Ollama
+- **CLI Utilities**: jq, yq, just, direnv, shellcheck, shfmt, tldr, hyperfine, neofetch, scc, wget, gitingest, blueutil, gnupg, poppler, stripe, supabase
+- **GUI Productivity**: 1Password, Notion suite, Raycast, Cursor
 - **GUI Development**: Zed (preview), Ghostty terminal, CotEditor
 - **GUI Media**: IINA, Figma, CleanShot, Clop
 - **GUI System**: CleanMyMac, Karabiner Elements, MonitorControl, Keka, Ice, Leader Key, Transmission
-- **GUI Communication**: WhatsApp, Zoom, Lark
+- **GUI Communication**: WhatsApp, Zoom
 - **GUI Cloud**: Google Drive, Dropbox, Backblaze
 - **GUI Security**: AdGuard
 
