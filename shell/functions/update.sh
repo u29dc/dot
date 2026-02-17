@@ -168,8 +168,8 @@ upd() {
             begin
               data = JSON.parse(STDIN.read)
               (data["casks"] || []).each do |cask|
-                name = cask["name"] || cask["token"] || cask["full_token"]
-                puts(name) if name.is_a?(String) && !name.empty?
+                token = cask["token"] || cask["full_token"]
+                puts(token) if token.is_a?(String) && !token.empty?
               end
             rescue JSON::ParserError
             end
@@ -179,11 +179,19 @@ upd() {
     upd__manual_casks_from_tokens() {
         local tokens="$1"
         local info_json=""
+        local token=""
+        local -a token_args=()
         [ -n "$tokens" ] || return 0
         command -v ruby >/dev/null 2>&1 || return 0
 
-        # shellcheck disable=SC2086
-        info_json="$(brew info --cask --json=v2 $tokens 2>/dev/null || true)"
+        while IFS= read -r token; do
+            [ -n "$token" ] || continue
+            token_args+=("$token")
+        done <<<"$tokens"
+
+        [ "${#token_args[@]}" -gt 0 ] || return 0
+
+        info_json="$(brew info --cask --json=v2 "${token_args[@]}" 2>/dev/null || true)"
         [ -n "$info_json" ] || return 0
 
         printf '%s\n' "$info_json" | ruby -rjson -e '
@@ -494,10 +502,16 @@ upd() {
     fi
 
     if [ "$actionable_cask_before_count" -gt 0 ]; then
+        local cask_token=""
+        local -a actionable_cask_args=()
+        while IFS= read -r cask_token; do
+            [ -n "$cask_token" ] || continue
+            actionable_cask_args+=("$cask_token")
+        done <<<"$actionable_casks_before"
+
         # Refresh ticket right before cask upgrades to reduce chance of mid-step prompts.
         upd__ensure_sudo_session "$actionable_cask_before_count" "refresh" || return 1
-        # shellcheck disable=SC2086
-        upd__run_step --stream "Upgrading casks (greedy)" brew upgrade --cask --greedy $actionable_casks_before
+        upd__run_step --stream "Upgrading casks (greedy)" brew upgrade --cask --greedy "${actionable_cask_args[@]}"
         step_result=$?
         upd__apply_step_result "$step_result" || return $?
     elif [ "$cask_before_count" -gt 0 ]; then
