@@ -19,5 +19,18 @@ export OPENROUTER_API_KEY="sk-or-v1-..."
 # ------------------------------------------------------------------------------
 
 # Cloud storage shortcuts (private)
-alias gdrive='cd "folder_path"'
-alias dropbox='cd "folder_path"'
+gdrive() {
+    cd "folder_path"
+}
+
+dropbox() {
+    cd "folder_path"
+}
+
+:g() {
+    gdrive
+}
+
+:d() {
+    dropbox
+}

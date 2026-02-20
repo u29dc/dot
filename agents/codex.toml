@@ -30,7 +30,7 @@ inherit = "all"
 [features]
 apply_patch_freeform = true
 apps = true
-collab = true
+multi_agent = true
 shell_snapshot = true
 skills = true
 unified_exec = true
@@ -47,9 +47,6 @@ env_vars = ["GITHUB_TOKEN"]
 [mcp_servers.svelte]
 command = "bunx"
 args = ["@sveltejs/mcp"]
-
-[mcp_servers.notion]
-url = "https://mcp.notion.com/mcp"
 
 [projects."/Users/han/Git"]
 trust_level = "trusted"
