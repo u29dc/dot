@@ -21,6 +21,7 @@ export KOE_HOME="$TOOLS_HOME/koe"
 export ASH_HOME="$TOOLS_HOME/ash"
 export EBB_HOME="$TOOLS_HOME/ebb"
 export CHO_HOME="$TOOLS_HOME/cho"
+export PDF_HOME="$TOOLS_HOME/pdf"
 
 # Agent skill directories
 export SKILLS_BASE="$HOME/Git/dot/agents/skills"
@@ -127,6 +128,7 @@ alias virtualenv='uv venv'
 :ash() { "$ASH_HOME/ash" "$@"; }
 :ebb() { "$EBB_HOME/ebb" "$@"; }
 :cho() { "$CHO_HOME/cho" "$@"; }
+:pdf() { "$PDF_HOME/pdf" "$@"; }
 cc() {
     if [[ "$1" == "allow" ]]; then
         shift
