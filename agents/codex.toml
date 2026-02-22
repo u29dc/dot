@@ -57,8 +57,6 @@ hide_full_access_warning = true
 [tui]
 status_line = ["five-hour-limit", "context-used", "model-with-reasoning", "current-dir", "git-branch"]
 
-[profiles.m]
+[profiles.fast]
+model = "gpt-5.3-codex-spark"
 model_reasoning_effort = "medium"
-
-[profiles.l]
-model_reasoning_effort = "low"
