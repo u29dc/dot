@@ -42,48 +42,48 @@ dot/
 
 ## 4. Agent Configurations
 
-| File                | Description                                              | Usage                                                                                |
-| ------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| `AGENTS.md`         | Main AI agent manifesto and guidelines                   | Linked to `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, and `~/.config/amp/AGENTS.md` |
-| `claude.json`       | Claude Code settings with modern tool permissions        | Linked to `~/.claude/settings.json`                                                  |
-| `amp.settings.json` | AMP CLI settings and permissions                         | Linked to `~/.config/amp/settings.json`                                              |
-| `skills/`           | Shared skill library (`align`, `compose`, `craft`, etc.) | Linked to `~/.claude/skills` and `~/.agents/skills`                                  |
-| `codex.toml`        | Codex AI configuration and model settings                | Linked to `~/.codex/config.toml`                                                     |
+| File | Description | Usage |
+| --- | --- | --- |
+| `AGENTS.md` | Main AI agent manifesto and guidelines | Linked to `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, and `~/.config/amp/AGENTS.md` |
+| `claude.json` | Claude Code settings with modern tool permissions | Linked to `~/.claude/settings.json` |
+| `amp.settings.json` | AMP CLI settings and permissions | Linked to `~/.config/amp/settings.json` |
+| `skills/` | Shared skill library (`align`, `compose`, `craft`, etc.) | Linked to `~/.claude/skills` and `~/.agents/skills` |
+| `codex.toml` | Codex AI configuration and model settings | Linked to `~/.codex/config.toml` |
 
 Codex skills are invoked via `/skills` or by mentioning `$skill-name` in prompts (for example `$compose`), not via slash command names like `/compose`.
 
 ## 5. Configuration Mappings
 
-| Config           | Source                         | Destination                                                            |
-| ---------------- | ------------------------------ | ---------------------------------------------------------------------- |
-| **Shell**        |                                |                                                                        |
-| Zsh              | `shell/zshrc`                  | `~/.zshrc`                                                             |
-| Zsh Profile      | `shell/zprofile`               | `~/.zprofile`                                                          |
-| **Editor**       |                                |                                                                        |
-| Zed Settings     | `editor/settings.json`         | `~/.config/zed/settings.json`                                          |
-| Zed Keymap       | `editor/keymap.json`           | `~/.config/zed/keymap.json`                                            |
-| **Terminal**     |                                |                                                                        |
-| SSH              | `terminal/ssh`                 | `~/.ssh/config`                                                        |
-| Neofetch         | `terminal/neofetch`            | `~/.config/neofetch/config.conf`                                       |
-| Statusline       | `terminal/statusline`          | `~/.config/ccstatusline/settings.json`                                 |
-| Starship (Dark)  | `terminal/starship-dark.toml`  | `~/.config/starship/starship-dark.toml`                                |
-| Starship (Light) | `terminal/starship-light.toml` | `~/.config/starship/starship-light.toml`                               |
-| Bottom           | `terminal/bottom.toml`         | `~/.config/bottom/bottom.toml`                                         |
-| Atuin            | `terminal/atuin.toml`          | `~/.config/atuin/config.toml`                                          |
-| Ghostty          | `terminal/ghostty`             | `~/Library/Application Support/com.mitchellh.ghostty/config`           |
-| Bat              | `terminal/bat`                 | `~/.config/bat/config`                                                 |
-| Biome            | `biome.json`                   | `~/.config/biome/biome.json`                                           |
-| **System**       |                                |                                                                        |
-| Git              | `system/gitconfig`             | `~/.gitconfig`                                                         |
-| Karabiner        | `system/karabiner`             | `~/.config/karabiner/karabiner.json`                                   |
-| 1Password        | `system/1password`             | `~/.config/1Password/ssh/agent.toml`                                   |
-| macOS            | `macos/.macos`                 | `~/.macos`                                                             |
-| **Agents**       |                                |                                                                        |
-| AI Manifesto     | `agents/AGENTS.md`             | `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, `~/.config/amp/AGENTS.md` |
-| Claude Code      | `agents/claude.json`           | `~/.claude/settings.json`                                              |
-| AMP CLI          | `agents/amp.settings.json`     | `~/.config/amp/settings.json`                                          |
-| Codex            | `agents/codex.toml`            | `~/.codex/config.toml`                                                 |
-| Skills           | `agents/skills`                | `~/.claude/skills`, `~/.agents/skills`                                 |
+| Config | Source | Destination |
+| --- | --- | --- |
+| **Shell** |  |  |
+| Zsh | `shell/zshrc` | `~/.zshrc` |
+| Zsh Profile | `shell/zprofile` | `~/.zprofile` |
+| **Editor** |  |  |
+| Zed Settings | `editor/settings.json` | `~/.config/zed/settings.json` |
+| Zed Keymap | `editor/keymap.json` | `~/.config/zed/keymap.json` |
+| **Terminal** |  |  |
+| SSH | `terminal/ssh` | `~/.ssh/config` |
+| Neofetch | `terminal/neofetch` | `~/.config/neofetch/config.conf` |
+| Statusline | `terminal/statusline` | `~/.config/ccstatusline/settings.json` |
+| Starship (Dark) | `terminal/starship-dark.toml` | `~/.config/starship/starship-dark.toml` |
+| Starship (Light) | `terminal/starship-light.toml` | `~/.config/starship/starship-light.toml` |
+| Bottom | `terminal/bottom.toml` | `~/.config/bottom/bottom.toml` |
+| Atuin | `terminal/atuin.toml` | `~/.config/atuin/config.toml` |
+| Ghostty | `terminal/ghostty` | `~/Library/Application Support/com.mitchellh.ghostty/config` |
+| Bat | `terminal/bat` | `~/.config/bat/config` |
+| Biome | `biome.json` | `~/.config/biome/biome.json` |
+| **System** |  |  |
+| Git | `system/gitconfig` | `~/.gitconfig` |
+| Karabiner | `system/karabiner` | `~/.config/karabiner/karabiner.json` |
+| 1Password | `system/1password` | `~/.config/1Password/ssh/agent.toml` |
+| macOS | `macos/.macos` | `~/.macos` |
+| **Agents** |  |  |
+| AI Manifesto | `agents/AGENTS.md` | `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, `~/.config/amp/AGENTS.md` |
+| Claude Code | `agents/claude.json` | `~/.claude/settings.json` |
+| AMP CLI | `agents/amp.settings.json` | `~/.config/amp/settings.json` |
+| Codex | `agents/codex.toml` | `~/.codex/config.toml` |
+| Skills | `agents/skills` | `~/.claude/skills`, `~/.agents/skills` |
 
 ## 6. Applications
 

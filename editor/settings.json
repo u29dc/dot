@@ -43,6 +43,14 @@
 		"JSON": { "formatter": { "language_server": { "name": "biome" } } },
 		"JSONC": { "formatter": { "language_server": { "name": "biome" } } },
 		"CSS": { "formatter": { "language_server": { "name": "biome" } } },
+		"Markdown": {
+			"formatter": {
+				"external": {
+					"command": "/Users/han/Git/dot/scripts/markdown.sh",
+					"arguments": ["{buffer_path}"]
+				}
+			}
+		},
 		"Python": {
 			"language_servers": ["ruff"],
 			"formatter": { "language_server": { "name": "ruff" } }

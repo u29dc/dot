@@ -182,7 +182,7 @@ upd() {
         local token=""
         local -a token_args=()
         [ -n "$tokens" ] || return 0
-        command -v ruby >/dev/null 2>&1 || return 0
+        command -v ruby >/dev/null 2>&1 || return 2
 
         while IFS= read -r token; do
             [ -n "$token" ] || continue
@@ -191,8 +191,8 @@ upd() {
 
         [ "${#token_args[@]}" -gt 0 ] || return 0
 
-        info_json="$(brew info --cask --json=v2 "${token_args[@]}" 2>/dev/null || true)"
-        [ -n "$info_json" ] || return 0
+        info_json="$(brew info --cask --json=v2 "${token_args[@]}" 2>/dev/null)" || return 3
+        [ -n "$info_json" ] || return 3
 
         printf '%s\n' "$info_json" | ruby -rjson -e '
             begin
@@ -213,8 +213,19 @@ upd() {
                 puts(token) if manual_installer
               end
             rescue JSON::ParserError
+              exit 4
             end
-        ' 2>/dev/null
+        ' 2>/dev/null || return 4
+    }
+
+    upd__manual_cask_detection_reason() {
+        local status="${1:-0}"
+        case "$status" in
+            2) printf 'ruby runtime unavailable' ;;
+            3) printf 'Homebrew cask metadata unavailable' ;;
+            4) printf 'Homebrew cask metadata parse failure' ;;
+            *) printf 'detection failure (status %s)' "$status" ;;
+        esac
     }
 
     upd__filter_excluded_items() {
@@ -455,14 +466,27 @@ upd() {
     local cask_before
     local manual_casks_before
     local actionable_casks_before
+    local manual_cask_detection_before_status=0
     formula_before="$(brew outdated --formula 2>/dev/null || true)"
     cask_before_json="$(brew outdated --cask --greedy --json=v2 2>/dev/null || true)"
     cask_before="$(upd__json_outdated_casks "$cask_before_json")"
     if [ -z "$cask_before" ]; then
         cask_before="$(brew outdated --cask --greedy 2>/dev/null || true)"
     fi
-    manual_casks_before="$(upd__manual_casks_from_tokens "$cask_before")"
-    actionable_casks_before="$(upd__filter_excluded_items "$cask_before" "$manual_casks_before")"
+    manual_casks_before=""
+    if [ -n "$cask_before" ]; then
+        if manual_casks_before="$(upd__manual_casks_from_tokens "$cask_before")"; then
+            :
+        else
+            manual_cask_detection_before_status=$?
+            manual_casks_before=""
+        fi
+    fi
+    if [ "$manual_cask_detection_before_status" -ne 0 ]; then
+        actionable_casks_before=""
+    else
+        actionable_casks_before="$(upd__filter_excluded_items "$cask_before" "$manual_casks_before")"
+    fi
 
     local formula_before_count
     local cask_before_count
@@ -494,14 +518,16 @@ upd() {
     upd__apply_step_result "$step_result" || return $?
 
     if [ "$formula_before_count" -gt 0 ]; then
-        upd__run_step "Upgrading formulae" brew upgrade
+        upd__run_step "Upgrading formulae" brew upgrade --formula
         step_result=$?
         upd__apply_step_result "$step_result" || return $?
     else
         echo -e "${YELLOW}[SKIP]${RESET} Upgrading formulae (none outdated)."
     fi
 
-    if [ "$actionable_cask_before_count" -gt 0 ]; then
+    if [ "$manual_cask_detection_before_status" -ne 0 ] && [ "$cask_before_count" -gt 0 ]; then
+        echo -e "${YELLOW}[SKIP]${RESET} Upgrading casks (manual-install cask detection unavailable: $(upd__manual_cask_detection_reason "$manual_cask_detection_before_status"))."
+    elif [ "$actionable_cask_before_count" -gt 0 ]; then
         local cask_token=""
         local -a actionable_cask_args=()
         while IFS= read -r cask_token; do
@@ -533,14 +559,23 @@ upd() {
     local cask_after
     local manual_casks_after
     local cask_after_effective
+    local manual_cask_detection_after_status=0
     formula_after="$(brew outdated --formula 2>/dev/null || true)"
     cask_after_json="$(brew outdated --cask --greedy --json=v2 2>/dev/null || true)"
     cask_after="$(upd__json_outdated_casks "$cask_after_json")"
     if [ -z "$cask_after" ]; then
         cask_after="$(brew outdated --cask --greedy 2>/dev/null || true)"
     fi
-    manual_casks_after="$(upd__manual_casks_from_tokens "$cask_after")"
-    cask_after_effective="$(upd__filter_excluded_items "$cask_after" "$manual_casks_after")"
+    manual_casks_after=""
+    cask_after_effective="$cask_after"
+    if [ -n "$cask_after" ]; then
+        if manual_casks_after="$(upd__manual_casks_from_tokens "$cask_after")"; then
+            cask_after_effective="$(upd__filter_excluded_items "$cask_after" "$manual_casks_after")"
+        else
+            manual_cask_detection_after_status=$?
+            manual_casks_after=""
+        fi
+    fi
 
     local formula_after_count
     local cask_after_count
@@ -567,6 +602,9 @@ upd() {
     echo -e "${YELLOW}[WARN]${RESET} ${total_after} package(s) remain outdated after update."
     if [ "$formula_after_count" -gt 0 ]; then
         echo -e "${DIM}Remaining formulae: $(upd__summarize_items "$formula_after")${RESET}"
+    fi
+    if [ "$manual_cask_detection_after_status" -ne 0 ] && [ -n "$cask_after" ]; then
+        echo -e "${YELLOW}[WARN]${RESET} Manual-install cask detection unavailable after update: $(upd__manual_cask_detection_reason "$manual_cask_detection_after_status")."
     fi
     if [ "$cask_after_count" -gt 0 ]; then
         echo -e "${DIM}Remaining casks: $(upd__summarize_items "$cask_after_effective")${RESET}"
