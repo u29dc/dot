@@ -22,6 +22,7 @@ export ASH_HOME="$TOOLS_HOME/ash"
 export EBB_HOME="$TOOLS_HOME/ebb"
 export CHO_HOME="$TOOLS_HOME/cho"
 export PDF_HOME="$TOOLS_HOME/pdf"
+export TAO_HOME="$TOOLS_HOME/tao"
 
 # Agent skill directories
 export SKILLS_BASE="$HOME/Git/dot/agents/skills"
@@ -129,6 +130,7 @@ alias virtualenv='uv venv'
 :ebb() { "$EBB_HOME/ebb" "$@"; }
 :cho() { "$CHO_HOME/cho" "$@"; }
 :pdf() { "$PDF_HOME/pdf" "$@"; }
+:tao() { "$TAO_HOME/tao" "$@"; }
 cc() {
     if [[ "$1" == "allow" ]]; then
         shift
@@ -198,6 +200,11 @@ eval "$(uv generate-shell-completion zsh)"
 if [ -f "$HOME/.config/broot/launcher/bash/br" ]; then
     source "$HOME/.config/broot/launcher/bash/br"
 fi
+
+# Google Cloud SDK integration
+GCLOUD_SDK_HOME="${GCLOUD_SDK_HOME:-$HOME/google-cloud-sdk}"
+[ -f "$GCLOUD_SDK_HOME/path.zsh.inc" ] && source "$GCLOUD_SDK_HOME/path.zsh.inc"
+[ -f "$GCLOUD_SDK_HOME/completion.zsh.inc" ] && source "$GCLOUD_SDK_HOME/completion.zsh.inc"
 
 # ------------------------------------------------------------------------------
 # LOCAL OVERRIDES
