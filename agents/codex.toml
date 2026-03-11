@@ -1,15 +1,25 @@
-# Codex Global Configuration
+#:schema https://developers.openai.com/codex/config-schema.json
+
+# # Codex Global Configuration
 # ~/.codex/config.toml
 # https://raw.githubusercontent.com/openai/codex/refs/heads/main/docs/config.md
 # https://developers.openai.com/codex/config-reference
 
-model = "gpt-5.3-codex"
+profile = "full"
+
+model = "gpt-5.4"
+review_model = "gpt-5.4"
 model_reasoning_effort = "xhigh"
-model_reasoning_summary = "detailed"
-model_verbosity = "high"
-model_context_window = 250000
-model_auto_compact_token_limit = 200000
-tool_output_token_limit = 25000
+model_reasoning_summary = "concise"
+model_verbosity = "medium"
+model_context_window = 500000
+model_auto_compact_token_limit = 300000
+tool_output_token_limit = 20000
+plan_mode_reasoning_effort = "xhigh"
+background_terminal_max_timeout = 1800000
+project_root_markers = [".codex-root"]
+project_doc_fallback_filenames = ["AGENTS.md", "CLAUDE.md", "README.md", "CONTEXT.md"]
+project_doc_max_bytes = 64000
 
 approval_policy = "never"
 file_opener = "cursor"
@@ -23,6 +33,13 @@ sandbox_mode = "danger-full-access"
 
 [sandbox_workspace_write]
 network_access = true
+exclude_slash_tmp = false
+exclude_tmpdir_env_var = false
+writable_roots = [
+  "/tmp",
+  "/Users/han/Git",
+  "/Users/han/Library/CloudStorage/Dropbox",
+]
 
 [shell_environment_policy]
 ignore_default_excludes = false
@@ -33,22 +50,61 @@ apply_patch_freeform = true
 apps = false
 multi_agent = true
 shell_snapshot = true
-skills = true
 unified_exec = true
+js_repl = true
+prevent_idle_sleep = true
+
+[agents]
+max_threads = 6
+max_depth = 2
+job_max_runtime_seconds = 7200
 
 [history]
-max_bytes = 10485760
+max_bytes = 100000000
 persistence = "save-all"
-
-[projects."/Users/han/Git"]
-trust_level = "trusted"
 
 [notice]
 hide_full_access_warning = true
 
+[notice.model_migrations]
+"gpt-5.3-codex" = "gpt-5.4"
+
 [tui]
 status_line = ["five-hour-limit", "context-used", "model-with-reasoning", "current-dir", "git-branch"]
+theme = "github"
+
+[profiles.full]
+model = "gpt-5.4"
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
+model_reasoning_effort = "xhigh"
+model_reasoning_summary = "concise"
+model_verbosity = "medium"
+web_search = "live"
+
+[profiles.balanced]
+model = "gpt-5.4"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+model_reasoning_effort = "high"
+model_reasoning_summary = "concise"
+model_verbosity = "medium"
+web_search = "live"
 
 [profiles.fast]
 model = "gpt-5.3-codex-spark"
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
 model_reasoning_effort = "medium"
+model_reasoning_summary = "concise"
+model_verbosity = "low"
+web_search = "live"
+
+[projects."/Users/han/Git"]
+trust_level = "trusted"
+
+[projects."/Users/han/Library/CloudStorage/Dropbox"]
+trust_level = "trusted"
+
+[projects."/Users/han/Git/dot"]
+trust_level = "trusted"

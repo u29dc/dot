@@ -42,7 +42,7 @@ Optional: `$ARGUMENTS`
 
 ## Git Commit Execution
 
-- MUST write commit message to `/tmp/claude/commit-msg.txt` then commit with `git commit -F /tmp/claude/commit-msg.txt`.
+- MUST write commit message to `/tmp/commit-msg.txt` then commit with `git commit -F /tmp/commit-msg.txt`.
 - MUST NOT use heredoc syntax (`<<EOF`) for commit messages; shell heredocs create temp files that fail under macOS sandbox.
 - MUST remove the temp file after successful commit.
 

@@ -13,53 +13,46 @@
 			"Glob",
 			"Grep",
 			"LS",
-
 			"TodoWrite",
 			"Task",
-
+			"Bash(--------------------------------------------------SKILLS-----------------------------)",
 			"Skill(align)",
 			"Skill(compose)",
 			"Skill(craft)",
 			"Skill(create)",
 			"Skill(loop)",
 			"Skill(ship)",
-
 			"Skill(u29dc-cco)",
 			"Skill(u29dc-cfo)",
 			"Skill(u29dc-cio)",
 			"Skill(u29dc-cso)",
 			"Skill(u29dc-cto)",
 			"Skill(u29dc-protocols)",
-
+			"Bash(--------------------------------------------------MCP-INTEGRATIONS-------------------)",
 			"mcp__next-devtools__*",
 			"mcp__svelte__*",
 			"mcp__notion__*",
-
+			"Bash(--------------------------------------------------BASH-LANGUAGES-RUNTIMES------------)",
 			"Bash(bun *)",
 			"Bash(bunx *)",
 			"Bash(npm *)",
 			"Bash(npx *)",
 			"Bash(node *)",
 			"Bash(deno *)",
-
 			"Bash(cargo *)",
 			"Bash(rustc *)",
 			"Bash(rustup *)",
 			"Bash(rustfmt *)",
-
 			"Bash(uv *)",
 			"Bash(uvx *)",
 			"Bash(ruff *)",
 			"Bash(python *)",
 			"Bash(python3 *)",
-
 			"Bash(zig *)",
-
+			"Bash(--------------------------------------------------BASH-TOOLING-PLATFORMS-------------)",
 			"Bash(git *)",
 			"Bash(gh *)",
-
 			"Bash(brew *)",
-
 			"Bash(biome *)",
 			"Bash(tsc *)",
 			"Bash(tsgo *)",
@@ -68,7 +61,6 @@
 			"Bash(vite *)",
 			"Bash(vitest *)",
 			"Bash(playwright *)",
-
 			"Bash(vercel *)",
 			"Bash(stripe *)",
 			"Bash(supabase *)",
@@ -76,12 +68,10 @@
 			"Bash(turbo *)",
 			"Bash(just *)",
 			"Bash(obsidian *)",
-
+			"Bash(--------------------------------------------------BASH-SHELL-LOCAL-------------------)",
 			"Bash(sh *)",
-
 			"Bash(curl *)",
 			"Bash(wget *)",
-
 			"Bash(:fin *)",
 			"Bash(:let *)",
 			"Bash(:koe *)",
@@ -94,39 +84,26 @@
 			"Bash(/Users/han/.tools/ash/ash *)",
 			"Bash(/Users/han/.tools/ebb/ebb *)",
 			"Bash(/Users/han/.tools/cho/cho *)",
-
+			"Bash(--------------------------------------------------WEB-SEARCH-------------------------)",
 			"WebSearch",
-
+			"Bash(--------------------------------------------------WEB-CODE-DOCS----------------------)",
 			"WebFetch(domain:github.com)",
 			"WebFetch(domain:raw.githubusercontent.com)",
 			"WebFetch(domain:gist.githubusercontent.com)",
 			"WebFetch(domain:gist.github.com)",
 			"WebFetch(domain:api.github.com)",
-
 			"WebFetch(domain:npmjs.com)",
 			"WebFetch(domain:registry.npmjs.org)",
 			"WebFetch(domain:jsr.io)",
 			"WebFetch(domain:crates.io)",
-
 			"WebFetch(domain:developer.mozilla.org)",
 			"WebFetch(domain:stackoverflow.com)",
-
 			"WebFetch(domain:json.schemastore.org)",
 			"WebFetch(domain:www.schemastore.org)",
-
 			"WebFetch(domain:notion.com)",
 			"WebFetch(domain:developers.notion.com)",
-
-			"WebFetch(domain:anthropic.com)",
-			"WebFetch(domain:docs.anthropic.com)",
-			"WebFetch(domain:openai.com)",
-			"WebFetch(domain:platform.openai.com)",
-			"WebFetch(domain:developers.openai.com)",
-			"WebFetch(domain:ai.google.dev)",
-
 			"WebFetch(domain:modelcontextprotocol.io)",
 			"WebFetch(domain:ampcode.com)",
-
 			"WebFetch(domain:bun.sh)",
 			"WebFetch(domain:bun.com)",
 			"WebFetch(domain:deno.com)",
@@ -134,10 +111,9 @@
 			"WebFetch(domain:typescriptlang.org)",
 			"WebFetch(domain:vitejs.dev)",
 			"WebFetch(domain:turbo.build)",
-
 			"WebFetch(domain:astral.sh)",
 			"WebFetch(domain:docs.astral.sh)",
-
+			"Bash(--------------------------------------------------WEB-FRONTEND-ECOSYSTEM-------------)",
 			"WebFetch(domain:nextjs.org)",
 			"WebFetch(domain:react.dev)",
 			"WebFetch(domain:react-hook-form.com)",
@@ -150,14 +126,27 @@
 			"WebFetch(domain:formsnap.dev)",
 			"WebFetch(domain:superforms.rocks)",
 			"WebFetch(domain:paraglide.inlang.com)",
-
+			"WebFetch(domain:tailwindcss.com)",
+			"WebFetch(domain:shadcn.com)",
+			"WebFetch(domain:ui.shadcn.com)",
+			"WebFetch(domain:radix-ui.com)",
+			"WebFetch(domain:headlessui.com)",
+			"WebFetch(domain:lucide.dev)",
+			"WebFetch(domain:zod.dev)",
+			"WebFetch(domain:tanstack.com)",
+			"WebFetch(domain:trpc.io)",
+			"WebFetch(domain:motion.dev)",
+			"WebFetch(domain:echarts.apache.org)",
+			"WebFetch(domain:bunny.net)",
+			"WebFetch(domain:web.dev)",
+			"WebFetch(domain:tc39.es)",
+			"Bash(--------------------------------------------------WEB-CLOUD-AUTH-BILLING-------------)",
 			"WebFetch(domain:vercel.com)",
 			"WebFetch(domain:netlify.com)",
 			"WebFetch(domain:fly.io)",
 			"WebFetch(domain:railway.app)",
 			"WebFetch(domain:cloudflare.com)",
 			"WebFetch(domain:developers.cloudflare.com)",
-
 			"WebFetch(domain:supabase.com)",
 			"WebFetch(domain:supabase.io)",
 			"WebFetch(domain:convex.dev)",
@@ -168,41 +157,24 @@
 			"WebFetch(domain:turso.tech)",
 			"WebFetch(domain:upstash.com)",
 			"WebFetch(domain:planetscale.com)",
-
 			"WebFetch(domain:prisma.io)",
 			"WebFetch(domain:orm.drizzle.team)",
-
 			"WebFetch(domain:clerk.com)",
 			"WebFetch(domain:authjs.dev)",
 			"WebFetch(domain:lucia-auth.com)",
-
 			"WebFetch(domain:stripe.com)",
 			"WebFetch(domain:docs.stripe.com)",
 			"WebFetch(domain:polar.sh)",
 			"WebFetch(domain:useautumn.com)",
 			"WebFetch(domain:docs.useautumn.com)",
 			"WebFetch(domain:lemonsqueezy.com)",
-
-			"WebFetch(domain:tailwindcss.com)",
-			"WebFetch(domain:shadcn.com)",
-			"WebFetch(domain:ui.shadcn.com)",
-			"WebFetch(domain:radix-ui.com)",
-			"WebFetch(domain:headlessui.com)",
-			"WebFetch(domain:lucide.dev)",
-
-			"WebFetch(domain:zod.dev)",
-			"WebFetch(domain:tanstack.com)",
-			"WebFetch(domain:trpc.io)",
-
-			"WebFetch(domain:vitest.dev)",
-			"WebFetch(domain:playwright.dev)",
-
-			"WebFetch(domain:resend.com)",
-			"WebFetch(domain:react.email)",
-
-			"WebFetch(domain:sanity.io)",
-			"WebFetch(domain:payloadcms.com)",
-
+			"Bash(--------------------------------------------------WEB-AI-PLATFORMS-------------------)",
+			"WebFetch(domain:anthropic.com)",
+			"WebFetch(domain:docs.anthropic.com)",
+			"WebFetch(domain:openai.com)",
+			"WebFetch(domain:platform.openai.com)",
+			"WebFetch(domain:developers.openai.com)",
+			"WebFetch(domain:ai.google.dev)",
 			"WebFetch(domain:replicate.com)",
 			"WebFetch(domain:huggingface.co)",
 			"WebFetch(domain:groq.com)",
@@ -210,39 +182,32 @@
 			"WebFetch(domain:langchain.com)",
 			"WebFetch(domain:mistral.ai)",
 			"WebFetch(domain:openrouter.ai)",
-
+			"Bash(--------------------------------------------------WEB-DEVTOOLS-GENERAL---------------)",
+			"WebFetch(domain:vitest.dev)",
+			"WebFetch(domain:playwright.dev)",
+			"WebFetch(domain:resend.com)",
+			"WebFetch(domain:react.email)",
+			"WebFetch(domain:sanity.io)",
+			"WebFetch(domain:payloadcms.com)",
 			"WebFetch(domain:posthog.com)",
 			"WebFetch(domain:sentry.io)",
-
-			"WebFetch(domain:motion.dev)",
-			"WebFetch(domain:echarts.apache.org)",
-			"WebFetch(domain:bunny.net)",
-
 			"WebFetch(domain:rust-lang.org)",
 			"WebFetch(domain:doc.rust-lang.org)",
 			"WebFetch(domain:docs.rs)",
 			"WebFetch(domain:ziglang.org)",
-
-			"WebFetch(domain:web.dev)",
-			"WebFetch(domain:tc39.es)",
-
 			"WebFetch(domain:raycast.com)",
 			"WebFetch(domain:developers.raycast.com)",
 			"WebFetch(domain:zed.dev)",
 			"WebFetch(domain:cursor.com)",
 			"WebFetch(domain:ghostty.org)",
-
 			"WebFetch(domain:starship.rs)",
 			"WebFetch(domain:nerdfonts.com)",
-
 			"WebFetch(domain:swift.org)",
 			"WebFetch(domain:docs.swift.org)",
 			"WebFetch(domain:developer.apple.com)",
 			"WebFetch(domain:tart.run)",
-
 			"WebFetch(domain:google.com)",
 			"WebFetch(domain:developers.google.com)",
-
 			"WebFetch(domain:nonstrict.eu)"
 		],
 		"deny": [],
@@ -254,7 +219,9 @@
 		"command": "bunx -y ccstatusline@latest",
 		"padding": 0
 	},
-	"enabledPlugins": {},
+	"enabledPlugins": {
+		"rust-analyzer-lsp@claude-plugins-official": true
+	},
 	"outputStyle": "Explanatory",
 	"sandbox": {
 		"enabled": true,
@@ -266,31 +233,23 @@
 				"raw.githubusercontent.com",
 				"objects.githubusercontent.com",
 				"gist.githubusercontent.com",
-
 				"registry.npmjs.org",
 				"registry.yarnpkg.com",
-
 				"crates.io",
 				"index.crates.io",
 				"static.crates.io",
 				"static.rust-lang.org",
-
 				"pypi.org",
 				"files.pythonhosted.org",
-
 				"deno.land",
 				"dl.deno.land",
 				"jsr.io",
 				"esm.sh",
-
 				"ziglang.org",
-
 				"formulae.brew.sh",
 				"ghcr.io",
-
 				"json.schemastore.org",
 				"www.schemastore.org",
-
 				"api.vercel.com",
 				"api.stripe.com",
 				"api.supabase.co",
@@ -300,37 +259,29 @@
 				"api.cloudflare.com",
 				"challenges.cloudflare.com",
 				"checkout.stripe.com",
-
 				"api.anthropic.com",
 				"api.openai.com",
 				"developers.openai.com",
 				"generativelanguage.googleapis.com",
-
 				"fonts.googleapis.com",
 				"fonts.gstatic.com",
-
 				"gmail.googleapis.com",
 				"oauth2.googleapis.com",
 				"accounts.google.com",
 				"www.googleapis.com",
-
 				"openrouter.ai",
 				"api.groq.com",
 				"huggingface.co",
-
 				"api.xero.com",
 				"identity.xero.com",
 				"login.xero.com",
-
 				"www.rightmove.co.uk",
 				"media.rightmove.co.uk",
 				"epc.opendatacommunities.org",
 				"api.mapbox.com",
-
 				"api.notion.com",
 				"notion.com",
 				"developers.notion.com",
-
 				"duckduckgo.com"
 			],
 			"allowUnixSockets": ["/Users/han/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"],
@@ -354,7 +305,8 @@
 	},
 	"spinnerTipsEnabled": false,
 	"alwaysThinkingEnabled": true,
+	"effortLevel": "high",
 	"autoUpdatesChannel": "latest",
-	"teammateMode": "in-process",
-	"skipDangerousModePermissionPrompt": true
+	"skipDangerousModePermissionPrompt": true,
+	"teammateMode": "in-process"
 }
