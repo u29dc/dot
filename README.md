@@ -47,7 +47,7 @@ dot/
 | `AGENTS.md` | Main AI agent manifesto and guidelines | Linked to `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, and `~/.config/amp/AGENTS.md` |
 | `claude.json` | Claude Code settings with modern tool permissions | Linked to `~/.claude/settings.json` |
 | `amp.settings.json` | AMP CLI settings and permissions | Linked to `~/.config/amp/settings.json` |
-| `skills/` | Shared skill library (`align`, `compose`, `craft`, etc.) | Linked to `~/.claude/skills` and `~/.agents/skills` |
+| `skills/` | Shared skill library (`align`, `compose`, `craft`, etc.) | Linked to `~/.claude/skills`, `~/.codex/skills`, and `~/.agents/skills` |
 | `codex.toml` | Codex AI configuration and model settings | Linked to `~/.codex/config.toml` |
 
 Codex skills are invoked via `/skills` or by mentioning `$skill-name` in prompts (for example `$compose`), not via slash command names like `/compose`.
@@ -83,7 +83,7 @@ Codex skills are invoked via `/skills` or by mentioning `$skill-name` in prompts
 | Claude Code | `agents/claude.json` | `~/.claude/settings.json` |
 | AMP CLI | `agents/amp.settings.json` | `~/.config/amp/settings.json` |
 | Codex | `agents/codex.toml` | `~/.codex/config.toml` |
-| Skills | `agents/skills` | `~/.claude/skills`, `~/.agents/skills` |
+| Skills | `agents/skills` | `~/.claude/skills`, `~/.codex/skills`, `~/.agents/skills` |
 
 ## 6. Applications
 

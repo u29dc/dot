@@ -215,6 +215,7 @@ link_skills "$HOME/.claude/skills" "$SKILLS_BASE" ${SKILLS_U29DC:+"$SKILLS_U29DC
 # Codex CLI
 link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.codex/AGENTS.md"
 link_file "$DOTFILES_DIR/agents/codex.toml" "$HOME/.codex/config.toml"
+link_skills "$HOME/.codex/skills" "$SKILLS_BASE" ${SKILLS_U29DC:+"$SKILLS_U29DC"}
 link_skills "$HOME/.agents/skills" "$SKILLS_BASE" ${SKILLS_U29DC:+"$SKILLS_U29DC"}
 # AMP CLI
 link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.config/amp/AGENTS.md"

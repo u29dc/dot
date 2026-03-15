@@ -25,7 +25,7 @@ export ASH_HOME="$TOOLS_HOME/ash"
 
 # Agent skill directories
 export SKILLS_BASE="$HOME/Git/dot/agents/skills"
-export SKILLS_U29DC="$HOME/Dropbox (Personal)/VAULT/WORK/15-STRATEGY/Skills"
+export SKILLS_U29DC="$HOME/Library/CloudStorage/Dropbox/VAULT/WORK/15-STRATEGY/Skills"
 
 # Silence Homebrew environment hints
 export HOMEBREW_NO_ENV_HINTS=1
