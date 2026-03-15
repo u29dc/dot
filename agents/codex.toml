@@ -8,28 +8,26 @@
 profile = "full"
 
 model = "gpt-5.4"
-review_model = "gpt-5.4"
-model_reasoning_effort = "xhigh"
-model_reasoning_summary = "concise"
-model_verbosity = "medium"
-model_context_window = 500000
-model_auto_compact_token_limit = 300000
-tool_output_token_limit = 20000
-plan_mode_reasoning_effort = "xhigh"
-background_terminal_max_timeout = 1800000
-project_root_markers = [".codex-root"]
-project_doc_fallback_filenames = ["AGENTS.md", "CLAUDE.md", "README.md", "CONTEXT.md"]
-project_doc_max_bytes = 64000
-
 approval_policy = "never"
-file_opener = "cursor"
-personality = "pragmatic"
+sandbox_mode = "danger-full-access"
+model_reasoning_effort = "xhigh"
+model_reasoning_summary = "detailed"
+model_verbosity = "high"
 web_search = "live"
 
+review_model = "gpt-5.4"
+plan_mode_reasoning_effort = "xhigh"
 show_raw_agent_reasoning = true
 suppress_unstable_features_warning = true
 
-sandbox_mode = "danger-full-access"
+model_context_window = 500000
+model_auto_compact_token_limit = 300000
+tool_output_token_limit = 20000
+background_terminal_max_timeout = 1800000
+project_doc_fallback_filenames = ["AGENTS.md", "CLAUDE.md", "README.md", "CONTEXT.md"]
+project_doc_max_bytes = 64000
+file_opener = "cursor"
+personality = "pragmatic"
 
 [sandbox_workspace_write]
 network_access = true
@@ -78,8 +76,8 @@ model = "gpt-5.4"
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
 model_reasoning_effort = "xhigh"
-model_reasoning_summary = "concise"
-model_verbosity = "medium"
+model_reasoning_summary = "detailed"
+model_verbosity = "high"
 web_search = "live"
 
 [profiles.balanced]
@@ -106,5 +104,32 @@ trust_level = "trusted"
 [projects."/Users/han/Library/CloudStorage/Dropbox"]
 trust_level = "trusted"
 
+[projects."/Users/han/Library/CloudStorage/Dropbox/VAULT"]
+trust_level = "trusted"
+
 [projects."/Users/han/Git/dot"]
+trust_level = "trusted"
+
+[projects."/Users/han/Git/tao"]
+trust_level = "trusted"
+
+[projects."/Users/han/Git/cho"]
+trust_level = "trusted"
+
+[projects."/Users/han/Git/fin"]
+trust_level = "trusted"
+
+[projects."/Users/han/Git/let"]
+trust_level = "trusted"
+
+[projects."/Users/han/Git/pdf"]
+trust_level = "trusted"
+
+[projects."/Users/han/Git/buf"]
+trust_level = "trusted"
+
+[projects."/Users/han/Git/ash"]
+trust_level = "trusted"
+
+[projects."/Users/han/Git/www"]
 trust_level = "trusted"
