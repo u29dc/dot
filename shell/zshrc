@@ -15,14 +15,13 @@ export PATH="$PATH:/Applications/Obsidian.app/Contents/MacOS"
 export TOOLS_HOME="${TOOLS_HOME:-$HOME/.tools}"
 
 # Per-tool home directories
+export TAO_HOME="$TOOLS_HOME/tao"
+export CHO_HOME="$TOOLS_HOME/cho"
 export FIN_HOME="$TOOLS_HOME/fin"
 export LET_HOME="$TOOLS_HOME/let"
-export KOE_HOME="$TOOLS_HOME/koe"
-export ASH_HOME="$TOOLS_HOME/ash"
-export EBB_HOME="$TOOLS_HOME/ebb"
-export CHO_HOME="$TOOLS_HOME/cho"
 export PDF_HOME="$TOOLS_HOME/pdf"
-export TAO_HOME="$TOOLS_HOME/tao"
+export BUF_HOME="$TOOLS_HOME/buf"
+export ASH_HOME="$TOOLS_HOME/ash"
 
 # Agent skill directories
 export SKILLS_BASE="$HOME/Git/dot/agents/skills"
@@ -110,7 +109,7 @@ alias htop='btm'
 alias top='btm'
 alias scc='scc --no-cocomo'
 alias b='bun run'
-alias bup='bun update --latest'
+alias context='bunx contextcalc@latest --bars --depth 3 --min-tokens 1000 --sort name --output tree'
 
 # Python Tool Replacements (uv)
 alias python='uv run python'
@@ -123,14 +122,14 @@ alias virtualenv='uv venv'
 # ------------------------------------------------------------------------------
 
 # CLI tool functions (colon-prefix for namespace isolation)
+:tao() { "$TAO_HOME/tao" "$@"; }
+:cho() { "$CHO_HOME/cho" "$@"; }
 :fin() { "$FIN_HOME/fin" "$@"; }
 :let() { "$LET_HOME/let" "$@"; }
-:koe() { "$KOE_HOME/koe" "$@"; }
-:ash() { "$ASH_HOME/ash" "$@"; }
-:ebb() { "$EBB_HOME/ebb" "$@"; }
-:cho() { "$CHO_HOME/cho" "$@"; }
 :pdf() { "$PDF_HOME/pdf" "$@"; }
-:tao() { "$TAO_HOME/tao" "$@"; }
+:buf() { "$BUF_HOME/buf" "$@"; }
+:ash() { "$ASH_HOME/ash" "$@"; }
+
 cc() {
     if [[ "$1" == "allow" ]]; then
         shift
@@ -139,6 +138,7 @@ cc() {
         claude "$@"
     fi
 }
+
 # Auto-trust working paths under ~/Git and ~/Library/CloudStorage/Dropbox.
 _codex_auto_trust_path() {
     local codex_home cfg cwd trust_target
@@ -176,12 +176,32 @@ _codex_auto_trust_path() {
         printf 'trust_level = "trusted"\n'
     } >> "$cfg"
 }
+
 codex() {
     _codex_auto_trust_path
     command codex "$@"
 }
+
 co() {
     codex "$@"
+}
+
+bup() {
+    local repo_root=""
+
+    bun update --latest || return $?
+
+    if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        repo_root="$(git rev-parse --show-toplevel 2>/dev/null)" || repo_root=""
+    fi
+
+    if [[ -z "$repo_root" ]]; then
+        repo_root="$PWD"
+    fi
+
+    if [[ -f "$repo_root/biome.json" || -f "$repo_root/biome.jsonc" ]]; then
+        bunx biome migrate --write
+    fi
 }
 
 # EZA configuration for better tree view defaults
