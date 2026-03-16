@@ -8,10 +8,11 @@ allowed-tools: Bash, Read, Write, Glob, Grep, Edit
 # Ship
 
 Commit changes with deterministic batching and execute safe `dev -> main` pull request flow.
+If the user invokes this skill without extra instructions, assume the task is to commit the relevant local changes and push the current branch to its configured remote.
 
 ## How to Use
 
-- `/ship` - analyze changes and create optimal commit batches
+- `/ship` - create optimal commit batches for the current changes, commit them, and push the current branch
 - `/ship pr` - create, validate, and merge PR from `dev` to `main`
 - `/ship only src/lib single commit` - scope and batching override
 
@@ -19,6 +20,7 @@ Commit changes with deterministic batching and execute safe `dev -> main` pull r
 
 Optional: `$ARGUMENTS`
 
+- no arguments: default to standard commit-and-push flow on the current branch
 - path scope: `only <path>`
 - file filter: `<glob> only`
 - batching override: `single commit` or `separate commits`
@@ -31,7 +33,8 @@ Optional: `$ARGUMENTS`
 3. Classify changes by type/scope and detect unrelated clusters.
 4. Determine batching strategy (auto or argument override).
 5. For each batch: reset staging, stage exact files, generate compliant message, commit.
-6. Report commit SHAs, titles, scopes, and file counts.
+6. Push the current branch to its configured upstream remote unless the user explicitly requested commit-only behavior.
+7. Report commit SHAs, titles, scopes, file counts, and push target.
 
 ## Commit Message Contract
 
