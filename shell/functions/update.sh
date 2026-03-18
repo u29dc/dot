@@ -40,28 +40,39 @@ upd() {
         esac
     }
 
+    upd__spinner_glyph() {
+        local frame_index="$1"
+        case $((frame_index % 10)) in
+            0) printf '⠋' ;;
+            1) printf '⠙' ;;
+            2) printf '⠹' ;;
+            3) printf '⠸' ;;
+            4) printf '⠼' ;;
+            5) printf '⠴' ;;
+            6) printf '⠦' ;;
+            7) printf '⠧' ;;
+            8) printf '⠇' ;;
+            *) printf '⠏' ;;
+        esac
+    }
+
     upd__spinner_frame() {
         local frame_index="$1"
+        local status_text=""
+        local offset=""
+
         if upd__locale_is_utf8; then
-            case $((frame_index % 10)) in
-                0) printf '⠋' ;;
-                1) printf '⠙' ;;
-                2) printf '⠹' ;;
-                3) printf '⠸' ;;
-                4) printf '⠼' ;;
-                5) printf '⠴' ;;
-                6) printf '⠦' ;;
-                7) printf '⠧' ;;
-                8) printf '⠇' ;;
-                *) printf '⠏' ;;
-            esac
+            for offset in 0 3 6 9; do
+                status_text="${status_text}$(upd__spinner_glyph "$((frame_index + offset))")"
+            done
+            printf '%s' "$status_text"
         else
             # shellcheck disable=SC1003
             case $((frame_index % 4)) in
-                0) printf '|' ;;
-                1) printf '/' ;;
-                2) printf '-' ;;
-                *) printf '\\' ;;
+                0) printf '|/-\\' ;;
+                1) printf '/-\\|' ;;
+                2) printf '-\\|/' ;;
+                *) printf '\\|/-' ;;
             esac
         fi
     }
@@ -114,7 +125,7 @@ upd() {
         fi
 
         display_label="$(upd__truncate_text "$label" "$max_label_width")"
-        printf '\r\033[2K%b[%s]%b %s (%s)' "$BLUE" "$frame" "$RESET" "$display_label" "$elapsed"
+        printf '\r\033[2K%b[%-4s]%b %s (%s)' "$BLUE" "$frame" "$RESET" "$display_label" "$elapsed"
     }
 
     upd__clear_spinner_line() {
