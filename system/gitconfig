@@ -75,6 +75,7 @@
 	cb = checkout -b
 	c = commit -v
 	ca = commit -v --amend
+	d = !git diff --stat --patch --unified=1 --find-renames --submodule=diff HEAD | delta --no-gitconfig --paging=never --syntax-theme=GitHub --hyperlinks --file-style='bold blue' --file-decoration-style='none' --hunk-header-style='line-number syntax' --hunk-header-decoration-style='none'
 	l = !git --no-pager log --oneline --graph --decorate
 	p = pull --rebase --autostash
 	ps = push
