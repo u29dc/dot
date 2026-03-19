@@ -308,5 +308,13 @@
 	"effortLevel": "high",
 	"autoUpdatesChannel": "latest",
 	"skipDangerousModePermissionPrompt": true,
-	"teammateMode": "in-process"
+	"teammateMode": "in-process",
+	"extraKnownMarketplaces": {
+		"claude-plugins-official": {
+			"source": {
+				"source": "github",
+				"repo": "anthropics/claude-plugins-official"
+			}
+		}
+	}
 }
