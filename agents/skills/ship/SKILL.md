@@ -7,13 +7,13 @@ allowed-tools: Bash, Read, Write, Glob, Grep, Edit
 
 # Ship
 
-Commit changes with deterministic batching and execute safe `dev -> main` pull request flow.
+Commit changes with deterministic batching and execute safe repository-specific pull request flow.
 If the user invokes this skill without extra instructions, assume the task is to commit the relevant local changes and push the current branch to its configured remote.
 
 ## How to Use
 
 - `/ship` - create optimal commit batches for the current changes, commit them, and push the current branch
-- `/ship pr` - create, validate, and merge PR from `dev` to `main`
+- `/ship pr` - create, validate, and merge a PR using the repo's configured source and base branches
 - `/ship only src/lib single commit` - scope and batching override
 
 ## Arguments
@@ -57,14 +57,14 @@ Optional: `$ARGUMENTS`
 
 ## PR Workflow (`/ship pr`)
 
-1. Validate environment: clean tree, on `dev`, remotes configured, `gh` authenticated.
-2. Sync local `dev` with remote before PR creation.
-3. Analyze `main..dev` commit range and derive PR title type/scope.
-4. Create PR `dev -> main` with summary body and risk/testing notes.
+1. Validate environment: clean tree, remotes configured, `gh` authenticated, and source/base branches identified from repo policy.
+2. Sync the source branch with remote before PR creation.
+3. Analyze the commit range between source and base branches and derive PR title type/scope.
+4. Create the PR with summary body and risk/testing notes.
 5. Detect and watch required checks (CI, deployment, release workflows).
 6. Abort with actionable failure context if checks fail or timeout.
-7. Merge with merge commit (no squash) to preserve commit/release semantics.
-8. Keep `dev` branch; sync `main` back into `dev`; push both states.
+7. Merge using the repo's required strategy; default to merge commit when no stricter policy exists.
+8. Sync affected long-lived branches per repo policy.
 9. Report PR URL, merge commit SHA, and release tag if produced.
 
 ## PR Title Contract
@@ -77,8 +77,8 @@ Optional: `$ARGUMENTS`
 
 - MUST preserve unrelated staged work if outside requested scope.
 - MUST avoid force-push during normal ship flow.
-- MUST avoid deleting `dev`.
-- MUST avoid squash merges unless explicitly requested.
+- MUST avoid deleting long-lived repo branches.
+- MUST avoid squash merges unless explicitly requested or required by repo policy.
 - SHOULD block merge when required checks are missing or failing.
 
 ## Quality Standards
@@ -88,5 +88,5 @@ Optional: `$ARGUMENTS`
 - Atomic commit grouping with clear review boundaries.
 - Clean staging boundaries between batches.
 - PR checks verified before merge.
-- Final branch sync complete (`main` merged back into `dev`).
+- Final branch state synced per repo policy.
 - Clear report with exact next-state verification commands.

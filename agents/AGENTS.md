@@ -42,11 +42,12 @@ Applies to Claude Code, Codex CLI, and AMP unless an agent-specific override exp
 - MUST use shell only when built-ins are insufficient or measurably slower.
 - JavaScript/TypeScript: `bun` > `npm`/`yarn`; `bunx` > `npx`; lockfiles required.
 - Python: `uv` > `pip`.
+- Python tool execution: `uvx` for one-off CLIs; `uv tool install` for persistent installs.
 - Lint/format: `biome` > `eslint`/`prettier`.
-- Typecheck: `tsgo --noEmit` by default; framework add-ons allowed (for example Svelte checks).
+- Typecheck: prefer `bunx tsgo --noEmit` when `@typescript/native-preview` is configured; otherwise use `bunx tsc --noEmit`; framework add-ons allowed (for example Svelte checks).
 - Shell utilities preference: `eza` > `ls`, `bat` > `cat`, `fd` > `find`, `rg` > `grep`, `sd` > `sed`.
 - Benchmarking preference: `hyperfine`.
-- Repository analysis preference: `gitingest -o -` then narrow scope.
+- Repository analysis preference: `uvx gitingest -o -` then narrow scope.
 - Git UI preference: `gitui` for staging, `lazygit` for rebase/cherry-pick, `delta` for diffs.
 - MUST chain commands with `&&` only when dependent.
 - SHOULD avoid `||` in quality-gate scripts unless explicitly aggregating status.
@@ -61,7 +62,7 @@ Applies to Claude Code, Codex CLI, and AMP unless an agent-specific override exp
 - MUST cite sources for high-impact recommendations or non-trivial claims.
 - MUST acknowledge evidence gaps; NEVER invent missing facts.
 - Preferred sources:
-  `https://bun.sh/docs/llms.txt`, `https://biomejs.dev`, `https://zod.dev/llms.txt`, `https://svelte.dev/llms.txt`, `https://nextjs.org/docs/llms.txt`, `https://vite.dev`, `https://tailwindcss.com/docs`, `https://ui.shadcn.com/llms.txt`, `https://bits-ui.com/docs`, `https://docs.convex.dev/llms.txt`, `https://clerk.com/docs/llms.txt`.
+  `https://bun.sh/docs/llms.txt`, `https://biomejs.dev`, `https://zod.dev/llms.txt`, `https://svelte.dev/llms.txt`, `https://nextjs.org/docs/llms.txt`, `https://vite.dev/llms.txt`, `https://tailwindcss.com/docs`, `https://ui.shadcn.com/llms.txt`, `https://bits-ui.com/llms.txt`, `https://docs.convex.dev/llms.txt`, `https://clerk.com/docs/llms.txt`.
 
 ## 6. Engineering Standards
 
@@ -105,7 +106,7 @@ Applies to Claude Code, Codex CLI, and AMP unless an agent-specific override exp
 - SvelteKit:
   use `vitePreprocess`, alias `@ -> ./src`, strict TS on top of `.svelte-kit/tsconfig.json`.
 - Svelte typecheck pipeline:
-  `svelte-kit sync && tsgo --noEmit && svelte-check --tsconfig ./tsconfig.json`.
+  `bunx svelte-kit sync && bunx tsgo --noEmit && bunx svelte-check --tsconfig ./tsconfig.json` when `@typescript/native-preview` is configured; otherwise substitute `bunx tsc --noEmit`.
 - If a project already uses `svelte-check-rs` or a custom Svelte tsconfig, preserve that variant.
 - Next.js:
   `jsx: preserve`, incremental enabled, Next plugin in TS config, Turbopack for dev.
@@ -114,6 +115,8 @@ Applies to Claude Code, Codex CLI, and AMP unless an agent-specific override exp
 
 ## 9. Frontend UI/UX Standards
 
+- Skill reference:
+  use the `craft` skill as needed for deeper UI/UX, accessibility, motion, interaction, and performance guidance.
 - Design intent first:
   identify user, job-to-be-done, and interaction mood before implementation.
 - Avoid generic "AI-default" UI:
@@ -165,15 +168,15 @@ Applies to Claude Code, Codex CLI, and AMP unless an agent-specific override exp
   `agents/skills/align/references/index.md`.
 - Remote fallback for agents without local reference access:
   `https://github.com/u29dc/dot/tree/main/agents/skills/align/references`.
-- This file is the policy layer; `/align` owns template instantiation and project-level conformance.
+- This file is the policy layer; the `align` skill owns template instantiation and project-level conformance.
 
 ## 13. Skills
 
 - Selection rule:
-  when a request explicitly names a skill or clearly matches a skill scope, use that skill; if multiple match, choose the minimal set and state sequence.
+  when a request explicitly names a skill or clearly matches a skill scope, use that skill via the runtime's supported invocation mechanism; if multiple match, choose the minimal set and state sequence.
 - `align`: use for project bootstrap, config drift correction, template alignment, and quality-gate baseline enforcement.
 - `compose`: use for CLI/tooling design or refactors that require agent-native primitives, JSON contracts, and capability discovery.
 - `craft`: use for frontend UI/UX implementation or review where accessibility, motion, layout, interaction, and performance quality must be enforced.
 - `loop`: use to scaffold autonomous execution loops (`prd.json`, `PROMPT.md`, `loop.sh`, `progress.txt`) for multi-story goals.
 - `create`: use to create or update local skill definitions with required frontmatter, structure, and compact operational guidance.
-- `ship`: use for deterministic commit batching, commitlint-compliant messaging, and `dev -> main` pull request flow.
+- `ship`: use for deterministic commit batching, commitlint-compliant messaging, and repository-specific pull request / release flow.
