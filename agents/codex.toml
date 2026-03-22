@@ -136,3 +136,12 @@ trust_level = "trusted"
 
 [projects."/Users/han/Git/www"]
 trust_level = "trusted"
+
+[projects."/Users/han/Git/aix"]
+trust_level = "trusted"
+
+[projects."/Users/han/Git/tok"]
+trust_level = "trusted"
+
+[projects."/Users/han/Git/ray"]
+trust_level = "trusted"
