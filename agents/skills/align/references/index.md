@@ -11,6 +11,7 @@ Canonical source for project bootstrap templates used by `/align`.
 
 ## Templates
 
+- `templates/AGENTS.md`: canonical repo-level agent instructions template.
 - `templates/.gitignore`: baseline ignore patterns.
 - `templates/package.json`: script naming, field order, and baseline tooling deps.
 - `templates/tsconfig.json`: strict TypeScript defaults and path alias baseline.

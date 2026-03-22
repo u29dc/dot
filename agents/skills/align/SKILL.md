@@ -7,7 +7,7 @@ allowed-tools: Bash, Read, Write, Glob, Grep, Edit
 
 # Align
 
-Audit and enforce project baseline standards from `agents/AGENTS.md` using canonical templates under `agents/skills/align/references/`.
+Audit and enforce project baseline standards from `agents/AGENTS.md` using canonical templates under `agents/skills/align/references/`, including the canonical repo-level agent-doc template at `agents/skills/align/references/templates/AGENTS.md`.
 
 ## How to Use
 
@@ -26,8 +26,8 @@ Optional: `$ARGUMENTS`
 ## Workflow
 
 1. Detect project type and package/runtime context.
-2. Load canonical references from `references/index.md`.
-3. Audit existing config files against policy and templates.
+2. Load canonical references from `references/index.md` and `references/templates/AGENTS.md` when aligning root agent documentation.
+3. Audit existing config files and root agent docs against policy and templates.
 4. Report drift (missing files, invalid patterns, rule violations).
 5. Apply minimal corrective edits while preserving valid project-specific intent.
 6. Install missing tooling dependencies required by configured scripts.
@@ -38,6 +38,7 @@ Optional: `$ARGUMENTS`
 ## Canonical Sources
 
 - Primary: `agents/skills/align/references/index.md`
+- Agent docs template: `agents/skills/align/references/templates/AGENTS.md`
 - Templates: `agents/skills/align/references/templates/`
 - Variants: `agents/skills/align/references/variants/`
 - Remote fallback: `https://github.com/u29dc/dot/tree/main/agents/skills/align/references`
@@ -63,6 +64,14 @@ Optional: `$ARGUMENTS`
 - MUST align `tsconfig.json` strict-mode baseline and alias contract.
 - MUST align `.gitignore` baseline patterns.
 - MUST align `.husky/pre-commit` and `.husky/commit-msg` hooks.
+
+### AGENTS.md
+
+- MUST treat `templates/AGENTS.md` as the canonical root agent-doc template.
+- MUST keep root agent docs repo-wide, concise, and operational.
+- SHOULD mirror to `CLAUDE.md` only when needed for tool compatibility.
+- SHOULD keep `README.md` human-facing unless the repository is intentionally agent-first.
+- SHOULD move subtree-specific guidance into nested `AGENTS.md` files or linked docs near the code.
 
 ## Safety Rules
 
