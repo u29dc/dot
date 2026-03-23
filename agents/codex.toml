@@ -2,8 +2,10 @@
 
 # # Codex Global Configuration
 # ~/.codex/config.toml
-# https://raw.githubusercontent.com/openai/codex/refs/heads/main/docs/config.md
+# https://developers.openai.com/codex/config-basics
 # https://developers.openai.com/codex/config-reference
+# https://developers.openai.com/codex/config-sample
+# https://developers.openai.com/codex/speed
 
 profile = "full"
 
@@ -46,6 +48,7 @@ inherit = "all"
 [features]
 apply_patch_freeform = true
 apps = false
+fast_mode = true
 multi_agent = true
 shell_snapshot = true
 unified_exec = true
@@ -94,7 +97,7 @@ model = "gpt-5.3-codex-spark"
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
 model_reasoning_effort = "medium"
-model_reasoning_summary = "concise"
+model_reasoning_summary = "none"
 model_verbosity = "low"
 web_search = "live"
 
