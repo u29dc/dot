@@ -1,182 +1,116 @@
-# AI Agent Operating Contract
+> Shared operating contract for Claude Code, Codex CLI, and AMP. Use this file for system-wide defaults on communication, tooling, implementation quality, and validation. Let more local `AGENTS.md` files add repo-specific commands, architecture, and constraints.
 
-Applies to Claude Code, Codex CLI, and AMP unless an agent-specific override explicitly says otherwise.
+## 1. Documentation
 
-## 1. Scope and Semantics
+- Local source of truth: [`agents/AGENTS.md`](AGENTS.md), [`agents/claude.json`](claude.json), [`agents/codex.toml`](codex.toml), [`agents/amp.settings.json`](amp.settings.json)
+- Skill procedures live with the named skills: `align`, `compose`, `craft`, `create`, `loop`, `ship`.
+- Canonical templates and repo-alignment references live with the `align` skill.
+- Preferred external docs: [Bun](https://bun.sh/docs/llms.txt), [Biome](https://biomejs.dev), [Zod](https://zod.dev/llms.txt), [Svelte](https://svelte.dev/llms.txt), [Next.js](https://nextjs.org/docs/llms.txt), [Vite](https://vite.dev/llms.txt), [Tailwind](https://tailwindcss.com/docs), [shadcn/ui](https://ui.shadcn.com/llms.txt), [Bits UI](https://bits-ui.com/llms.txt), [Convex](https://docs.convex.dev/llms.txt), [Clerk](https://clerk.com/docs/llms.txt)
+- Prefer `llms.txt`, official docs, and primary sources for technical behavior. Cross-check conflicting claims, cite high-impact recommendations, acknowledge evidence gaps, and state confidence as `high`, `medium`, or `low` when uncertainty remains.
 
-- This file defines behavior, communication, and quality policy; it does not embed project template file bodies.
-- Template files and concrete config examples live under `agents/skills/align/references/`.
-- Normative keywords follow RFC-style intent:
-  `MUST` required, `SHOULD` default unless justified exception, `MAY` optional, `NEVER` forbidden.
-- Priority when rules conflict:
-  security > correctness > reproducibility > performance > convenience.
+## 2. Scope and Precedence
 
-## 2. Core Principles
+- Runtime surface usually includes this shared policy file, per-agent runtime settings, and named task-scoped skills.
 
-- Context awareness: adapt strategy to task type and risk.
-- Performance first: choose faster tools and smaller feedback loops.
-- Developer experience: prefer maintainable, well-documented tools.
-- Clarity over cleverness: optimize for readable code and obvious intent.
-- Consistency: follow existing patterns unless change is deliberate.
-- Measurement: validate with evidence, not preference.
+- This file applies unless an agent-specific or repo-local override says otherwise.
+- When rules conflict, prefer `security > correctness > reproducibility > performance > convenience`.
+- Repo-level or subtree-level `AGENTS.md` files should define local commands, architecture, runtime state, dangerous paths, and validation. Do not duplicate full template payloads here.
+- Normative keywords follow RFC intent: `MUST` required, `SHOULD` default unless a justified exception exists, `MAY` optional, `NEVER` forbidden.
+- Default operating principles: context awareness, performance first, clarity over cleverness, consistency with existing patterns, and measurement over preference.
 
-## 3. Communication and Writing Protocol
+## 3. Communication
 
 - Applies to terminal replies, plans, docs, code comments, commit text, and generated files.
-- MUST be concise, direct, and information-dense; remove filler, motivational prose, and rhetorical preambles.
+- MUST be concise, direct, and information-dense. Remove filler, motivational prose, rhetorical preambles, and duplicated guidance.
 - MUST use imperative language for instructions and explicit statements for facts.
-- MUST keep one actionable idea per bullet or sentence; collapse repetition aggressively.
-- MUST include assumptions, constraints, and unknowns when they affect decisions.
-- MUST provide progress updates during long tasks and surface blockers with concrete context.
-- MUST report measurable outcomes (files changed, checks run, failures, residual risk).
-- MUST avoid decorative formatting; use tables only when they increase compression.
-- MUST forbid emojis everywhere (responses, code, docs, scripts, commits, output).
-- SHOULD prefer compact structures:
-  Goal -> Constraints -> Actions -> Validation -> Risks.
-- SHOULD preserve all constraints when compacting existing text; target 40-60% line reduction where feasible.
-- NEVER bloat output with duplicated rules, repeated examples, or obvious boilerplate.
+- MUST keep one actionable idea per bullet or sentence. Collapse repetition aggressively.
+- MUST surface assumptions, constraints, unknowns, and tradeoffs when they affect decisions.
+- MUST provide progress updates during long tasks and report measurable outcomes such as files changed, checks run, failures, and residual risk.
+- MUST avoid decorative formatting. Use tables only when they materially improve compression.
+- MUST forbid emojis everywhere, including responses, code, docs, scripts, commits, and generated output.
+- SHOULD default to `Goal -> Constraints -> Actions -> Validation -> Risks` when a structured response helps.
+- SHOULD preserve all constraints when compacting existing text and target meaningful line-count reduction instead of cosmetic rewrites.
 
-## 4. Tooling and Execution Defaults
+## 4. Tooling and Research Defaults
 
-- MUST prefer built-in agent read/search/edit tools over shell commands.
-- MUST use shell only when built-ins are insufficient or measurably slower.
-- JavaScript/TypeScript: `bun` > `npm`/`yarn`; `bunx` > `npx`; lockfiles required.
-- Python: `uv` > `pip`.
-- Python tool execution: `uvx` for one-off CLIs; `uv tool install` for persistent installs.
-- Lint/format: `biome` > `eslint`/`prettier`.
-- Typecheck: prefer `bunx tsgo --noEmit` when `@typescript/native-preview` is configured; otherwise use `bunx tsc --noEmit`; framework add-ons allowed (for example Svelte checks).
-- Shell utilities preference: `eza` > `ls`, `bat` > `cat`, `fd` > `find`, `rg` > `grep`, `sd` > `sed`.
-- Benchmarking preference: `hyperfine`.
-- Repository analysis preference: `uvx gitingest -o -` then narrow scope.
-- Git UI preference: `gitui` for staging, `lazygit` for rebase/cherry-pick, `delta` for diffs.
-- MUST chain commands with `&&` only when dependent.
-- SHOULD avoid `||` in quality-gate scripts unless explicitly aggregating status.
-- SHOULD parallelize independent reads/checks where tooling allows.
+- MUST prefer built-in agent read, search, and edit tools over shell commands when they are sufficient.
+- MUST use shell only when built-ins are unavailable, materially slower, or clearly less reliable for the task.
+- JavaScript and TypeScript: prefer `bun` over `npm` or `yarn`, `bunx` over `npx`, and keep lockfiles committed.
+- Python: prefer `uv` over `pip`, `uvx` for one-off CLIs, and `uv tool install` for persistent tools.
+- Lint and format: prefer `biome` over `eslint` or `prettier`.
+- Typecheck: prefer `bunx tsgo --noEmit` when `@typescript/native-preview` is configured; otherwise use `bunx tsc --noEmit`. Add framework-specific checks when needed.
+- Shell utilities: prefer `eza`, `bat`, `fd`, `rg`, and `sd` over older defaults when available.
+- Benchmarking: prefer `hyperfine`.
+- Repository analysis: prefer `uvx gitingest -o -` for initial ingestion, then narrow scope with direct reads.
+- Git UI preference: `gitui` for staging, `lazygit` for rebase or cherry-pick workflows, `delta` for diffs.
+- MUST chain commands with `&&` only when later commands depend on earlier success.
+- SHOULD avoid `||` in quality-gate scripts unless intentionally aggregating failure status.
+- SHOULD parallelize independent reads and checks when tooling allows.
 
-## 5. Documentation and Evidence Protocol
-
-- MUST prefer `llms.txt` or official docs when available.
-- MUST use primary sources for technical/API behavior.
-- MUST cross-check conflicting claims before acting.
-- MUST state confidence (`high` / `medium` / `low`) for uncertain conclusions.
-- MUST cite sources for high-impact recommendations or non-trivial claims.
-- MUST acknowledge evidence gaps; NEVER invent missing facts.
-- Preferred sources:
-  `https://bun.sh/docs/llms.txt`, `https://biomejs.dev`, `https://zod.dev/llms.txt`, `https://svelte.dev/llms.txt`, `https://nextjs.org/docs/llms.txt`, `https://vite.dev/llms.txt`, `https://tailwindcss.com/docs`, `https://ui.shadcn.com/llms.txt`, `https://bits-ui.com/llms.txt`, `https://docs.convex.dev/llms.txt`, `https://clerk.com/docs/llms.txt`.
-
-## 6. Engineering Standards
+## 5. Engineering Standards
 
 - Type safety: zero `any`, explicit boundaries, strict mode always.
 - Error handling: contextual messages, stable error codes, no internal leakage.
 - Validation: sanitize and validate all external input at boundaries.
-- Security: least privilege, secrets via env vars, never commit sensitive data.
-- Architecture: domain boundaries, single-responsibility modules, predictable naming.
-- Project structure default: `src/{app,components,lib,types,utils}`, mirrored `tests/`.
-- Naming default: lowercase-hyphen files, PascalCase component exports.
-- Documentation: JSDoc for exported APIs; comments only for non-obvious logic.
-- Build optimization: caching, parallel operations, tree shaking, minimal bundle impact.
-- Manual QA minimum: config variants, invalid input paths, empty states, limits, concurrency.
-- Quality gates (required before completion):
-  zero type errors, zero linter warnings, passing tests (if present), successful production build.
+- Security: least privilege, secrets via environment variables, never commit sensitive data.
+- Architecture: clear domain boundaries, single-responsibility modules, predictable naming.
+- Default project structure: `src/{app,components,lib,types,utils}` with mirrored `tests/` when the stack fits that model.
+- Naming default: lowercase-hyphen files and PascalCase component exports.
+- Documentation: JSDoc for exported APIs; comments only for non-obvious logic or invariants.
+- Build quality: favor caching, parallel work, tree shaking, and minimal bundle impact where relevant.
 
-## 7. Project Bootstrap and Config Policy
+## 6. Project and Framework Defaults
 
-- Required baseline files:
-  `.gitignore`, `package.json`, `tsconfig.json`, `biome.json`, `commitlint.config.js`, `lint-staged.config.js`, `.husky/*`.
-- Initialization default:
-  `bun init` or framework CLI -> install tooling deps -> create configs -> `bunx husky init` -> add `util:*` scripts -> first commit.
-- `package.json` policy:
-  field order `name > version > type > private > workspaces > repository > scripts > devDependencies > dependencies`; scripts use `util:*` prefixes; avoid bare `format`/`lint`.
-- Monorepo policy:
-  `workspaces: ["packages/*"]`, workspace deps via `workspace:*`, child `tsconfig` extends root.
-- TypeScript policy:
-  ESNext + Bundler resolution + strict flags + `noEmit` + `isolatedModules` + `verbatimModuleSyntax`.
-- Biome policy:
-  extend `~/.config/biome/biome.json`; add Svelte overrides for compiler-driven unused semantics.
-- Commitlint policy:
-  extends conventional, enforce scoped commits, allowed types:
-  `feat|fix|refactor|docs|style|chore|test`, lowercase subject, no trailing period, max header/body length 100.
-- Lint-staged policy:
-  all files trigger full quality gate via `bun run util:check`.
-- Templates for exact file content:
-  `agents/skills/align/references/index.md`.
+- Required baseline files for most JS or TS repositories: `.gitignore`, `package.json`, `tsconfig.json`, `biome.json`, `commitlint.config.js`, `lint-staged.config.js`, and `.husky/*`.
+- Default bootstrap flow: framework CLI or `bun init` -> install tooling deps -> add configs -> `bunx husky init` -> add `util:*` scripts -> first commit.
+- `package.json` policy: field order `name > version > type > private > workspaces > repository > scripts > devDependencies > dependencies`; keep scripts under `util:*` where appropriate and avoid bare `format` or `lint`.
+- Monorepo policy: `workspaces: ["packages/*"]`, workspace dependencies via `workspace:*`, and child `tsconfig` files extending the root.
+- TypeScript policy: `ESNext`, bundler resolution, strict flags, `noEmit`, `isolatedModules`, and `verbatimModuleSyntax`.
+- Biome policy: extend `~/.config/biome/biome.json` and add Svelte-specific overrides when compiler-driven unused semantics require them.
+- Commitlint policy: conventional base, scoped commits, allowed types `feat|fix|refactor|docs|style|chore|test`, lowercase subject, no trailing period, max header and body length `100`.
+- Lint-staged policy: trigger the full quality gate through `bun run util:check`.
+- SvelteKit: use `vitePreprocess`, alias `@ -> ./src`, and keep strict TypeScript on top of `.svelte-kit/tsconfig.json`.
+- Svelte typecheck pipeline: `bunx svelte-kit sync && bunx tsgo --noEmit && bunx svelte-check --tsconfig ./tsconfig.json` when `@typescript/native-preview` is configured; otherwise substitute `bunx tsc --noEmit`.
+- Preserve existing compatible variants such as `svelte-check-rs` or custom Svelte tsconfig layouts when the project already depends on them.
+- Next.js: use `jsx: preserve`, incremental builds, the Next TypeScript plugin, and Turbopack for development where supported.
+- CLI projects: prefer `citty`, keep the TypeScript entrypoint in `src/index.ts`, and keep orchestration in `scripts/` when that structure exists.
 
-## 8. Framework Notes
+## 7. Frontend Standards
 
-- SvelteKit:
-  use `vitePreprocess`, alias `@ -> ./src`, strict TS on top of `.svelte-kit/tsconfig.json`.
-- Svelte typecheck pipeline:
-  `bunx svelte-kit sync && bunx tsgo --noEmit && bunx svelte-check --tsconfig ./tsconfig.json` when `@typescript/native-preview` is configured; otherwise substitute `bunx tsc --noEmit`.
-- If a project already uses `svelte-check-rs` or a custom Svelte tsconfig, preserve that variant.
-- Next.js:
-  `jsx: preserve`, incremental enabled, Next plugin in TS config, Turbopack for dev.
-- CLI projects:
-  prefer `citty`, TypeScript entrypoint in `src/index.ts`, script orchestration in `scripts/`.
+- Use the `craft` skill when frontend work needs deeper guidance on interaction, accessibility, motion, layout, or performance.
+- Start with design intent: identify user, job-to-be-done, and interaction mood before implementation.
+- Avoid generic AI-default UI. Choose deliberate typography, color direction, and motion language.
+- Motion defaults: `150-200ms` standard duration, `300ms` max, button press `scale(0.97)`, entry scale at least `0.96`, and animate `transform` plus `opacity` only.
+- Motion constraints: no animation for frequent keyboard-driven actions, no `transition: all`, and no layout-property animation.
+- Easing defaults: `cubic-bezier(0.16, 1, 0.3, 1)` for ease-out and `cubic-bezier(0.34, 1.56, 0.64, 1)` for spring-like motion.
+- Accessibility and touch: minimum touch target `44px`, minimum input text `16px`, hover styles gated by `@media (hover: hover)`, and robust ARIA labels and state handling.
+- Respect `prefers-reduced-motion` with reduced or disabled alternatives.
+- Interaction rules: labels focus inputs, `Enter` submits forms, submitting states disable repeat actions, optimistic updates require rollback paths, and clickable regions must not contain dead zones.
+- Visual quality: use tabular numerals for numeric UI, preserve border radius on focus rings, and avoid theme-transition flashes.
 
-## 9. Frontend UI/UX Standards
+## 8. Execution, Constraints, and Validation
 
-- Skill reference:
-  use the `craft` skill as needed for deeper UI/UX, accessibility, motion, interaction, and performance guidance.
-- Design intent first:
-  identify user, job-to-be-done, and interaction mood before implementation.
-- Avoid generic "AI-default" UI:
-  choose deliberate typography, color direction, and motion language.
-- Motion defaults:
-  150-200ms standard, 300ms max, button press `scale(0.97)`, entry scale >= `0.96`, animate `transform/opacity` only.
-- Motion constraints:
-  no animation for frequent keyboard-driven actions; no `transition: all`; no layout-property animation.
-- Easing defaults:
-  `--ease-out: cubic-bezier(0.16, 1, 0.3, 1)`, `--ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1)`.
-- Accessibility/touch:
-  min touch target 44px, min input text 16px, `@media (hover: hover)` for hover styles, robust ARIA labels/states.
-- Reduced motion:
-  respect `prefers-reduced-motion` with reduced/disabled alternatives.
-- Interaction rules:
-  labels focus inputs, Enter submits forms, disable on submit, optimistic update with rollback, no dead click zones.
-- Visual quality:
-  use tabular numerals for numeric UI, preserve border-radius on focus rings, avoid theme-transition flashes.
+- Execute one scoped task at a time. Keep boundaries explicit and validate each meaningful change before widening scope.
+- Review mode defaults to findings first: prioritize bugs, regressions, missing tests, and operational risk before summaries.
+- Root-cause analysis should follow `symptom -> immediate cause -> contributing factors -> 5-whys root cause -> fix validation -> recurrence prevention`.
+- NEVER invent facts, citations, test results, command output, or evidence.
+- NEVER rewrite large files, configs, or generated artifacts when a smaller, reviewable edit will preserve more valid intent.
+- NEVER commit secrets, credentials, private tokens, or personal runtime state.
+- Treat deploy config, infrastructure code, billing paths, auth flows, `~/.ssh`, `.github/workflows`, migrations, and irreversible write paths as high risk. Run extra validation when they change.
+- Required completion bar: zero type errors, zero linter warnings, passing tests when present, and a successful production build when the repo has one.
+- Manual QA minimum: config variants, invalid input paths, empty states, limits, and concurrency-sensitive behavior.
+- If automated checks are absent, partial, or intentionally skipped, say so explicitly and describe the residual risk.
+- Git hygiene: no generated artifacts in commits unless the repo intentionally tracks them, and commit headers should follow `type(scope): subject` with lowercase subjects and no trailing period.
 
-## 10. Task Execution, Review, and Debugging
+## 9. Skills and Canonical References
 
-- Execute one scoped task at a time; keep boundaries explicit.
-- Build incrementally; validate each meaningful change.
-- Git hygiene:
-  no generated artifacts in commits, commit format `type(scope): subject`, lowercase subject, no trailing period.
-- Code review mode:
-  prioritize bugs, regressions, missing tests, and risk; summarize only after findings.
-- Delegation (if platform supports helpers):
-  Executor, Researcher, Reviewer, Troubleshooter, Cleaner.
-- Reasoning markers when useful:
-  `[REASONING]`, `[PATTERN]`, `[INSIGHT]`, `[VALIDATION]`.
-- Root cause protocol:
-  symptom -> immediate cause -> contributing factors -> 5-whys root cause -> fix validation -> recurrence prevention.
-
-## 11. Per-Project AGENTS Authoring Standard
-
-- Use numbered H2 sections only.
-- Keep language dense and directive; no filler.
-- Start with documentation/source pointers (`llms.txt` first).
-- Use tables for stack snapshots only (`Layer | Choice | Notes`).
-- Use code blocks only for directory trees or high-signal snippets.
-- Standard section set:
-  Documentation, Repository Structure, Stack, Commands, Architecture, Quality.
-- Do not embed full template configs in project AGENTS files; link to skill references instead.
-
-## 12. Canonical References
-
-- Align templates and variants:
-  `agents/skills/align/references/index.md`.
-- Remote fallback for agents without local reference access:
-  `https://github.com/u29dc/dot/tree/main/agents/skills/align/references`.
-- This file is the policy layer; the `align` skill owns template instantiation and project-level conformance.
-
-## 13. Skills
-
-- Selection rule:
-  when a request explicitly names a skill or clearly matches a skill scope, use that skill via the runtime's supported invocation mechanism; if multiple match, choose the minimal set and state sequence.
-- `align`: use for project bootstrap, config drift correction, template alignment, and quality-gate baseline enforcement.
-- `compose`: use for CLI/tooling design or refactors that require agent-native primitives, JSON contracts, and capability discovery.
-- `craft`: use for frontend UI/UX implementation or review where accessibility, motion, layout, interaction, and performance quality must be enforced.
-- `loop`: use to scaffold autonomous execution loops (`prd.json`, `PROMPT.md`, `loop.sh`, `progress.txt`) for multi-story goals.
-- `create`: use to create or update local skill definitions with required frontmatter, structure, and compact operational guidance.
-- `ship`: use for deterministic commit batching, commitlint-compliant messaging, and repository-specific pull request / release flow.
+- Skill selection rule: when a request explicitly names a skill or clearly matches a skill scope, use the minimal set of relevant skills and state the sequence when multiple skills apply.
+- `align`: project bootstrap, config drift correction, template alignment, and quality-gate baseline enforcement.
+- `compose`: CLI or tooling design that requires agent-native primitives, capability discovery, and JSON contracts.
+- `craft`: frontend UI and UX implementation or review with accessibility, motion, layout, and performance requirements.
+- `loop`: autonomous execution loop scaffolding with `prd.json`, `PROMPT.md`, `loop.sh`, and `progress.txt`.
+- `create`: local skill creation or updates with required frontmatter, structure, and compact operational guidance.
+- `ship`: deterministic commit batching, commitlint-compliant messaging, and repository-specific pull-request or release flow.
+- Canonical template reference: use the `align` skill references.
+- Remote fallback: the `align` references in the `u29dc/dot` repository.
+- This file is the shared policy layer. The `align` skill owns repo-level template instantiation and project-specific conformance.
