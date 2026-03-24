@@ -186,10 +186,39 @@ co() {
     codex "$@"
 }
 
+# Resolve the repo-local Biome install without falling back to bunx cache.
+_local_biome_info() {
+    (
+        cd "$1" || exit 1
+        bun --no-install --eval '
+            import path from "node:path";
+            import { createRequire } from "node:module";
+
+            const require = createRequire(process.cwd() + "/noop.js");
+
+            try {
+                const pkgPath = require.resolve("@biomejs/biome/package.json");
+                const pkg = require(pkgPath);
+                const binRel = typeof pkg.bin === "string" ? pkg.bin : pkg.bin?.biome;
+
+                if (!pkg.version || !binRel) {
+                    process.exit(1);
+                }
+
+                console.log(`${pkg.version}\t${path.resolve(path.dirname(pkgPath), binRel)}`);
+            } catch {
+                process.exit(1);
+            }
+        '
+    )
+}
+
 bup() {
     local repo_root=""
-
-    bun update --latest || return $?
+    local biome_info=""
+    local biome_before=""
+    local biome_after=""
+    local biome_bin=""
 
     if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
         repo_root="$(git rev-parse --show-toplevel 2>/dev/null)" || repo_root=""
@@ -200,7 +229,28 @@ bup() {
     fi
 
     if [[ -f "$repo_root/biome.json" || -f "$repo_root/biome.jsonc" ]]; then
-        bunx biome migrate --write
+        biome_info="$(_local_biome_info "$repo_root" 2>/dev/null)" || biome_info=""
+
+        if [[ -n "$biome_info" ]]; then
+            IFS=$'\t' read -r biome_before biome_bin <<< "$biome_info"
+        fi
+    fi
+
+    bun update --latest || return $?
+
+    if [[ -n "$biome_before" ]]; then
+        biome_info="$(_local_biome_info "$repo_root" 2>/dev/null)" || biome_info=""
+
+        if [[ -n "$biome_info" ]]; then
+            IFS=$'\t' read -r biome_after biome_bin <<< "$biome_info"
+        fi
+    fi
+
+    if [[ -n "$biome_before" && -n "$biome_after" && "$biome_before" != "$biome_after" && -x "$biome_bin" ]]; then
+        (
+            cd "$repo_root" || exit 1
+            "$biome_bin" migrate --write
+        )
     fi
 }
 
