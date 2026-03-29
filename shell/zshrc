@@ -131,11 +131,11 @@ alias virtualenv='uv venv'
 :ash() { "$ASH_HOME/ash" "$@"; }
 
 cc() {
-    if [[ "$1" == "allow" ]]; then
+    if [[ "$1" == "allow" || "$1" == "auto" ]]; then
         shift
-        claude --dangerously-skip-permissions "$@"
+        claude --enable-auto-mode --permission-mode auto "$@"
     else
-        claude "$@"
+        claude --enable-auto-mode "$@"
     fi
 }
 
@@ -285,7 +285,6 @@ pip3() { uv pip "$@"; }
 # Load external functions
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/Git/dot}"
 source "$DOTFILES_DIR/shell/functions/update.sh"
-command -v tart &>/dev/null && source "$DOTFILES_DIR/shell/functions/sandbox.sh"
 
 # ------------------------------------------------------------------------------
 # SHELL INTEGRATIONS

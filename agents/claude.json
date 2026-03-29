@@ -3,6 +3,15 @@
 	"env": {
 		"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
 	},
+	"autoMode": {
+		"environment": [
+			"Organization: U29DC. Primary use: local software development, workstation automation, CLI tooling, and repository maintenance on trusted developer machines.",
+			"Source control: GitHub org github.com/u29dc and the remotes configured for the repository Claude started in.",
+			"Trusted internal domains: none configured by default beyond the repository remotes in the current session.",
+			"Trusted cloud buckets: none configured by default.",
+			"Key internal services: none configured by default."
+		]
+	},
 	"includeCoAuthoredBy": false,
 	"permissions": {
 		"allow": [
@@ -20,7 +29,6 @@
 			"Skill(compose)",
 			"Skill(craft)",
 			"Skill(create)",
-			"Skill(loop)",
 			"Skill(ship)",
 			"Skill(u29dc-cco)",
 			"Skill(u29dc-cfo)",
@@ -212,7 +220,8 @@
 		],
 		"deny": [],
 		"ask": ["Bash(rm *)", "Bash(rm -rf *)", "Bash(rm -r *)", "Bash(sudo *)"],
-		"defaultMode": "acceptEdits"
+		"defaultMode": "acceptEdits",
+		"disableBypassPermissionsMode": "disable"
 	},
 	"statusLine": {
 		"type": "command",
