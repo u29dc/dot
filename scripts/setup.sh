@@ -39,11 +39,9 @@ DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # Parse command line arguments
 LINK_ONLY=false
-VM_MODE=false
 for arg in "$@"; do
     case "$arg" in
         --link-only) LINK_ONLY=true ;;
-        --vm) VM_MODE=true ;;
     esac
 done
 
@@ -86,7 +84,7 @@ link_file() {
 
 # Merge skills from multiple source directories into a single target.
 # Creates target as real directory; symlinks each valid skill subdirectory.
-# Skips sources that don't exist (ctx repo may be absent on VMs).
+# Skips sources that don't exist.
 #
 # Usage: link_skills <target_dir> <source_dir> [<source_dir>...]
 link_skills() {
@@ -152,11 +150,9 @@ echo
 echo "Shell configurations:"
 link_file "$DOTFILES_DIR/shell/zshrc" "$HOME/.zshrc"
 link_file "$DOTFILES_DIR/shell/zprofile" "$HOME/.zprofile"
-if [ "$VM_MODE" = false ]; then
-    link_file "$DOTFILES_DIR/shell/zshrc.local" "$HOME/.zshrc.local"
-fi
+link_file "$DOTFILES_DIR/shell/zshrc.local" "$HOME/.zshrc.local"
 
-# Terminal configs (shared between host and VM)
+# Terminal configs
 echo
 echo "Terminal configurations:"
 link_file "$DOTFILES_DIR/terminal/starship-dark.toml" "$HOME/.config/starship/starship-dark.toml"
@@ -171,45 +167,32 @@ link_file "$DOTFILES_DIR/tsconfig.json" "$HOME/.config/typescript/tsconfig.json"
 link_file "$DOTFILES_DIR/bunfig.toml" "$HOME/.bunfig.toml"
 link_file "$DOTFILES_DIR/uv.toml" "$HOME/.config/uv/uv.toml"
 
-if [ "$VM_MODE" = false ]; then
-    # Host-only: editor, 1Password, karabiner, macOS, ghostty, yt-dlp
-    echo
-    echo "Editor configurations:"
-    link_file "$DOTFILES_DIR/editor/settings.json" "$HOME/.config/zed/settings.json"
-    link_file "$DOTFILES_DIR/editor/keymap.json" "$HOME/.config/zed/keymap.json"
+echo
+echo "Editor configurations:"
+link_file "$DOTFILES_DIR/editor/settings.json" "$HOME/.config/zed/settings.json"
+link_file "$DOTFILES_DIR/editor/keymap.json" "$HOME/.config/zed/keymap.json"
 
-    echo
-    echo "Host-only terminal configurations:"
-    link_file "$DOTFILES_DIR/terminal/ssh" "$HOME/.ssh/config"
-    link_file "$DOTFILES_DIR/terminal/neofetch" "$HOME/.config/neofetch/config.conf"
-    link_file "$DOTFILES_DIR/terminal/statusline" "$HOME/.config/ccstatusline/settings.json"
-    link_file "$DOTFILES_DIR/terminal/ghostty" "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
-    link_file "$DOTFILES_DIR/terminal/yt-dlp" "$HOME/.config/yt-dlp/config"
+echo
+echo "Additional terminal configurations:"
+link_file "$DOTFILES_DIR/terminal/ssh" "$HOME/.ssh/config"
+link_file "$DOTFILES_DIR/terminal/neofetch" "$HOME/.config/neofetch/config.conf"
+link_file "$DOTFILES_DIR/terminal/statusline" "$HOME/.config/ccstatusline/settings.json"
+link_file "$DOTFILES_DIR/terminal/ghostty" "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
+link_file "$DOTFILES_DIR/terminal/yt-dlp" "$HOME/.config/yt-dlp/config"
 
-    echo
-    echo "System configurations:"
-    link_file "$DOTFILES_DIR/system/gitconfig" "$HOME/.gitconfig"
-    link_file "$DOTFILES_DIR/system/karabiner" "$HOME/.config/karabiner/karabiner.json"
-    link_file "$DOTFILES_DIR/system/1password" "$HOME/.config/1Password/ssh/agent.toml"
-    link_file "$DOTFILES_DIR/macos/.macos" "$HOME/.macos"
-else
-    # VM-specific: no 1Password, no editor, no karabiner, no macOS prefs
-    echo
-    echo "VM configurations:"
-    link_file "$DOTFILES_DIR/vm/ssh-config" "$HOME/.ssh/config"
-    link_file "$DOTFILES_DIR/vm/gitconfig" "$HOME/.gitconfig"
-fi
+echo
+echo "System configurations:"
+link_file "$DOTFILES_DIR/system/gitconfig" "$HOME/.gitconfig"
+link_file "$DOTFILES_DIR/system/karabiner" "$HOME/.config/karabiner/karabiner.json"
+link_file "$DOTFILES_DIR/system/1password" "$HOME/.config/1Password/ssh/agent.toml"
+link_file "$DOTFILES_DIR/macos/.macos" "$HOME/.macos"
 
 # Agent configurations
 echo
 echo "Agent configurations:"
 # Claude Code
 link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.claude/CLAUDE.md"
-CLAUDE_SETTINGS_SRC="$DOTFILES_DIR/agents/claude.json"
-if [ "$VM_MODE" = true ]; then
-    CLAUDE_SETTINGS_SRC="$DOTFILES_DIR/vm/claude.json"
-fi
-link_file "$CLAUDE_SETTINGS_SRC" "$HOME/.claude/settings.json"
+link_file "$DOTFILES_DIR/agents/claude.json" "$HOME/.claude/settings.json"
 SKILLS_BASE="${SKILLS_BASE:-$DOTFILES_DIR/agents/skills}"
 link_skills "$HOME/.claude/skills" "$SKILLS_BASE" ${SKILLS_U29DC:+"$SKILLS_U29DC"}
 # Codex CLI

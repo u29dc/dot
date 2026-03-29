@@ -3,7 +3,7 @@
 ## 1. Documentation
 
 - Local source of truth: [`agents/AGENTS.md`](AGENTS.md), [`agents/claude.json`](claude.json), [`agents/codex.toml`](codex.toml), [`agents/amp.settings.json`](amp.settings.json)
-- Skill procedures live with the named skills: `align`, `compose`, `craft`, `create`, `loop`, `ship`.
+- Skill procedures live with the named skills: `align`, `compose`, `craft`, `create`, `ship`.
 - Canonical templates and repo-alignment references live with the `align` skill.
 - Preferred external docs: [Bun](https://bun.sh/docs/llms.txt), [Biome](https://biomejs.dev), [Zod](https://zod.dev/llms.txt), [Svelte](https://svelte.dev/llms.txt), [Next.js](https://nextjs.org/docs/llms.txt), [Vite](https://vite.dev/llms.txt), [Tailwind](https://tailwindcss.com/docs), [shadcn/ui](https://ui.shadcn.com/llms.txt), [Bits UI](https://bits-ui.com/llms.txt), [Convex](https://docs.convex.dev/llms.txt), [Clerk](https://clerk.com/docs/llms.txt)
 - Prefer `llms.txt`, official docs, and primary sources for technical behavior. Cross-check conflicting claims, cite high-impact recommendations, acknowledge evidence gaps, and state confidence as `high`, `medium`, or `low` when uncertainty remains.
@@ -108,7 +108,6 @@
 - `align`: project bootstrap, config drift correction, template alignment, and quality-gate baseline enforcement.
 - `compose`: CLI or tooling design that requires agent-native primitives, capability discovery, and JSON contracts.
 - `craft`: frontend UI and UX implementation or review with accessibility, motion, layout, and performance requirements.
-- `loop`: autonomous execution loop scaffolding with `prd.json`, `PROMPT.md`, `loop.sh`, and `progress.txt`.
 - `create`: local skill creation or updates with required frontmatter, structure, and compact operational guidance.
 - `ship`: deterministic commit batching, commitlint-compliant messaging, and repository-specific pull-request or release flow.
 - Canonical template reference: use the `align` skill references.
