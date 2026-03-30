@@ -161,3 +161,6 @@ enabled = true
 
 [plugins."google-drive@openai-curated"]
 enabled = true
+
+[projects."/Users/han/Git/tab"]
+trust_level = "trusted"

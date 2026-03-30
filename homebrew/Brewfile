@@ -5,6 +5,7 @@ tap "oven-sh/bun"
 tap "ampcode/tap"
 tap "arbourd/tap"
 tap "cirruslabs/cli"
+tap "lightpanda-io/browser"
 
 # Core Development Tools
 brew "git"
@@ -16,6 +17,7 @@ brew "deno"               # Secure JavaScript/TypeScript runtime
 brew "zig"                # Programming language for robustness
 brew "zvelte-check"       # Fast Svelte diagnostics
 # brew "rust"             # Installed via rustup
+brew "lightpanda-io/browser/lightpanda"
 
 # Modern CLI Tools
 brew "starship"           # Fast shell prompt
@@ -67,13 +69,16 @@ brew "sd"                 # Modern sed replacement
 brew "dust"               # Intuitive disk usage
 brew "procs"              # Modern ps replacement
 brew "jq"                 # JSON processor
+brew "jaq"                # Rust jq-compatible alternative
+brew "jsongrep"           # Fast path-query search for structured data
 brew "yq"                 # YAML processor
 brew "just"               # Command runner
 brew "direnv"             # Per-directory environments
 brew "tldr"               # Simplified man pages
 brew "shellcheck"         # Shell script linter
 brew "shfmt"              # Shell script formatter
-brew "cirruslabs/cli/tart" # macOS VM sandbox
+# macOS VM sandbox
+brew "cirruslabs/cli/tart"
 
 # AI & Cloud CLIs
 cask "codex"              # AI code assistant

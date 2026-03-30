@@ -21,6 +21,7 @@ export FIN_HOME="$TOOLS_HOME/fin"
 export LET_HOME="$TOOLS_HOME/let"
 export PDF_HOME="$TOOLS_HOME/pdf"
 export BUF_HOME="$TOOLS_HOME/buf"
+export TAB_HOME="$TOOLS_HOME/tab"
 export ASH_HOME="$TOOLS_HOME/ash"
 
 # Agent skill directories
@@ -128,6 +129,7 @@ alias virtualenv='uv venv'
 :let() { "$LET_HOME/let" "$@"; }
 :pdf() { "$PDF_HOME/pdf" "$@"; }
 :buf() { "$BUF_HOME/buf" "$@"; }
+:tab() { "$TAB_HOME/tab" "$@"; }
 :ash() { "$ASH_HOME/ash" "$@"; }
 
 cc() {
