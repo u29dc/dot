@@ -5,7 +5,7 @@
 - Local source of truth: [`agents/AGENTS.md`](AGENTS.md), [`agents/claude.json`](claude.json), [`agents/codex.toml`](codex.toml), [`agents/amp.settings.json`](amp.settings.json)
 - Skill procedures live with the named skills: `align`, `compose`, `craft`, `create`, `ship`.
 - Canonical templates and repo-alignment references live with the `align` skill.
-- Preferred external docs: [Bun](https://bun.sh/docs/llms.txt), [Biome](https://biomejs.dev), [Zod](https://zod.dev/llms.txt), [Svelte](https://svelte.dev/llms.txt), [Next.js](https://nextjs.org/docs/llms.txt), [Vite](https://vite.dev/llms.txt), [Tailwind](https://tailwindcss.com/docs), [shadcn/ui](https://ui.shadcn.com/llms.txt), [Bits UI](https://bits-ui.com/llms.txt), [Convex](https://docs.convex.dev/llms.txt), [Clerk](https://clerk.com/docs/llms.txt)
+- Preferred external docs: [Bun](https://bun.sh/docs/llms.txt), [Biome](https://biomejs.dev), [Zod](https://zod.dev/llms.txt), [Svelte](https://svelte.dev/llms.txt), [Next.js](https://nextjs.org/docs/llms.txt), [Vite](https://vite.dev/llms.txt), [Tailwind](https://tailwindcss.com/docs), [shadcn/ui](https://ui.shadcn.com/llms.txt), [Bits UI](https://bits-ui.com/llms.txt), [Convex](https://docs.convex.dev/llms.txt), [Clerk](https://clerk.com/docs/llms.txt), [Rust Book](https://doc.rust-lang.org/book/), [Rust Reference](https://doc.rust-lang.org/reference/), [Cargo Book](https://doc.rust-lang.org/cargo/), [Rust Standard Library](https://doc.rust-lang.org/std/), [Clippy](https://doc.rust-lang.org/clippy/), [Rust API Guidelines](https://rust-lang.github.io/api-guidelines/), [Tokio](https://tokio.rs/tokio/tutorial)
 - Prefer `llms.txt`, official docs, and primary sources for technical behavior. Cross-check conflicting claims, cite high-impact recommendations, acknowledge evidence gaps, and state confidence as `high`, `medium`, or `low` when uncertainty remains.
 
 ## 2. Scope and Precedence
@@ -21,13 +21,19 @@
 ## 3. Communication
 
 - Applies to terminal replies, plans, docs, code comments, commit text, and generated files.
-- MUST be concise, direct, and information-dense. Remove filler, motivational prose, rhetorical preambles, and duplicated guidance.
+- MUST use the shortest response that fully solves the task. Prefer terse, direct, information-dense phrasing with no wasted words.
+- MUST not start with pleasantries, acknowledgements, praise, or conversational filler such as `got it`, `sure`, `happy to help`, `great question`, `done`, or `absolutely` unless the user explicitly asks for that tone.
+- MUST not restate the user's request, obvious context, or already-stated constraints unless repetition prevents an error or changes the decision.
+- MUST remove filler, motivational prose, rhetorical preambles, weak modifiers, and duplicated guidance. Cut words such as `just`, `really`, `basically`, and `simply` unless they add necessary meaning.
 - MUST use imperative language for instructions and explicit statements for facts.
 - MUST keep one actionable idea per bullet or sentence. Collapse repetition aggressively.
+- MUST prefer short prose over bullets when prose is shorter. Use lists only when content is inherently list-shaped or materially easier to scan that way.
 - MUST surface assumptions, constraints, unknowns, and tradeoffs when they affect decisions.
 - MUST provide progress updates during long tasks and report measurable outcomes such as files changed, checks run, failures, and residual risk.
+- MUST use normal grammar and precise technical wording in persistent artifacts. Terseness means less filler, not clipped or vague writing.
 - MUST avoid decorative formatting. Use tables only when they materially improve compression.
 - MUST forbid emojis everywhere, including responses, code, docs, scripts, commits, and generated output.
+- MUST not compress so aggressively that required caveats, evidence, reasoning, or validation results disappear.
 - SHOULD default to `Goal -> Constraints -> Actions -> Validation -> Risks` when a structured response helps.
 - SHOULD preserve all constraints when compacting existing text and target meaningful line-count reduction instead of cosmetic rewrites.
 
