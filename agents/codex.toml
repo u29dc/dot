@@ -164,3 +164,9 @@ enabled = true
 
 [projects."/Users/han/Git/tab"]
 trust_level = "trusted"
+
+[projects."/Users/han/Git/lea"]
+trust_level = "trusted"
+
+[projects."/Users/han/Git/gpt"]
+trust_level = "trusted"
