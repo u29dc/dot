@@ -105,6 +105,18 @@ web_search = "live"
 enabled = false
 url = "http://127.0.0.1:29979/mcp"
 
+[plugins."google-calendar@openai-curated"]
+enabled = true
+
+[plugins."gmail@openai-curated"]
+enabled = true
+
+[plugins."google-drive@openai-curated"]
+enabled = false
+
+[plugins."github@openai-curated"]
+enabled = false
+
 [projects."/Users/han/Git"]
 trust_level = "trusted"
 
@@ -149,18 +161,6 @@ trust_level = "trusted"
 
 [projects."/Users/han/Git/ray"]
 trust_level = "trusted"
-
-[plugins."google-calendar@openai-curated"]
-enabled = true
-
-[plugins."gmail@openai-curated"]
-enabled = true
-
-[plugins."github@openai-curated"]
-enabled = true
-
-[plugins."google-drive@openai-curated"]
-enabled = true
 
 [projects."/Users/han/Git/tab"]
 trust_level = "trusted"
