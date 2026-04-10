@@ -36,6 +36,10 @@ set -e
 # ==============================================================================
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+AGENT_BROWSER_DIA_PORT="${AGENT_BROWSER_DIA_PORT:-9222}"
+AGENT_BROWSER_DIA_APP="/Applications/Dia.app"
+AGENT_BROWSER_DIA_BIN="$AGENT_BROWSER_DIA_APP/Contents/MacOS/Dia"
+AGENT_BROWSER_DIA_LAUNCH_AGENT="com.u29dc.dia-cdp"
 
 # Parse command line arguments
 LINK_ONLY=false
@@ -113,6 +117,127 @@ link_skills() {
     done
 }
 
+dia_cdp_url() {
+    printf 'http://127.0.0.1:%s/json/version\n' "$AGENT_BROWSER_DIA_PORT"
+}
+
+dia_launch_agent_domain() {
+    printf 'gui/%s\n' "$UID"
+}
+
+dia_launch_agent_service() {
+    printf '%s/%s\n' "$(dia_launch_agent_domain)" "$AGENT_BROWSER_DIA_LAUNCH_AGENT"
+}
+
+dia_cdp_healthy() {
+    curl -fsS "$(dia_cdp_url)" >/dev/null 2>&1
+}
+
+wait_for_dia_cdp() {
+    local tries="${1:-40}"
+    local i
+
+    for ((i = 0; i < tries; i++)); do
+        if dia_cdp_healthy; then
+            return 0
+        fi
+        sleep 0.25
+    done
+
+    return 1
+}
+
+dia_main_commands() {
+    ps -axo command= | awk '/\/Applications\/Dia.app\/Contents\/MacOS\/Dia( |$)/ { print }'
+}
+
+dia_running_without_cdp() {
+    local commands
+    commands="$(dia_main_commands)"
+    [ -n "$commands" ] || return 1
+
+    printf '%s\n' "$commands" | grep -F -- "--remote-debugging-port=${AGENT_BROWSER_DIA_PORT}" >/dev/null 2>&1 && return 1
+    return 0
+}
+
+dia_running_with_cdp() {
+    local commands
+    commands="$(dia_main_commands)"
+    [ -n "$commands" ] || return 1
+
+    printf '%s\n' "$commands" | grep -F -- "--remote-debugging-port=${AGENT_BROWSER_DIA_PORT}" >/dev/null 2>&1
+}
+
+dia_gui_domain_available() {
+    launchctl print "$(dia_launch_agent_domain)" >/dev/null 2>&1
+}
+
+dia_launch_agent_loaded() {
+    launchctl print "$(dia_launch_agent_service)" >/dev/null 2>&1
+}
+
+setup_dia_cdp() {
+    local plist_path
+    local domain_target
+    local service_target
+
+    plist_path="$HOME/Library/LaunchAgents/${AGENT_BROWSER_DIA_LAUNCH_AGENT}.plist"
+    domain_target="$(dia_launch_agent_domain)"
+    service_target="$(dia_launch_agent_service)"
+
+    if [ ! -f "$plist_path" ]; then
+        echo "[SKIP] Dia LaunchAgent not linked: $plist_path"
+        return 0
+    fi
+
+    if [ ! -x "$AGENT_BROWSER_DIA_BIN" ]; then
+        echo "[SKIP] Dia.app not found: $AGENT_BROWSER_DIA_APP"
+        return 0
+    fi
+
+    if ! command -v launchctl >/dev/null 2>&1; then
+        echo "[SKIP] launchctl not available"
+        return 0
+    fi
+
+    if ! dia_gui_domain_available; then
+        echo "[SKIP] GUI launchctl domain unavailable: $domain_target"
+        return 0
+    fi
+
+    if dia_cdp_healthy; then
+        echo "[OK] Dia CDP already available on port $AGENT_BROWSER_DIA_PORT"
+        return 0
+    fi
+
+    if dia_running_without_cdp; then
+        echo "[SKIP] Dia is already running without CDP. Quit Dia, then run agent-browser-dia-on or rerun setup."
+        return 0
+    fi
+
+    if dia_running_with_cdp; then
+        if wait_for_dia_cdp 20; then
+            echo "[OK] Dia CDP became healthy on port $AGENT_BROWSER_DIA_PORT"
+        else
+            echo "[SKIP] Dia is already running with a CDP flag, but port $AGENT_BROWSER_DIA_PORT is not healthy yet."
+        fi
+        return 0
+    fi
+
+    echo "Dia browser CDP:"
+    if dia_launch_agent_loaded; then
+        launchctl kickstart -k "$service_target"
+    else
+        launchctl bootstrap "$domain_target" "$plist_path"
+    fi
+
+    if wait_for_dia_cdp; then
+        echo "[OK] Dia CDP ready on port $AGENT_BROWSER_DIA_PORT"
+    else
+        echo "[WARN] Dia LaunchAgent loaded, but CDP did not become healthy on port $AGENT_BROWSER_DIA_PORT"
+    fi
+}
+
 # Full setup: Install Homebrew and packages
 if [ "$LINK_ONLY" = false ]; then
     echo "Starting dotfiles setup..."
@@ -179,13 +304,17 @@ link_file "$DOTFILES_DIR/terminal/neofetch" "$HOME/.config/neofetch/config.conf"
 link_file "$DOTFILES_DIR/terminal/statusline" "$HOME/.config/ccstatusline/settings.json"
 link_file "$DOTFILES_DIR/terminal/ghostty" "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
 link_file "$DOTFILES_DIR/terminal/yt-dlp" "$HOME/.config/yt-dlp/config"
+link_file "$DOTFILES_DIR/terminal/agent-browser.json" "$HOME/.agent-browser/config.json"
+link_file "$DOTFILES_DIR/terminal/agent-browser.chrome.json" "$HOME/.agent-browser/chrome.json"
 
 echo
 echo "System configurations:"
 link_file "$DOTFILES_DIR/system/gitconfig" "$HOME/.gitconfig"
 link_file "$DOTFILES_DIR/system/karabiner" "$HOME/.config/karabiner/karabiner.json"
 link_file "$DOTFILES_DIR/system/1password" "$HOME/.config/1Password/ssh/agent.toml"
+link_file "$DOTFILES_DIR/system/launchagents/com.u29dc.dia-cdp.plist" "$HOME/Library/LaunchAgents/com.u29dc.dia-cdp.plist"
 link_file "$DOTFILES_DIR/macos/.macos" "$HOME/.macos"
+setup_dia_cdp
 
 # Agent configurations
 echo

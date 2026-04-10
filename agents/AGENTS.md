@@ -52,6 +52,7 @@
 - MUST chain commands with `&&` only when later commands depend on earlier success.
 - SHOULD avoid `||` in quality-gate scripts unless intentionally aggregating failure status.
 - SHOULD parallelize independent reads and checks when tooling allows.
+- Browser automation default: plain `agent-browser` targets the managed Dia CDP session on `127.0.0.1:9222`; use `agent-browser-chrome` to force Chrome `Default`, and use `--engine lightpanda` only for stateless scraping where auth and profile reuse do not matter.
 
 ## 5. Engineering Standards
 

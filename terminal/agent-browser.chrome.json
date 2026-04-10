@@ -1,0 +1,7 @@
+{
+	"engine": "chrome",
+	"session": "chrome",
+	"profile": "Default",
+	"contentBoundaries": true,
+	"maxOutput": 50000
+}

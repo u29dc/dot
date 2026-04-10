@@ -5,6 +5,7 @@
 - Bootstrap and symlink behavior: [`scripts/setup.sh`](scripts/setup.sh)
 - Package inventory: [`homebrew/Brewfile`](homebrew/Brewfile)
 - Agent policy and shared AI config: [`agents/AGENTS.md`](agents/AGENTS.md), [`agents/codex.toml`](agents/codex.toml), [`agents/claude.json`](agents/claude.json), [`agents/amp.settings.json`](agents/amp.settings.json)
+- Agent browser defaults: [`terminal/agent-browser.json`](terminal/agent-browser.json), [`terminal/agent-browser.chrome.json`](terminal/agent-browser.chrome.json), [`system/launchagents/com.u29dc.dia-cdp.plist`](system/launchagents/com.u29dc.dia-cdp.plist)
 - Local secrets template: [`shell/zshrc.local.example`](shell/zshrc.local.example)
 - Root quality tooling: [`package.json`](package.json), [`biome.json`](biome.json), [`commitlint.config.js`](commitlint.config.js), [`lint-staged.config.js`](lint-staged.config.js)
 
@@ -16,7 +17,7 @@
 ├── shell/                   zsh config and extracted shell functions
 ├── terminal/                CLI and terminal tool config
 ├── editor/                  editor settings and keymaps
-├── system/                  git, karabiner, and 1Password config
+├── system/                  git, launchagent, karabiner, and 1Password config
 ├── homebrew/                package and cask inventory
 ├── macos/                   macOS preference script
 └── scripts/                 bootstrap and maintenance scripts
@@ -37,6 +38,12 @@ Fresh machine setup does not require Bun; use the setup script directly. Day-to-
 - `bun install` - install repo-local tooling and husky hooks when working on the repo itself
 - `bun run setup` - run the full setup flow from the repository root
 - `bun run setup:link` - recreate symlinks without reinstalling packages
+- `agent-browser ...` - browser automation against the managed Dia CDP endpoint on `127.0.0.1:9222`
+- `agent-browser-dia ...` - force `agent-browser` to use the managed Dia config explicitly
+- `agent-browser-dia-on` - start or load the managed Dia CDP session after quitting an unmanaged Dia instance
+- `agent-browser-dia-off` - unload the managed Dia CDP LaunchAgent
+- `agent-browser-dia-status` - inspect the Dia LaunchAgent and CDP endpoint health
+- `agent-browser-chrome ...` - force `agent-browser` to use Chrome `Default` instead of Dia
 - `bun run util:check` - format and lint repository files
 - `bun run util:lint:shell` - run `shellcheck` on setup scripts and shell functions
 
@@ -53,13 +60,15 @@ Fresh machine setup does not require Bun; use the setup script directly. Day-to-
 - Create local-only secrets from [`shell/zshrc.local.example`](shell/zshrc.local.example) and keep machine-specific keys out of the repository.
 - Setup flags: `--link-only` skips Homebrew installation.
 - Environment overrides: `TOOLS_HOME` changes the tool home directory, `SKILLS_BASE` changes the base skill source, `SKILLS_U29DC` adds an extra skill source tree.
-- High-impact write targets include `~/.zshrc`, `~/.gitconfig`, `~/.ssh/config`, `~/.config/*`, `~/.claude/*`, `~/.codex/*`, `~/.config/amp/*`, and `~/Library/Application Support/com.mitchellh.ghostty/config` on host machines.
+- Agent browser defaults live at `~/.agent-browser/config.json` and `~/.agent-browser/chrome.json`; the managed Dia service lives at `~/Library/LaunchAgents/com.u29dc.dia-cdp.plist` and reserves local port `9222`.
+- High-impact write targets include `~/.zshrc`, `~/.gitconfig`, `~/.ssh/config`, `~/.config/*`, `~/.agent-browser/*`, `~/.claude/*`, `~/.codex/*`, `~/.config/amp/*`, `~/Library/LaunchAgents/*`, and `~/Library/Application Support/com.mitchellh.ghostty/config` on host machines.
 
 ## 6. Validation
 
 - Required repository gate: `bun run util:check`
 - If you change shell logic or setup behavior, also run `bun run util:lint:shell`
 - If you change [`scripts/setup.sh`](scripts/setup.sh), smoke-test at least one `--link-only` run before considering the change complete
+- If you change the Dia LaunchAgent or agent-browser defaults, verify `http://127.0.0.1:9222/json/version` and at least one `agent-browser` command against the managed Dia session
 - Verify that changed symlink targets resolve correctly and that existing real files are preserved as `.backup`
 
 ## 7. Further Reading

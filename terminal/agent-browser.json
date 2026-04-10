@@ -1,0 +1,7 @@
+{
+	"engine": "chrome",
+	"session": "dia",
+	"cdp": "9222",
+	"contentBoundaries": true,
+	"maxOutput": 50000
+}

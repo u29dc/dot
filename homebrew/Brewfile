@@ -81,6 +81,7 @@ brew "shfmt"              # Shell script formatter
 brew "cirruslabs/cli/tart"
 
 # AI & Cloud CLIs
+brew "agent-browser"       # Browser automation CLI for AI agents
 cask "codex"              # AI code assistant
 brew "gemini-cli"         # Gemini API CLI
 brew "stripe"             # Stripe CLI tools
@@ -104,6 +105,8 @@ cask "raycast"            # Launcher and productivity
 cask "cursor"             # AI-powered code editor
 
 # Development
+cask "thebrowsercompany-dia" # Default browser with CDP for agent-browser
+cask "google-chrome"         # Fallback browser profile for agent-browser
 cask "zed@preview"        # Fast code editor
 
 # Media & Utilities
