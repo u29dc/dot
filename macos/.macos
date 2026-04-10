@@ -162,6 +162,9 @@ defaults_write NSGlobalDomain NSDocumentSaveNewDocumentsToCloud -bool false
 # Always show scrollbars
 defaults_write NSGlobalDomain AppleShowScrollBars -string "Always"
 
+# Hide icons in menu items
+defaults_write NSGlobalDomain NSMenuEnableActionImages -bool false
+
 ###############################################################################
 # Keyboard & Input
 ###############################################################################
@@ -202,19 +205,19 @@ defaults_write NSGlobalDomain com.apple.trackpad.scaling -float 1.5
 # Enable natural scrolling
 defaults_write NSGlobalDomain com.apple.swipescrolldirection -bool true
 
-# Enable three-finger swipe gestures for spaces and Mission Control
-defaults_write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerHorizSwipeGesture -int 2
+# Preserve current three-finger swipe gesture preferences
+defaults_write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerHorizSwipeGesture -int 1
 defaults_write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerVertSwipeGesture -int 2
-defaults_write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerHorizSwipeGesture -int 2
-defaults_write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerVertSwipeGesture -int 2
+defaults_write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerHorizSwipeGesture -int 1
+defaults_write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerVertSwipeGesture -int 1
 
 # Disable three-finger drag (enables three-finger swipe gestures)
 defaults_write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerDrag -bool false
 defaults_write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag -bool false
 
-# Disable four-finger vertical swipe (use three-finger instead)
-defaults_write com.apple.AppleMultitouchTrackpad TrackpadFourFingerVertSwipeGesture -int 0
-defaults_write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadFourFingerVertSwipeGesture -int 0
+# Preserve current four-finger vertical swipe behavior
+defaults_write com.apple.AppleMultitouchTrackpad TrackpadFourFingerVertSwipeGesture -int 2
+defaults_write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadFourFingerVertSwipeGesture -int 2
 
 ###############################################################################
 # Finder
@@ -381,8 +384,8 @@ defaults_write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
 # Activity Monitor
 ###############################################################################
 
-# Show the main window when launching Activity Monitor
-defaults_write com.apple.ActivityMonitor OpenMainWindow -bool true
+# Keep Activity Monitor main window closed on launch
+defaults_write com.apple.ActivityMonitor OpenMainWindow -bool false
 
 # Visualize CPU usage in the Activity Monitor Dock icon
 defaults_write com.apple.ActivityMonitor IconType -int 5
