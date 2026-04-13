@@ -15,14 +15,15 @@ export PATH="$PATH:/Applications/Obsidian.app/Contents/MacOS"
 export TOOLS_HOME="${TOOLS_HOME:-$HOME/.tools}"
 
 # Per-tool home directories
-export TAO_HOME="$TOOLS_HOME/tao"
+export ASH_HOME="$TOOLS_HOME/ash"
+export BUF_HOME="$TOOLS_HOME/buf"
 export CHO_HOME="$TOOLS_HOME/cho"
 export FIN_HOME="$TOOLS_HOME/fin"
+export KAI_HOME="$TOOLS_HOME/kai"
 export LET_HOME="$TOOLS_HOME/let"
 export PDF_HOME="$TOOLS_HOME/pdf"
-export BUF_HOME="$TOOLS_HOME/buf"
 export TAB_HOME="$TOOLS_HOME/tab"
-export ASH_HOME="$TOOLS_HOME/ash"
+export TAO_HOME="$TOOLS_HOME/tao"
 
 # Agent skill directories
 export SKILLS_BASE="$HOME/Git/dot/agents/skills"
@@ -30,6 +31,21 @@ export SKILLS_U29DC="$HOME/Library/CloudStorage/Dropbox/VAULT/WORK/15-STRATEGY/S
 
 # Silence Homebrew environment hints
 export HOMEBREW_NO_ENV_HINTS=1
+
+# Tool defaults
+export BAT_PAGER=""
+export BAT_STYLE="numbers,changes"
+EZA_DEFAULT_IGNORE="node_modules|.cache|cache|dist|build|.next|.nuxt|.turbo|coverage|.pytest_cache|__pycache__|.venv|venv|.env"
+
+# Starship theme switching based on macOS appearance
+starship_theme() {
+    if [[ "$(defaults read -g AppleInterfaceStyle 2>/dev/null)" == "Dark" ]]; then
+        export STARSHIP_CONFIG="$HOME/.config/starship/starship-dark.toml"
+    else
+        export STARSHIP_CONFIG="$HOME/.config/starship/starship-light.toml"
+    fi
+}
+starship_theme
 
 # ------------------------------------------------------------------------------
 # ZSH COMPLETION SYSTEM
@@ -76,20 +92,6 @@ setopt PUSHD_IGNORE_DUPS    # No duplicates in dir stack
 setopt EXTENDED_GLOB        # Extended pattern matching
 setopt GLOB_DOTS            # Include dotfiles in globs
 
-# Bat configuration - disable pagination for direct output
-export BAT_PAGER=""
-export BAT_STYLE="numbers,changes"
-
-# Starship theme switching based on macOS appearance
-starship_theme() {
-    if [[ "$(defaults read -g AppleInterfaceStyle 2>/dev/null)" == "Dark" ]]; then
-        export STARSHIP_CONFIG="$HOME/.config/starship/starship-dark.toml"
-    else
-        export STARSHIP_CONFIG="$HOME/.config/starship/starship-light.toml"
-    fi
-}
-starship_theme
-
 # ------------------------------------------------------------------------------
 # ALIASES
 # Command shortcuts and modern CLI tool replacements
@@ -98,21 +100,23 @@ starship_theme
 # System & Shell Aliases
 alias cls='clear && echo "" > ~/.zsh_history && fc -p /dev/null && starship_theme && exec zsh'
 
-# Modern CLI Tool Replacements
+# File and directory tools
+alias cat='bat --paging=never'
+alias find='fd'
 alias ls="eza --icons -I $'Icon\r'"
 alias ll='eza --icons -la'
 alias lt='eza --icons --tree'
 alias tree='eza --icons -T'
 alias treed='eza --icons -T --only-dirs'
-alias cat='bat --paging=never'
-alias find='fd'
+
+# Runtime and utility shortcuts
+alias b='bun run'
+alias context='bunx contextcalc@latest --bars --depth 3 --min-tokens 1000 --sort name --output tree'
 alias htop='btm'
 alias top='btm'
 alias scc='scc --no-cocomo'
-alias b='bun run'
-alias context='bunx contextcalc@latest --bars --depth 3 --min-tokens 1000 --sort name --output tree'
 
-# Python Tool Replacements (uv)
+# Python compatibility shims
 alias python='uv run python'
 alias python3='uv run python3'
 alias virtualenv='uv venv'
@@ -122,16 +126,18 @@ alias virtualenv='uv venv'
 # Custom shell functions for enhanced functionality
 # ------------------------------------------------------------------------------
 
-# CLI tool functions (colon-prefix for namespace isolation)
-:tao() { "$TAO_HOME/tao" "$@"; }
+# Tool launchers
+:ash() { "$ASH_HOME/ash" "$@"; }
+:buf() { "$BUF_HOME/buf" "$@"; }
 :cho() { "$CHO_HOME/cho" "$@"; }
 :fin() { "$FIN_HOME/fin" "$@"; }
+:kai() { "$KAI_HOME/kai" "$@"; }
 :let() { "$LET_HOME/let" "$@"; }
 :pdf() { "$PDF_HOME/pdf" "$@"; }
-:buf() { "$BUF_HOME/buf" "$@"; }
 :tab() { "$TAB_HOME/tab" "$@"; }
-:ash() { "$ASH_HOME/ash" "$@"; }
+:tao() { "$TAO_HOME/tao" "$@"; }
 
+# AI assistant wrappers
 cc() {
     if [[ "$1" == "allow" || "$1" == "auto" ]]; then
         shift
@@ -143,12 +149,17 @@ cc() {
 
 # Auto-trust working paths under ~/Git and ~/Library/CloudStorage/Dropbox.
 _codex_auto_trust_path() {
-    local codex_home cfg cwd trust_target
+    local codex_home cfg candidate trust_target
     codex_home="${CODEX_HOME:-$HOME/.codex}"
     cfg="$codex_home/config.toml"
-    cwd="$(pwd -P 2>/dev/null || pwd)"
 
-    case "$cwd" in
+    if [[ -n "$1" ]]; then
+        candidate="$(cd "$1" 2>/dev/null && pwd -P)" || return 0
+    else
+        candidate="$(pwd -P 2>/dev/null || pwd)"
+    fi
+
+    case "$candidate" in
         "$HOME/Git" | "$HOME/Git/"* | "$HOME/Library/CloudStorage/Dropbox" | "$HOME/Library/CloudStorage/Dropbox/"*)
             ;;
         *)
@@ -158,11 +169,11 @@ _codex_auto_trust_path() {
 
     [[ -f "$cfg" ]] || return 0
 
-    if git -C "$cwd" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-        trust_target="$(git -C "$cwd" rev-parse --show-toplevel 2>/dev/null)" || trust_target="$cwd"
+    if git -C "$candidate" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        trust_target="$(git -C "$candidate" rev-parse --show-toplevel 2>/dev/null)" || trust_target="$candidate"
     else
         # Non-git folders still get trusted to avoid repeated prompt friction.
-        trust_target="$cwd"
+        trust_target="$candidate"
     fi
 
     [[ -n "$trust_target" ]] || return 0
@@ -179,16 +190,56 @@ _codex_auto_trust_path() {
     } >> "$cfg"
 }
 
-codex() {
-    _codex_auto_trust_path
-    command codex "$@"
+# Resolve the active project root for Codex session reuse.
+_codex_project_root() {
+    local candidate
+
+    if [[ -n "$1" ]]; then
+        candidate="$(cd "$1" 2>/dev/null && pwd -P)" || return 1
+    else
+        candidate="$(pwd -P 2>/dev/null || pwd)"
+    fi
+
+    if git -C "$candidate" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        git -C "$candidate" rev-parse --show-toplevel 2>/dev/null || print -r -- "$candidate"
+    else
+        print -r -- "$candidate"
+    fi
 }
 
+# Ensure `codex` resolves to the official CLI binary after re-sourcing this file.
+unfunction codex 2>/dev/null
+
+# `co` keeps the opinionated Codex workflow while `codex` stays official.
 co() {
-    codex "$@"
+    local project_root
+
+    project_root="$(_codex_project_root 2>/dev/null)" || project_root=""
+    [[ -n "$project_root" ]] && _codex_auto_trust_path "$project_root"
+
+    case "$1" in
+        -h | --help | -V | --version | exec | e | review | login | logout | mcp | mcp-server | app-server | app | completion | sandbox | debug | apply | a | resume | fork | cloud | exec-server | features | help)
+            command codex "$@"
+            ;;
+        new)
+            shift
+            if [[ -n "$project_root" ]]; then
+                command codex -C "$project_root" "$@"
+            else
+                command codex "$@"
+            fi
+            ;;
+        *)
+            if [[ -n "$project_root" ]]; then
+                command codex -C "$project_root" resume --last "$@"
+            else
+                command codex resume --last "$@"
+            fi
+            ;;
+    esac
 }
 
-# Resolve the repo-local Biome install without falling back to bunx cache.
+# Repo maintenance helpers
 _local_biome_info() {
     (
         cd "$1" || exit 1
@@ -256,22 +307,15 @@ bup() {
     fi
 }
 
-# EZA configuration for better tree view defaults
-EZA_DEFAULT_IGNORE="node_modules|.cache|cache|dist|build|.next|.nuxt|.turbo|coverage|.pytest_cache|__pycache__|.venv|venv|.env"
-
-# Wrapper function for eza to apply default tree options
+# CLI wrappers
 eza() {
-    # Check if --tree or -T flag is present
     if [[ "$*" == *"--tree"* ]] || [[ "$*" == *"-T"* ]]; then
-        # Apply default ignore patterns and git-ignore for tree view
         command eza --icons --git-ignore -I "$EZA_DEFAULT_IGNORE" "$@"
     else
-        # Run eza normally for non-tree commands
         command eza --icons "$@"
     fi
 }
 
-# Zed editor wrapper (defaults to current directory)
 zed() {
     if [ $# -eq 0 ]; then
         command zed .
@@ -280,11 +324,15 @@ zed() {
     fi
 }
 
-# pip -> uv pip (function for subcommand forwarding)
+# Package manager shims
 pip() { uv pip "$@"; }
 pip3() { uv pip "$@"; }
 
-# Load external functions
+# ------------------------------------------------------------------------------
+# EXTERNAL FUNCTIONS
+# Load repo-managed shell helpers
+# ------------------------------------------------------------------------------
+
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/Git/dot}"
 source "$DOTFILES_DIR/shell/functions/update.sh"
 source "$DOTFILES_DIR/shell/functions/agent-browser.sh"
