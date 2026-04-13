@@ -207,33 +207,170 @@ _codex_project_root() {
     fi
 }
 
+# Resolve the latest saved Codex session id for a project root.
+_codex_latest_session_id() {
+    local project_root codex_home sessions_dir session_file session_id
+    project_root="$1"
+
+    [[ -n "$project_root" ]] || return 1
+
+    codex_home="${CODEX_HOME:-$HOME/.codex}"
+    sessions_dir="$codex_home/sessions"
+    [[ -d "$sessions_dir" ]] || return 1
+
+    if command -v rg >/dev/null 2>&1; then
+        session_file="$(
+            rg -F -l --glob '*.jsonl' "\"cwd\":\"$project_root\"" "$sessions_dir" 2>/dev/null \
+                | LC_ALL=C sort \
+                | tail -n 1
+        )"
+    else
+        session_file="$(
+            find "$sessions_dir" -type f -name '*.jsonl' -print 2>/dev/null \
+                | LC_ALL=C sort \
+                | while IFS= read -r candidate; do
+                    grep -Fq "\"cwd\":\"$project_root\"" "$candidate" && printf '%s\n' "$candidate"
+                done \
+                | tail -n 1
+        )"
+    fi
+
+    [[ -n "$session_file" && -f "$session_file" ]] || return 1
+
+    session_id="$(sed -nE '1s/.*"id":"([^"]+)".*/\1/p' "$session_file")"
+    [[ -n "$session_id" ]] || return 1
+
+    print -r -- "$session_id"
+}
+
 # Ensure `codex` resolves to the official CLI binary after re-sourcing this file.
 unfunction codex 2>/dev/null
 
 # `co` keeps the opinionated Codex workflow while `codex` stays official.
 co() {
-    local project_root
+    local arg project_root session_id target_dir
+    local -a args prefix_args rest_args
 
-    project_root="$(_codex_project_root 2>/dev/null)" || project_root=""
+    args=("$@")
+    prefix_args=()
+    rest_args=()
+
+    local i=1
+
+    while (( i <= $#args )); do
+        arg="${args[i]}"
+
+        case "$arg" in
+            -C | --cd)
+                if (( i == $#args )); then
+                    command codex "$@"
+                    return
+                fi
+
+                target_dir="${args[i + 1]}"
+                (( i += 2 ))
+                ;;
+            --cd=*)
+                target_dir="${arg#--cd=}"
+                (( i += 1 ))
+                ;;
+            -c | -m | -p | -s | -a | -i)
+                if (( i == $#args )); then
+                    command codex "$@"
+                    return
+                fi
+
+                prefix_args+=("$arg" "${args[i + 1]}")
+                (( i += 2 ))
+                ;;
+            --config | --enable | --disable | --remote | --remote-auth-token-env | --local-provider | --profile | --sandbox | --ask-for-approval | --image | --model | --add-dir)
+                if (( i == $#args )); then
+                    command codex "$@"
+                    return
+                fi
+
+                prefix_args+=("$arg" "${args[i + 1]}")
+                (( i += 2 ))
+                ;;
+            --config=* | --enable=* | --disable=* | --remote=* | --remote-auth-token-env=* | --local-provider=* | --profile=* | --sandbox=* | --ask-for-approval=* | --image=* | --model=* | --add-dir=*)
+                prefix_args+=("$arg")
+                (( i += 1 ))
+                ;;
+            --oss | --full-auto | --dangerously-bypass-approvals-and-sandbox | --search | --no-alt-screen)
+                prefix_args+=("$arg")
+                (( i += 1 ))
+                ;;
+            -h | --help | -V | --version)
+                command codex "$@"
+                return
+                ;;
+            -*)
+                command codex "$@"
+                return
+                ;;
+            *)
+                rest_args=("${(@)args[$i,-1]}")
+                break
+                ;;
+        esac
+    done
+
+    if [[ -n "$target_dir" ]]; then
+        project_root="$(_codex_project_root "$target_dir" 2>/dev/null)" || project_root=""
+    else
+        project_root="$(_codex_project_root 2>/dev/null)" || project_root=""
+    fi
+
     [[ -n "$project_root" ]] && _codex_auto_trust_path "$project_root"
 
-    case "$1" in
-        -h | --help | -V | --version | exec | e | review | login | logout | mcp | mcp-server | app-server | app | completion | sandbox | debug | apply | a | resume | fork | cloud | exec-server | features | help)
+    if (( ${#rest_args} == 0 )); then
+        session_id="$(_codex_latest_session_id "$project_root" 2>/dev/null)" || session_id=""
+
+        if [[ -n "$project_root" && -n "$session_id" ]]; then
+            command codex "${prefix_args[@]}" -C "$project_root" resume "$session_id"
+        elif [[ -n "$project_root" ]]; then
+            command codex "${prefix_args[@]}" -C "$project_root"
+        else
+            command codex "${prefix_args[@]}"
+        fi
+        return
+    fi
+
+    case "${rest_args[1]}" in
+        exec | e | review | login | logout | mcp | mcp-server | app-server | app | completion | sandbox | debug | apply | a | cloud | exec-server | features | help)
             command codex "$@"
             ;;
         new)
-            shift
             if [[ -n "$project_root" ]]; then
-                command codex -C "$project_root" "$@"
+                command codex "${prefix_args[@]}" -C "$project_root" "${(@)rest_args[2,-1]}"
             else
-                command codex "$@"
+                command codex "${prefix_args[@]}" "${(@)rest_args[2,-1]}"
+            fi
+            ;;
+        resume | fork)
+            if [[ "${rest_args[2]}" == "--last" && ${#rest_args} -gt 2 && "${rest_args[3]}" != -* ]]; then
+                session_id="$(_codex_latest_session_id "$project_root" 2>/dev/null)" || session_id=""
+            else
+                session_id=""
+            fi
+
+            if [[ -n "$project_root" && -n "$session_id" ]]; then
+                command codex "${prefix_args[@]}" -C "$project_root" "${rest_args[1]}" "$session_id" "${(@)rest_args[3,-1]}"
+            elif [[ -n "$project_root" ]]; then
+                command codex "${prefix_args[@]}" -C "$project_root" "${rest_args[@]}"
+            else
+                command codex "${prefix_args[@]}" "${rest_args[@]}"
             fi
             ;;
         *)
-            if [[ -n "$project_root" ]]; then
-                command codex -C "$project_root" resume --last "$@"
+            session_id="$(_codex_latest_session_id "$project_root" 2>/dev/null)" || session_id=""
+
+            if [[ -n "$project_root" && -n "$session_id" ]]; then
+                command codex "${prefix_args[@]}" -C "$project_root" resume "$session_id" "${rest_args[@]}"
+            elif [[ -n "$project_root" ]]; then
+                command codex "${prefix_args[@]}" -C "$project_root" "${rest_args[@]}"
             else
-                command codex resume --last "$@"
+                command codex "${prefix_args[@]}" "${rest_args[@]}"
             fi
             ;;
     esac
