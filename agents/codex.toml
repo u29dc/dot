@@ -82,6 +82,7 @@ model_reasoning_effort = "xhigh"
 model_reasoning_summary = "detailed"
 model_verbosity = "high"
 web_search = "live"
+service_tier = "fast"
 
 [profiles.balanced]
 model = "gpt-5.4"
@@ -115,7 +116,7 @@ enabled = true
 enabled = false
 
 [plugins."github@openai-curated"]
-enabled = false
+enabled = true
 
 [projects."/Users/han/Git"]
 trust_level = "trusted"
@@ -169,4 +170,7 @@ trust_level = "trusted"
 trust_level = "trusted"
 
 [projects."/Users/han/Git/gpt"]
+trust_level = "trusted"
+
+[projects."/Users/han/Git/kai"]
 trust_level = "trusted"
