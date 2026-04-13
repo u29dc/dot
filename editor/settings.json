@@ -1,12 +1,12 @@
 {
 	"project_panel": {
-		"dock": "left"
+		"dock": "right"
 	},
 	"collaboration_panel": {
-		"dock": "left"
+		"dock": "right"
 	},
 	"agent": {
-		"dock": "right",
+		"dock": "left",
 		"favorite_models": [],
 		"model_parameters": []
 	},
@@ -16,7 +16,7 @@
 	"buffer_font_family": "Fira Code Retina",
 	"icon_theme": "Zed (Default)",
 
-	"git_panel": { "sort_by_path": false, "dock": "left" },
+	"git_panel": { "sort_by_path": false, "dock": "right" },
 	"outline_panel": { "dock": "right" },
 	"minimap": { "show": "always" },
 
