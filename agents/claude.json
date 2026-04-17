@@ -1,20 +1,11 @@
 {
 	"$schema": "https://json.schemastore.org/claude-code-settings.json",
 	"env": {
+		"ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-7[1m]",
 		"CLAUDE_CODE_EFFORT_LEVEL": "max",
 		"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
 		"CLAUDE_CODE_SUBAGENT_MODEL": "opus"
 	},
-	"autoMode": {
-		"environment": [
-			"Organization: U29DC. Primary use: local software development, workstation automation, CLI tooling, and repository maintenance on trusted developer machines.",
-			"Source control: GitHub org github.com/u29dc and the remotes configured for the repository Claude started in.",
-			"Trusted internal domains: none configured by default beyond the repository remotes in the current session.",
-			"Trusted cloud buckets: none configured by default.",
-			"Key internal services: none configured by default."
-		]
-	},
-	"model": "opus[1m]",
 	"includeCoAuthoredBy": false,
 	"permissions": {
 		"allow": [
@@ -223,8 +214,9 @@
 		],
 		"deny": [],
 		"ask": ["Bash(rm *)", "Bash(rm -rf *)", "Bash(rm -r *)", "Bash(sudo *)"],
-		"defaultMode": "acceptEdits"
+		"defaultMode": "auto"
 	},
+	"model": "claude-opus-4-7[1m]",
 	"statusLine": {
 		"type": "command",
 		"command": "bunx -y ccstatusline@latest",
@@ -242,6 +234,7 @@
 		}
 	},
 	"outputStyle": "Explanatory",
+	"viewMode": "verbose",
 	"sandbox": {
 		"enabled": false,
 		"autoAllowBashIfSandboxed": true,
@@ -324,10 +317,19 @@
 	},
 	"spinnerTipsEnabled": false,
 	"alwaysThinkingEnabled": true,
-	"effortLevel": "high",
-	"showThinkingSummaries": true,
 	"autoUpdatesChannel": "latest",
+	"showThinkingSummaries": true,
 	"skipDangerousModePermissionPrompt": true,
+	"autoMode": {
+		"environment": [
+			"Organization: U29DC. Primary use: local software development, workstation automation, CLI tooling, and repository maintenance on trusted developer machines.",
+			"Source control: GitHub org github.com/u29dc and the remotes configured for the repository Claude started in.",
+			"Trusted internal domains: none configured by default beyond the repository remotes in the current session.",
+			"Trusted cloud buckets: none configured by default.",
+			"Key internal services: none configured by default."
+		]
+	},
+	"voiceEnabled": true,
 	"teammateMode": "in-process",
-	"voiceEnabled": true
+	"skipAutoPermissionPrompt": true
 }

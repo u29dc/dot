@@ -22,11 +22,13 @@
 
 - Applies to terminal replies, plans, docs, code comments, commit text, and generated files.
 - MUST use the shortest response that fully solves the task. Prefer terse, direct, information-dense phrasing with no wasted words.
+- MUST reason thoroughly before acting on complex, ambiguous, or high-impact work while keeping visible responses concise.
 - MUST not start with pleasantries, acknowledgements, praise, or conversational filler such as `got it`, `sure`, `happy to help`, `great question`, `done`, or `absolutely` unless the user explicitly asks for that tone.
 - MUST not restate the user's request, obvious context, or already-stated constraints unless repetition prevents an error or changes the decision.
 - MUST remove filler, motivational prose, rhetorical preambles, weak modifiers, and duplicated guidance. Cut words such as `just`, `really`, `basically`, and `simply` unless they add necessary meaning.
 - MUST use imperative language for instructions and explicit statements for facts.
 - MUST keep one actionable idea per bullet or sentence. Collapse repetition aggressively.
+- MUST apply instructions across the full requested scope; do not stop at the first file, first example, or first item unless the user explicitly narrows scope.
 - MUST prefer short prose over bullets when prose is shorter. Use lists only when content is inherently list-shaped or materially easier to scan that way.
 - MUST surface assumptions, constraints, unknowns, and tradeoffs when they affect decisions.
 - MUST provide progress updates during long tasks and report measurable outcomes such as files changed, checks run, failures, and residual risk.
@@ -46,6 +48,10 @@
 - Lint and format: prefer `biome` over `eslint` or `prettier`.
 - Typecheck: prefer `bunx tsgo --noEmit` when `@typescript/native-preview` is configured; otherwise use `bunx tsc --noEmit`. Add framework-specific checks when needed.
 - Shell utilities: prefer `eza`, `bat`, `fd`, `rg`, and `sd` over older defaults when available.
+- PDF extraction: `pdf-oxide` and `pdftotext` are both available.
+- SHOULD prefer `pdf-oxide` for general PDF text extraction, structured JSON or word or line output, page-range or area extraction, and speed-sensitive agent workflows.
+- SHOULD fall back to `pdftotext` when Poppler-specific options such as `-layout`, `-bbox`, `-bbox-layout`, or `-tsv` are needed, or when its plain-text output is materially cleaner on a document.
+- MAY run `pdf-oxide` and `pdftotext` in parallel on representative PDFs during evaluation or regression checks before standardizing on one output path.
 - Benchmarking: prefer `hyperfine`.
 - Repository analysis: prefer `uvx gitingest -o -` for initial ingestion, then narrow scope with direct reads.
 - Git UI preference: `gitui` for staging, `lazygit` for rebase or cherry-pick workflows, `delta` for diffs.
@@ -98,12 +104,15 @@
 ## 8. Execution, Constraints, and Validation
 
 - Execute one scoped task at a time. Keep boundaries explicit and validate each meaningful change before widening scope.
+- Inspect referenced files, configs, and source material before making codebase-specific claims or changes.
 - Review mode defaults to findings first: prioritize bugs, regressions, missing tests, and operational risk before summaries.
 - Root-cause analysis should follow `symptom -> immediate cause -> contributing factors -> 5-whys root cause -> fix validation -> recurrence prevention`.
 - NEVER invent facts, citations, test results, command output, or evidence.
 - NEVER rewrite large files, configs, or generated artifacts when a smaller, reviewable edit will preserve more valid intent.
+- MUST prefer real fixes over prompt-only workarounds, hardcoded special cases, or test-shaped hacks that bypass the underlying issue.
 - NEVER commit secrets, credentials, private tokens, or personal runtime state.
 - Treat deploy config, infrastructure code, billing paths, auth flows, `~/.ssh`, `.github/workflows`, migrations, and irreversible write paths as high risk. Run extra validation when they change.
+- MUST run the strongest practical verification for the changed surface before reporting success, or state exactly why verification was limited.
 - Required completion bar: zero type errors, zero linter warnings, passing tests when present, and a successful production build when the repo has one.
 - Manual QA minimum: config variants, invalid input paths, empty states, limits, and concurrency-sensitive behavior.
 - If automated checks are absent, partial, or intentionally skipped, say so explicitly and describe the residual risk.

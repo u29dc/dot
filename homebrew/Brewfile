@@ -6,6 +6,7 @@ tap "ampcode/tap"
 tap "arbourd/tap"
 tap "cirruslabs/cli"
 tap "lightpanda-io/browser"
+tap "yfedoseev/tap"
 
 # Core Development Tools
 brew "git"
@@ -59,6 +60,7 @@ brew "neofetch"           # System info display
 brew "uv"                 # Python package manager (replaces pip, pipx, venv)
 brew "ruff"               # Python linter & formatter (replaces flake8, black, isort)
 brew "poppler"            # PDF text extraction (pdftotext)
+brew "pdf-oxide"          # Fast Rust PDF toolkit for text, Markdown, JSON, and images
 brew "ghostscript"        # PostScript/PDF interpreter
 brew "qpdf"               # PDF transformation tool
 brew "parallel"           # GNU parallel execution
