@@ -4,6 +4,7 @@ tap "supabase/tap"
 tap "oven-sh/bun"
 tap "ampcode/tap"
 tap "arbourd/tap"
+tap "anomalyco/tap"
 tap "cirruslabs/cli"
 tap "lightpanda-io/browser"
 tap "yfedoseev/tap"
@@ -83,6 +84,7 @@ brew "shfmt"              # Shell script formatter
 brew "cirruslabs/cli/tart"
 
 # AI & Cloud CLIs
+brew "anomalyco/tap/opencode" # OpenCode AI coding agent
 brew "agent-browser"       # Browser automation CLI for AI agents
 cask "codex"              # AI code assistant
 brew "gemini-cli"         # Gemini API CLI
