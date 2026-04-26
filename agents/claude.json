@@ -11,13 +11,10 @@
 		"allow": [
 			"Read",
 			"Edit",
-			"MultiEdit",
 			"Write",
 			"Glob",
 			"Grep",
-			"LS",
 			"TodoWrite",
-			"Task",
 			"Bash(--------------------------------------------------SKILLS-----------------------------)",
 			"Skill(align)",
 			"Skill(compose)",

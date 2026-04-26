@@ -9,7 +9,7 @@
 
 profile = "full"
 
-model = "gpt-5.4"
+model = "gpt-5.5"
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
 model_reasoning_effort = "xhigh"
@@ -17,7 +17,7 @@ model_reasoning_summary = "detailed"
 model_verbosity = "high"
 web_search = "live"
 
-review_model = "gpt-5.4"
+review_model = "gpt-5.5"
 plan_mode_reasoning_effort = "xhigh"
 show_raw_agent_reasoning = true
 suppress_unstable_features_warning = true
@@ -67,15 +67,12 @@ persistence = "save-all"
 [notice]
 hide_full_access_warning = true
 
-[notice.model_migrations]
-"gpt-5.3-codex" = "gpt-5.4"
-
 [tui]
 status_line = ["five-hour-limit", "context-used", "model-with-reasoning", "current-dir", "git-branch"]
 theme = "github"
 
 [profiles.full]
-model = "gpt-5.4"
+model = "gpt-5.5"
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
 model_reasoning_effort = "xhigh"
@@ -83,9 +80,17 @@ model_reasoning_summary = "detailed"
 model_verbosity = "high"
 web_search = "live"
 service_tier = "fast"
+approvals_reviewer = "guardian_subagent"
+
+[profiles.full.features]
+js_repl = true
+memories = true
+external_migration = true
+guardian_approval = true
+prevent_idle_sleep = true
 
 [profiles.balanced]
-model = "gpt-5.4"
+model = "gpt-5.5"
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 model_reasoning_effort = "high"
@@ -106,6 +111,16 @@ web_search = "live"
 enabled = false
 url = "http://127.0.0.1:29979/mcp"
 
+[marketplaces.openai-bundled]
+last_updated = "2026-04-26T11:05:19Z"
+source_type = "local"
+source = "/Users/han/.codex/.tmp/bundled-marketplaces/openai-bundled"
+
+[marketplaces.openai-primary-runtime]
+last_updated = "2026-04-23T18:43:37Z"
+source_type = "local"
+source = "/Users/han/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
+
 [plugins."google-calendar@openai-curated"]
 enabled = true
 
@@ -116,6 +131,12 @@ enabled = true
 enabled = false
 
 [plugins."github@openai-curated"]
+enabled = true
+
+[plugins."browser-use@openai-bundled"]
+enabled = true
+
+[plugins."documents@openai-primary-runtime"]
 enabled = true
 
 [projects."/Users/han/Git"]

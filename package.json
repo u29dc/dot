@@ -20,8 +20,8 @@
 		"util:check": "STATUS=0; bun run util:format || STATUS=1; bun run util:format:shell || STATUS=1; bun run util:lint || STATUS=1; bun run util:lint:shell || STATUS=1; exit $STATUS"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.11",
-		"@commitlint/cli": "^20.5.0",
+		"@biomejs/biome": "^2.4.13",
+		"@commitlint/cli": "^20.5.2",
 		"@commitlint/config-conventional": "^20.5.0",
 		"husky": "^9.1.7",
 		"lint-staged": "^16.4.0"
