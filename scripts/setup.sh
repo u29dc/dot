@@ -36,6 +36,9 @@ set -e
 # ==============================================================================
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=shell/functions/progress.sh
+source "$DOTFILES_DIR/shell/functions/progress.sh"
+
 AGENT_BROWSER_DIA_PORT="${AGENT_BROWSER_DIA_PORT:-9222}"
 AGENT_BROWSER_DIA_APP="/Applications/Dia.app"
 AGENT_BROWSER_DIA_BIN="$AGENT_BROWSER_DIA_APP/Contents/MacOS/Dia"
@@ -49,6 +52,12 @@ for arg in "$@"; do
     esac
 done
 
+install_homebrew() {
+    local installer
+    installer="$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || return $?
+    /bin/bash -c "$installer"
+}
+
 # Function to create symlink with backup and verification
 link_file() {
     local src="$1"
@@ -56,7 +65,7 @@ link_file() {
 
     # Skip if source doesn't exist
     if [ ! -e "$src" ]; then
-        echo "[SKIP] Source not found: $src"
+        dot_progress_skip "Source not found: $src"
         return 0
     fi
 
@@ -65,7 +74,7 @@ link_file() {
 
     # Backup existing file if it exists and isn't a symlink
     if [ -e "$dest" ] && [ ! -L "$dest" ]; then
-        echo "[BACKUP] $dest -> ${dest}.backup"
+        dot_progress_status "BACKUP" "$DOT_PROGRESS_YELLOW" "$dest -> ${dest}.backup"
         mv "$dest" "${dest}.backup"
     fi
 
@@ -79,9 +88,9 @@ link_file() {
 
     # Verify symlink was created correctly
     if [ -L "$dest" ] && [ "$(readlink "$dest")" = "$src" ]; then
-        echo "[LINK] $(basename "$src") -> $dest"
+        dot_progress_status "LINK" "$DOT_PROGRESS_BLUE" "$(basename "$src") -> $dest"
     else
-        echo "[ERROR] Failed to create symlink: $dest"
+        dot_progress_fail "Failed to create symlink: $dest"
         return 1
     fi
 }
@@ -99,7 +108,7 @@ link_skills() {
 
     for src_dir in "$@"; do
         if [ ! -d "$src_dir" ]; then
-            echo "[SKIP] Skills source not found: $src_dir"
+            dot_progress_skip "Skills source not found: $src_dir"
             continue
         fi
 
@@ -186,45 +195,45 @@ setup_dia_cdp() {
     service_target="$(dia_launch_agent_service)"
 
     if [ ! -f "$plist_path" ]; then
-        echo "[SKIP] Dia LaunchAgent not linked: $plist_path"
+        dot_progress_skip "Dia LaunchAgent not linked: $plist_path"
         return 0
     fi
 
     if [ ! -x "$AGENT_BROWSER_DIA_BIN" ]; then
-        echo "[SKIP] Dia.app not found: $AGENT_BROWSER_DIA_APP"
+        dot_progress_skip "Dia.app not found: $AGENT_BROWSER_DIA_APP"
         return 0
     fi
 
     if ! command -v launchctl >/dev/null 2>&1; then
-        echo "[SKIP] launchctl not available"
+        dot_progress_skip "launchctl not available"
         return 0
     fi
 
     if ! dia_gui_domain_available; then
-        echo "[SKIP] GUI launchctl domain unavailable: $domain_target"
+        dot_progress_skip "GUI launchctl domain unavailable: $domain_target"
         return 0
     fi
 
     if dia_cdp_healthy; then
-        echo "[OK] Dia CDP already available on port $AGENT_BROWSER_DIA_PORT"
+        dot_progress_ok "Dia CDP already available on port $AGENT_BROWSER_DIA_PORT"
         return 0
     fi
 
     if dia_running_without_cdp; then
-        echo "[SKIP] Dia is already running without CDP. Quit Dia, then run agent-browser-dia-on or rerun setup."
+        dot_progress_skip "Dia is already running without CDP. Quit Dia, then run agent-browser-dia-on or rerun setup."
         return 0
     fi
 
     if dia_running_with_cdp; then
         if wait_for_dia_cdp 20; then
-            echo "[OK] Dia CDP became healthy on port $AGENT_BROWSER_DIA_PORT"
+            dot_progress_ok "Dia CDP became healthy on port $AGENT_BROWSER_DIA_PORT"
         else
-            echo "[SKIP] Dia is already running with a CDP flag, but port $AGENT_BROWSER_DIA_PORT is not healthy yet."
+            dot_progress_skip "Dia is already running with a CDP flag, but port $AGENT_BROWSER_DIA_PORT is not healthy yet."
         fi
         return 0
     fi
 
-    echo "Dia browser CDP:"
+    dot_progress_run "Starting Dia CDP LaunchAgent"
     if dia_launch_agent_loaded; then
         launchctl kickstart -k "$service_target"
     else
@@ -232,54 +241,52 @@ setup_dia_cdp() {
     fi
 
     if wait_for_dia_cdp; then
-        echo "[OK] Dia CDP ready on port $AGENT_BROWSER_DIA_PORT"
+        dot_progress_ok "Dia CDP ready on port $AGENT_BROWSER_DIA_PORT"
     else
-        echo "[WARN] Dia LaunchAgent loaded, but CDP did not become healthy on port $AGENT_BROWSER_DIA_PORT"
+        dot_progress_warn "Dia LaunchAgent loaded, but CDP did not become healthy on port $AGENT_BROWSER_DIA_PORT"
     fi
 }
 
+dot_progress_title "Dotfiles setup"
+dot_progress_info "Directory: $DOTFILES_DIR"
+
+if [ "$LINK_ONLY" = true ]; then
+    dot_progress_info "Mode: link-only"
+fi
+
 # Full setup: Install Homebrew and packages
 if [ "$LINK_ONLY" = false ]; then
-    echo "Starting dotfiles setup..."
-    echo "Directory: $DOTFILES_DIR"
-    echo
-
     # Check prerequisites
     if ! command -v brew >/dev/null 2>&1; then
-        echo "Homebrew not found. Installing..."
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        dot_progress_run_step --stream "Installing Homebrew" install_homebrew
 
         # Add Homebrew to PATH for this session
         eval "$(/opt/homebrew/bin/brew shellenv)"
+    else
+        dot_progress_ok "Homebrew available"
     fi
 
     # Install Homebrew packages
     if [ -f "$DOTFILES_DIR/homebrew/Brewfile" ]; then
-        echo "Installing Homebrew packages..."
-        brew bundle install --file="$DOTFILES_DIR/homebrew/Brewfile"
-        echo
+        dot_progress_run_step --stream "Installing Homebrew packages" brew bundle install --file="$DOTFILES_DIR/homebrew/Brewfile"
     else
-        echo "Brewfile not found, skipping Homebrew packages"
-        echo
+        dot_progress_skip "Homebrew packages (Brewfile not found)"
     fi
+else
+    dot_progress_skip "Homebrew packages (--link-only)"
 fi
 
 # Create tool home directory
-mkdir -p "${TOOLS_HOME:-$HOME/.tools}"
-
-# Create symlinks (runs for both full setup and link-only mode)
-echo "Creating symlinks..."
-echo
+dot_progress_run_step "Creating tool home" mkdir -p "${TOOLS_HOME:-$HOME/.tools}"
 
 # Shell configs
-echo "Shell configurations:"
+dot_progress_section "Shell configurations"
 link_file "$DOTFILES_DIR/shell/zshrc" "$HOME/.zshrc"
 link_file "$DOTFILES_DIR/shell/zprofile" "$HOME/.zprofile"
 link_file "$DOTFILES_DIR/shell/zshrc.local" "$HOME/.zshrc.local"
 
 # Terminal configs
-echo
-echo "Terminal configurations:"
+dot_progress_section "Terminal configurations"
 link_file "$DOTFILES_DIR/terminal/starship-dark.toml" "$HOME/.config/starship/starship-dark.toml"
 link_file "$DOTFILES_DIR/terminal/starship-light.toml" "$HOME/.config/starship/starship-light.toml"
 link_file "$DOTFILES_DIR/terminal/bottom.toml" "$HOME/.config/bottom/bottom.toml"
@@ -292,13 +299,11 @@ link_file "$DOTFILES_DIR/tsconfig.json" "$HOME/.config/typescript/tsconfig.json"
 link_file "$DOTFILES_DIR/bunfig.toml" "$HOME/.bunfig.toml"
 link_file "$DOTFILES_DIR/uv.toml" "$HOME/.config/uv/uv.toml"
 
-echo
-echo "Editor configurations:"
+dot_progress_section "Editor configurations"
 link_file "$DOTFILES_DIR/editor/settings.json" "$HOME/.config/zed/settings.json"
 link_file "$DOTFILES_DIR/editor/keymap.json" "$HOME/.config/zed/keymap.json"
 
-echo
-echo "Additional terminal configurations:"
+dot_progress_section "Additional terminal configurations"
 link_file "$DOTFILES_DIR/terminal/ssh" "$HOME/.ssh/config"
 link_file "$DOTFILES_DIR/terminal/neofetch" "$HOME/.config/neofetch/config.conf"
 link_file "$DOTFILES_DIR/terminal/statusline" "$HOME/.config/ccstatusline/settings.json"
@@ -307,8 +312,7 @@ link_file "$DOTFILES_DIR/terminal/yt-dlp" "$HOME/.config/yt-dlp/config"
 link_file "$DOTFILES_DIR/terminal/agent-browser.json" "$HOME/.agent-browser/config.json"
 link_file "$DOTFILES_DIR/terminal/agent-browser.chrome.json" "$HOME/.agent-browser/chrome.json"
 
-echo
-echo "System configurations:"
+dot_progress_section "System configurations"
 link_file "$DOTFILES_DIR/system/gitconfig" "$HOME/.gitconfig"
 link_file "$DOTFILES_DIR/system/karabiner" "$HOME/.config/karabiner/karabiner.json"
 link_file "$DOTFILES_DIR/system/1password" "$HOME/.config/1Password/ssh/agent.toml"
@@ -317,8 +321,7 @@ link_file "$DOTFILES_DIR/macos/.macos" "$HOME/.macos"
 setup_dia_cdp
 
 # Agent configurations
-echo
-echo "Agent configurations:"
+dot_progress_section "Agent configurations"
 # Claude Code
 link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.claude/CLAUDE.md"
 link_file "$DOTFILES_DIR/agents/claude.json" "$HOME/.claude/settings.json"
@@ -333,11 +336,9 @@ link_skills "$HOME/.agents/skills" "$SKILLS_BASE" ${SKILLS_U29DC:+"$SKILLS_U29DC
 link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.config/amp/AGENTS.md"
 link_file "$DOTFILES_DIR/agents/amp.settings.json" "$HOME/.config/amp/settings.json"
 
-echo
-echo "Symlinks created successfully."
+dot_progress_ok "Symlinks created successfully"
 
 if [ "$LINK_ONLY" = false ]; then
-    echo
-    echo "Setup complete."
-    echo "Restart terminal or run: source ~/.zshrc"
+    dot_progress_ok "Setup complete"
+    dot_progress_info "Restart terminal or run: source ~/.zshrc"
 fi

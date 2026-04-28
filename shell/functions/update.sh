@@ -1,136 +1,21 @@
 #!/usr/bin/env bash
 # System update function
 
+# shellcheck source=shell/functions/progress.sh
+source "${DOTFILES_DIR:-$HOME/Git/dot}/shell/functions/progress.sh"
+
 upd() {
     # ANSI colors
-    local RED='\x1b[31m'
-    local BLUE='\x1b[34m'
-    local YELLOW='\x1b[33m'
-    local DIM='\x1b[2m'
-    local RESET='\x1b[0m'
+    local RED="$DOT_PROGRESS_RED"
+    local BLUE="$DOT_PROGRESS_BLUE"
+    local YELLOW="$DOT_PROGRESS_YELLOW"
+    local DIM="$DOT_PROGRESS_DIM"
+    local RESET="$DOT_PROGRESS_RESET"
 
     if ! command -v brew >/dev/null 2>&1; then
         echo -e "${RED}[FAIL]${RESET} Homebrew is not installed or not in PATH."
         return 1
     fi
-
-    upd__format_time() {
-        local total_seconds="$1"
-        local minutes=$((total_seconds / 60))
-        local seconds=$((total_seconds % 60))
-
-        if [ "$minutes" -gt 0 ]; then
-            printf '%sm %ss' "$minutes" "$seconds"
-        else
-            printf '%ss' "$seconds"
-        fi
-    }
-
-    upd__is_spinner_supported() {
-        [ -t 1 ] || return 1
-        [ "${TERM:-}" != "dumb" ] || return 1
-        return 0
-    }
-
-    upd__locale_is_utf8() {
-        local locale_value="${LC_ALL:-${LC_CTYPE:-${LANG:-}}}"
-        case "$locale_value" in
-            *[Uu][Tt][Ff]-8* | *[Uu][Tt][Ff]8*) return 0 ;;
-            *) return 1 ;;
-        esac
-    }
-
-    upd__spinner_glyph() {
-        local frame_index="$1"
-        case $((frame_index % 10)) in
-            0) printf '⠋' ;;
-            1) printf '⠙' ;;
-            2) printf '⠹' ;;
-            3) printf '⠸' ;;
-            4) printf '⠼' ;;
-            5) printf '⠴' ;;
-            6) printf '⠦' ;;
-            7) printf '⠧' ;;
-            8) printf '⠇' ;;
-            *) printf '⠏' ;;
-        esac
-    }
-
-    upd__spinner_frame() {
-        local frame_index="$1"
-        local status_text=""
-        local offset=""
-
-        if upd__locale_is_utf8; then
-            for offset in 0 3 6 9; do
-                status_text="${status_text}$(upd__spinner_glyph "$((frame_index + offset))")"
-            done
-            printf '%s' "$status_text"
-        else
-            # shellcheck disable=SC1003
-            case $((frame_index % 4)) in
-                0) printf '|/-\\' ;;
-                1) printf '/-\\|' ;;
-                2) printf '-\\|/' ;;
-                *) printf '\\|/-' ;;
-            esac
-        fi
-    }
-
-    upd__terminal_columns() {
-        local cols='80'
-        if command -v tput >/dev/null 2>&1; then
-            cols="$(tput cols 2>/dev/null || printf '80')"
-        fi
-        case "$cols" in
-            '' | *[!0-9]*) cols='80' ;;
-        esac
-        printf '%s' "$cols"
-    }
-
-    upd__truncate_text() {
-        local text="$1"
-        local max_length="$2"
-        if [ "$max_length" -le 0 ]; then
-            printf ''
-            return 0
-        fi
-
-        if [ "${#text}" -le "$max_length" ]; then
-            printf '%s' "$text"
-            return 0
-        fi
-
-        if [ "$max_length" -le 3 ]; then
-            printf '%s' "${text:0:${max_length}}"
-            return 0
-        fi
-
-        printf '%s...' "${text:0:$((max_length - 3))}"
-    }
-
-    upd__render_spinner_line() {
-        local label="$1"
-        local frame="$2"
-        local elapsed="$3"
-        local cols
-        local reserved_width=20
-        local max_label_width
-        local display_label
-
-        cols="$(upd__terminal_columns)"
-        max_label_width=$((cols - reserved_width))
-        if [ "$max_label_width" -lt 10 ]; then
-            max_label_width=10
-        fi
-
-        display_label="$(upd__truncate_text "$label" "$max_label_width")"
-        printf '\r\033[2K%b[%-4s]%b %s (%s)' "$BLUE" "$frame" "$RESET" "$display_label" "$elapsed"
-    }
-
-    upd__clear_spinner_line() {
-        printf '\r\033[2K'
-    }
 
     upd__count_items() {
         local items="$1"
@@ -261,160 +146,7 @@ upd() {
     }
 
     upd__run_step() {
-        local stream_mode=0
-        while [ $# -gt 0 ]; do
-            case "${1:-}" in
-                --stream)
-                    stream_mode=1
-                    shift
-                    ;;
-                *)
-                    break
-                    ;;
-            esac
-        done
-
-        local label="$1"
-        shift
-
-        local step_start=$SECONDS
-        local output_file=""
-        local step_status=0
-        local command_pid=""
-        local frame_index=0
-        local frame=""
-        local elapsed=""
-        local output_text=""
-        local bash_monitor_was_on=0
-        local interrupted_signal=0
-        local previous_int_trap=""
-        local previous_term_trap=""
-        local process_state=""
-        local paused_for_tty=0
-
-        if [ "$stream_mode" -eq 1 ]; then
-            printf '%b[RUN ]%b %s...\n' "$BLUE" "$RESET" "$label"
-            "$@" || step_status=$?
-            elapsed=$((SECONDS - step_start))
-            if [ "$step_status" -eq 0 ]; then
-                printf '%b[OK  ]%b %s (%s)\n' "$BLUE" "$RESET" "$label" "$(upd__format_time "$elapsed")"
-            else
-                printf '%b[FAIL]%b %s (%s)\n' "$RED" "$RESET" "$label" "$(upd__format_time "$elapsed")"
-            fi
-            return "$step_status"
-        fi
-
-        output_file="$(mktemp "${TMPDIR:-/tmp}/upd-step.XXXXXX" 2>/dev/null)"
-        if [ -z "$output_file" ]; then
-            printf '%b[RUN ]%b %s...\n' "$BLUE" "$RESET" "$label"
-            local output=""
-            output="$("$@" 2>&1)" || step_status=$?
-
-            local elapsed_fallback=$((SECONDS - step_start))
-            if [ "$step_status" -eq 0 ]; then
-                printf '%b[OK  ]%b %s (%s)\n' "$BLUE" "$RESET" "$label" "$(upd__format_time "$elapsed_fallback")"
-            else
-                printf '%b[FAIL]%b %s (%s)\n' "$RED" "$RESET" "$label" "$(upd__format_time "$elapsed_fallback")"
-                if [ -n "$output" ]; then
-                    printf '%b%s%b\n' "$DIM" "$output" "$RESET"
-                fi
-            fi
-            return "$step_status"
-        fi
-
-        if upd__is_spinner_supported; then
-            # Prevent interactive job-control messages ([n] pid / done) from corrupting spinner output.
-            if [ -n "${ZSH_VERSION:-}" ]; then
-                setopt localoptions nomonitor nonotify
-            elif [ -n "${BASH_VERSION:-}" ]; then
-                case "$-" in
-                    *m*)
-                        bash_monitor_was_on=1
-                        set +m
-                        ;;
-                esac
-            fi
-
-            previous_int_trap="$(trap -p INT || true)"
-            previous_term_trap="$(trap -p TERM || true)"
-            trap 'interrupted_signal=1; [ -n "$command_pid" ] && kill "$command_pid" 2>/dev/null; upd__clear_spinner_line' INT TERM
-
-            "$@" >"$output_file" 2>&1 &
-            command_pid=$!
-
-            while kill -0 "$command_pid" 2>/dev/null; do
-                if [ "$interrupted_signal" -ne 0 ]; then
-                    break
-                fi
-
-                if [ $((frame_index % 10)) -eq 0 ]; then
-                    process_state="$(ps -o stat= -p "$command_pid" 2>/dev/null | awk '{print $1}')"
-                    case "$process_state" in
-                        T*)
-                            paused_for_tty=1
-                            kill "$command_pid" 2>/dev/null || true
-                            upd__clear_spinner_line
-                            printf '%b[WARN]%b %s paused waiting for terminal input. Not rerunning automatically to avoid duplicate changes.\n' "$YELLOW" "$RESET" "$label"
-                            break
-                            ;;
-                    esac
-                fi
-
-                frame="$(upd__spinner_frame "$frame_index")"
-                elapsed="$(upd__format_time "$((SECONDS - step_start))")"
-                upd__render_spinner_line "$label" "$frame" "$elapsed"
-                frame_index=$((frame_index + 1))
-                sleep 0.1
-            done
-
-            if [ "$interrupted_signal" -eq 0 ] && [ "$paused_for_tty" -eq 0 ]; then
-                wait "$command_pid" || step_status=$?
-            else
-                wait "$command_pid" 2>/dev/null || true
-            fi
-            upd__clear_spinner_line
-
-            if [ "$paused_for_tty" -ne 0 ] && [ "$step_status" -eq 0 ]; then
-                step_status=125
-            fi
-            if [ "$interrupted_signal" -ne 0 ] && [ "$step_status" -eq 0 ]; then
-                step_status=130
-            fi
-
-            if [ "$bash_monitor_was_on" -eq 1 ]; then
-                set -m
-            fi
-
-            if [ -n "$previous_int_trap" ]; then
-                eval "$previous_int_trap"
-            else
-                trap - INT
-            fi
-            if [ -n "$previous_term_trap" ]; then
-                eval "$previous_term_trap"
-            else
-                trap - TERM
-            fi
-        else
-            printf '%b[RUN ]%b %s...\n' "$BLUE" "$RESET" "$label"
-            "$@" >"$output_file" 2>&1 || step_status=$?
-        fi
-
-        elapsed=$((SECONDS - step_start))
-        if [ "$step_status" -eq 0 ]; then
-            printf '%b[OK  ]%b %s (%s)\n' "$BLUE" "$RESET" "$label" "$(upd__format_time "$elapsed")"
-        else
-            printf '%b[FAIL]%b %s (%s)\n' "$RED" "$RESET" "$label" "$(upd__format_time "$elapsed")"
-            if [ -s "$output_file" ]; then
-                output_text="$(cat "$output_file")"
-                printf '%b%s%b\n' "$DIM" "$output_text" "$RESET"
-            else
-                printf '%b(no output)%b\n' "$DIM" "$RESET"
-            fi
-        fi
-
-        rm -f "$output_file"
-        return "$step_status"
+        dot_progress_run_step "$@"
     }
 
     upd__apply_step_result() {
@@ -598,7 +330,7 @@ upd() {
     local overall_elapsed=$((SECONDS - overall_start))
 
     if [ "$failed" -ne 0 ]; then
-        echo -e "${RED}[FAIL]${RESET} Homebrew update finished with errors in $(upd__format_time "$overall_elapsed")."
+        echo -e "${RED}[FAIL]${RESET} Homebrew update finished with errors in $(dot_progress_format_time "$overall_elapsed")."
         return 1
     fi
 
@@ -606,7 +338,7 @@ upd() {
         if [ -n "$manual_casks_after" ]; then
             echo -e "${YELLOW}[WARN]${RESET} Manual-install casks skipped by Homebrew: $(upd__summarize_items "$manual_casks_after")"
         fi
-        echo -e "${BLUE}Homebrew update complete in $(upd__format_time "$overall_elapsed").${RESET}"
+        echo -e "${BLUE}Homebrew update complete in $(dot_progress_format_time "$overall_elapsed").${RESET}"
         return 0
     fi
 
