@@ -72,7 +72,7 @@ status_line = ["five-hour-limit", "context-used", "model-with-reasoning", "curre
 theme = "github"
 
 [tui.model_availability_nux]
-"gpt-5.5" = 1
+"gpt-5.5" = 4
 
 [profiles.full]
 model = "gpt-5.5"
@@ -115,12 +115,12 @@ enabled = false
 url = "http://127.0.0.1:29979/mcp"
 
 [marketplaces.openai-bundled]
-last_updated = "2026-04-26T11:05:19Z"
+last_updated = "2026-04-27T21:52:25Z"
 source_type = "local"
 source = "/Users/han/.codex/.tmp/bundled-marketplaces/openai-bundled"
 
 [marketplaces.openai-primary-runtime]
-last_updated = "2026-04-23T18:43:37Z"
+last_updated = "2026-04-27T11:49:28Z"
 source_type = "local"
 source = "/Users/han/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
 
@@ -140,6 +140,12 @@ enabled = true
 enabled = true
 
 [plugins."documents@openai-primary-runtime"]
+enabled = true
+
+[plugins."spreadsheets@openai-primary-runtime"]
+enabled = true
+
+[plugins."presentations@openai-primary-runtime"]
 enabled = true
 
 [projects."/Users/han/Git"]
