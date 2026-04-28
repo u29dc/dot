@@ -5,138 +5,161 @@ tap "oven-sh/bun"
 tap "ampcode/tap"
 tap "arbourd/tap"
 tap "anomalyco/tap"
+tap "charmbracelet/tap"
 tap "cirruslabs/cli"
 tap "lightpanda-io/browser"
+tap "steipete/tap"
 tap "yfedoseev/tap"
+tap "zahidcakici/tap"
 
 # Core Development Tools
 brew "git"
-brew "gh"                 # GitHub CLI
+brew "gh"                            # GitHub CLI
 brew "neovim"
-brew "node"               # JavaScript runtime
-brew "oven-sh/bun/bun"    # Fast JavaScript runtime & bundler
-brew "deno"               # Secure JavaScript/TypeScript runtime
-brew "zig"                # Programming language for robustness
-brew "zvelte-check"       # Fast Svelte diagnostics
-# brew "rust"             # Installed via rustup
+brew "node"                          # JavaScript runtime
+brew "oven-sh/bun/bun"               # Fast JavaScript runtime & bundler
+brew "deno"                          # Secure JavaScript/TypeScript runtime
+brew "zig"                           # Programming language for robustness
+brew "cmake"                         # Cross-platform build system
+brew "golangci-lint"                 # Go linter runner
+brew "mint"                          # Swift package CLI runner
+brew "typst"                         # Markup-based typesetting system
+brew "zvelte-check"                  # Fast Svelte diagnostics
+# brew "rust"                        # Installed via rustup
 brew "lightpanda-io/browser/lightpanda"
 
 # Modern CLI Tools
-brew "starship"           # Fast shell prompt
-brew "eza"                # Modern ls replacement
-brew "bat"                # Cat with syntax highlighting
-brew "fd"                 # Fast find alternative
-brew "bottom"             # System monitor
-brew "zoxide"             # Smarter cd
-brew "ripgrep"            # Fast grep alternative
+brew "starship"                      # Fast shell prompt
+brew "eza"                           # Modern ls replacement
+brew "bat"                           # Cat with syntax highlighting
+brew "fd"                            # Fast find alternative
+brew "bottom"                        # System monitor
+brew "zoxide"                        # Smarter cd
+brew "ripgrep"                       # Fast grep alternative
 
 # Git Tools
-brew "git-delta"          # Better git diffs
-brew "gitui"              # Fast git TUI
-brew "lazygit"            # Complex git operations
-brew "git-open"           # Open repo in browser
-brew "gitingest"          # Lightweight repository analysis
+brew "git-delta"                     # Better git diffs
+brew "gitui"                         # Fast git TUI
+brew "lazygit"                       # Complex git operations
+brew "git-open"                      # Open repo in browser
+brew "git-filter-repo"               # Git history rewrite tool
+brew "gitingest"                     # Lightweight repository analysis
 
 # Shell Enhancements
-brew "atuin"              # Magic shell history search
-brew "broot"              # Interactive tree navigation
+brew "atuin"                         # Magic shell history search
+brew "broot"                         # Interactive tree navigation
+brew "tmux"                          # Terminal multiplexer
 
 # Media & Files
-brew "ffmpeg"             # Media processing framework
-brew "imagemagick"        # Image manipulation toolkit
-brew "graphicsmagick"     # Image processing (lighter ImageMagick)
-brew "exiftool"           # Image metadata reader/writer
-brew "libraw"             # Raw image decoder
-brew "gifsicle"           # GIF optimizer
-brew "sox"                # Sound processing
-brew "webp"               # WebP tools
-brew "openexr"            # HDR image format
-brew "yt-dlp"             # YouTube downloader
+brew "ffmpeg"                        # Media processing framework
+brew "imagemagick"                   # Image manipulation toolkit
+brew "graphicsmagick"                # Image processing (lighter ImageMagick)
+brew "exiftool"                      # Image metadata reader/writer
+brew "libraw"                        # Raw image decoder
+brew "dcraw"                         # Camera RAW decoder
+brew "gifsicle"                      # GIF optimizer
+brew "optipng"                       # PNG optimizer
+brew "sox"                           # Sound processing
+brew "webp"                          # WebP tools
+brew "openexr"                       # HDR image format
+brew "sevenzip"                      # File archiver
+brew "yt-dlp"                        # YouTube downloader
 
 # Utilities
-brew "blueutil"           # Bluetooth control
-brew "gnupg"              # GPG encryption
-brew "hyperfine"          # Command benchmarking
-brew "neofetch"           # System info display
-brew "uv"                 # Python package manager (replaces pip, pipx, venv)
-brew "ruff"               # Python linter & formatter (replaces flake8, black, isort)
-brew "poppler"            # PDF text extraction (pdftotext)
-brew "pdf-oxide"          # Fast Rust PDF toolkit for text, Markdown, JSON, and images
-brew "ghostscript"        # PostScript/PDF interpreter
-brew "qpdf"               # PDF transformation tool
-brew "parallel"           # GNU parallel execution
-brew "scc"                # Code statistics
-brew "tokei"              # Fast code statistics
-brew "wget"               # Web downloader
-brew "sd"                 # Modern sed replacement
-brew "dust"               # Intuitive disk usage
-brew "procs"              # Modern ps replacement
-brew "jq"                 # JSON processor
-brew "jaq"                # Rust jq-compatible alternative
-brew "jsongrep"           # Fast path-query search for structured data
-brew "yq"                 # YAML processor
-brew "just"               # Command runner
-brew "direnv"             # Per-directory environments
-brew "tldr"               # Simplified man pages
-brew "shellcheck"         # Shell script linter
-brew "shfmt"              # Shell script formatter
+brew "blueutil"                      # Bluetooth control
+brew "gnupg"                         # GPG encryption
+brew "hyperfine"                     # Command benchmarking
+brew "neofetch"                      # System info display
+brew "uv"                            # Primary Python package manager
+brew "pipx"                          # Isolated Python CLI runner
+brew "ruff"                          # Python linter & formatter (replaces flake8, black, isort)
+brew "poppler"                       # PDF text extraction (pdftotext)
+brew "pdf-oxide"                     # Fast Rust PDF toolkit for text, Markdown, JSON, and images
+brew "ghostscript"                   # PostScript/PDF interpreter
+brew "qpdf"                          # PDF transformation tool
+brew "parallel"                      # GNU parallel execution
+brew "scc"                           # Code statistics
+brew "tokei"                         # Fast code statistics
+brew "wget"                          # Web downloader
+brew "sd"                            # Modern sed replacement
+brew "dust"                          # Intuitive disk usage
+brew "procs"                         # Modern ps replacement
+brew "jq"                            # JSON processor
+brew "jaq"                           # Rust jq-compatible alternative
+brew "jsongrep"                      # Fast path-query search for structured data
+brew "yq"                            # YAML processor
+brew "just"                          # Command runner
+brew "direnv"                        # Per-directory environments
+brew "tldr"                          # Simplified man pages
+brew "shellcheck"                    # Shell script linter
+brew "shfmt"                         # Shell script formatter
 # macOS VM sandbox
 brew "cirruslabs/cli/tart"
 
 # AI & Cloud CLIs
-brew "anomalyco/tap/opencode" # OpenCode AI coding agent
-brew "agent-browser"       # Browser automation CLI for AI agents
-cask "codex"              # AI code assistant
-brew "gemini-cli"         # Gemini API CLI
-brew "stripe"             # Stripe CLI tools
-brew "supabase"           # Supabase CLI
-brew "vercel-cli"         # Vercel deployment CLI
+brew "anomalyco/tap/opencode"        # OpenCode AI coding agent
+brew "agent-browser"                 # Browser automation CLI for AI agents
+brew "charmbracelet/tap/crush"       # Terminal AI coding assistant
+cask "codex"                         # AI code assistant
+brew "gemini-cli"                    # Gemini API CLI
+brew "ollama"                        # Local LLM runner
+brew "steipete/tap/gogcli"           # Google Workspace CLI
+brew "stripe"                        # Stripe CLI tools
+brew "supabase"                      # Supabase CLI
+brew "whisperkit-cli"                # On-device speech recognition CLI
+brew "zahidcakici/tap/tokenizer"     # LLM token counter
+brew "vercel-cli"                    # Vercel deployment CLI
 
 # Casks (GUI Applications)
 
 # Terminal & System Tools
-cask "1password-cli"      # Password manager CLI
-cask "ghostty"            # GPU-accelerated terminal
-cask "jordanbaird-ice"    # Menu bar manager
-cask "leader-key"         # Keyboard shortcut manager
+cask "1password-cli"                 # Password manager CLI
+cask "font-jetbrains-mono-nerd-font" # Terminal/programming font
+cask "ghostty"                       # GPU-accelerated terminal
+cask "jordanbaird-ice"               # Menu bar manager
+cask "leader-key"                    # Keyboard shortcut manager
 
 # Productivity & Notes
-cask "1password"          # Password manager (GUI version)
-cask "notion"             # Note-taking and productivity
-cask "notion-calendar"    # Calendar app
-cask "notion-mail"        # Email client
-cask "raycast"            # Launcher and productivity
-cask "cursor"             # AI-powered code editor
+cask "1password"                     # Password manager (GUI version)
+cask "notion"                        # Note-taking and productivity
+cask "notion-calendar"               # Calendar app
+cask "notion-mail"                   # Email client
+cask "obsidian"                      # Markdown knowledge base
+cask "raycast"                       # Launcher and productivity
+cask "cursor"                        # AI-powered code editor
 
 # Development
-cask "thebrowsercompany-dia" # Default browser with CDP for agent-browser
-cask "google-chrome"         # Fallback browser profile for agent-browser
-cask "zed@preview"        # Fast code editor
+cask "thebrowsercompany-dia"         # Default browser with CDP for agent-browser
+cask "google-chrome"                 # Fallback browser profile for agent-browser
+cask "t3-code"                       # Minimal GUI for AI code agents
+cask "zed@preview"                   # Fast code editor
 
 # Media & Utilities
-cask "iina"               # Modern media player
-cask "figma"              # Design tool
-cask "cleanshot"          # Screenshot tool
-cask "clop"               # Image optimizer
-cask "coteditor"          # Plain text editor
-cask "keka"               # Archive utility
-cask "karabiner-elements" # Keyboard customizer
-cask "monitorcontrol"     # External display control
-cask "transmission"       # BitTorrent client
-cask "blender"            # 3D creation suite
-cask "spotify"            # Music streaming
+cask "iina"                          # Modern media player
+cask "figma"                         # Design tool
+cask "cleanshot"                     # Screenshot tool
+cask "clop"                          # Image optimizer
+cask "coteditor"                     # Plain text editor
+cask "keka"                          # Archive utility
+cask "karabiner-elements"            # Keyboard customizer
+cask "monitorcontrol"                # External display control
+cask "transmission"                  # BitTorrent client
+cask "blender"                       # 3D creation suite
+cask "spotify"                       # Music streaming
 
 # Communication
-cask "whatsapp"           # Messaging
-cask "zoom"               # Video conferencing
+cask "slack"                         # Team communication
+cask "telegram"                      # Messaging
+cask "whatsapp"                      # Messaging
+cask "zoom"                          # Video conferencing
 
 # Cloud Storage
-cask "google-drive"       # Google Drive sync
-cask "dropbox"            # Dropbox sync
-cask "backblaze"          # Backup service
+cask "google-drive"                  # Google Drive sync
+cask "dropbox"                       # Dropbox sync
+cask "backblaze"                     # Backup service
 
 # Security
-cask "adguard"            # Ad blocker
+cask "adguard"                       # Ad blocker
 
 ### Manual Installation Required
 #
