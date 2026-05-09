@@ -78,7 +78,7 @@ theme = "github"
 model = "gpt-5.5"
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
-model_reasoning_effort = "xhigh"
+model_reasoning_effort = "high"
 model_reasoning_summary = "detailed"
 model_verbosity = "high"
 web_search = "live"
@@ -91,6 +91,8 @@ memories = true
 external_migration = true
 guardian_approval = true
 prevent_idle_sleep = true
+terminal_resize_reflow = true
+goals = true
 
 [profiles.balanced]
 model = "gpt-5.5"
@@ -115,12 +117,12 @@ enabled = false
 url = "http://127.0.0.1:29979/mcp"
 
 [marketplaces.openai-bundled]
-last_updated = "2026-04-27T21:52:25Z"
+last_updated = "2026-05-09T07:38:16Z"
 source_type = "local"
 source = "/Users/han/.codex/.tmp/bundled-marketplaces/openai-bundled"
 
 [marketplaces.openai-primary-runtime]
-last_updated = "2026-04-27T11:49:28Z"
+last_updated = "2026-05-07T11:43:19Z"
 source_type = "local"
 source = "/Users/han/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
 
@@ -136,9 +138,6 @@ enabled = false
 [plugins."github@openai-curated"]
 enabled = true
 
-[plugins."browser-use@openai-bundled"]
-enabled = true
-
 [plugins."documents@openai-primary-runtime"]
 enabled = true
 
@@ -146,6 +145,9 @@ enabled = true
 enabled = true
 
 [plugins."presentations@openai-primary-runtime"]
+enabled = true
+
+[plugins."browser-use@openai-bundled"]
 enabled = true
 
 [projects."/Users/han/Git"]
@@ -203,4 +205,10 @@ trust_level = "trusted"
 trust_level = "trusted"
 
 [projects."/Users/han/Git/kai"]
+trust_level = "trusted"
+
+[projects."/Users/han/Git/res"]
+trust_level = "trusted"
+
+[projects."/Users/han/Git/pop"]
 trust_level = "trusted"
