@@ -71,18 +71,6 @@
 			"Bash(sh *)",
 			"Bash(curl *)",
 			"Bash(wget *)",
-			"Bash(:fin *)",
-			"Bash(:let *)",
-			"Bash(:koe *)",
-			"Bash(:ash *)",
-			"Bash(:ebb *)",
-			"Bash(:cho *)",
-			"Bash(/Users/han/.tools/fin/fin *)",
-			"Bash(/Users/han/.tools/let/let *)",
-			"Bash(/Users/han/.tools/koe/koe *)",
-			"Bash(/Users/han/.tools/ash/ash *)",
-			"Bash(/Users/han/.tools/ebb/ebb *)",
-			"Bash(/Users/han/.tools/cho/cho *)",
 			"Bash(--------------------------------------------------WEB-SEARCH-------------------------)",
 			"WebSearch",
 			"Bash(--------------------------------------------------WEB-CODE-DOCS----------------------)",
@@ -138,7 +126,6 @@
 			"WebFetch(domain:echarts.apache.org)",
 			"WebFetch(domain:bunny.net)",
 			"WebFetch(domain:web.dev)",
-			"WebFetch(domain:tc39.es)",
 			"Bash(--------------------------------------------------WEB-CLOUD-AUTH-BILLING-------------)",
 			"WebFetch(domain:vercel.com)",
 			"WebFetch(domain:netlify.com)",
@@ -317,6 +304,8 @@
 	"autoUpdatesChannel": "latest",
 	"showThinkingSummaries": true,
 	"skipDangerousModePermissionPrompt": true,
+	"teammateMode": "in-process",
+	"skipAutoPermissionPrompt": true,
 	"autoMode": {
 		"environment": [
 			"Organization: U29DC. Primary use: local software development, workstation automation, CLI tooling, and repository maintenance on trusted developer machines.",
@@ -327,6 +316,6 @@
 		]
 	},
 	"voiceEnabled": true,
-	"teammateMode": "in-process",
-	"skipAutoPermissionPrompt": true
+	"theme": "light",
+	"autoCompactEnabled": false
 }

@@ -1,4 +1,4 @@
-> Shared operating contract for Claude Code, Codex CLI, and AMP. Use this file for system-wide defaults on communication, tooling, implementation quality, and validation. Let more local `AGENTS.md` files add repo-specific commands, architecture, and constraints.
+> Shared operating contract for Claude Code, Codex CLI, and AMP. Use this file for system-wide defaults on communication, tooling, research, implementation quality, and validation across coding and knowledge work. Let more local `AGENTS.md` files add repo-specific commands, architecture, domain context, and constraints.
 
 ## 1. Documentation
 
@@ -14,9 +14,11 @@
 
 - This file applies unless an agent-specific or repo-local override says otherwise.
 - When rules conflict, prefer `security > correctness > reproducibility > performance > convenience`.
+- This policy applies across coding, deep research, file and vault organization, meeting preparation, finance and business strategy support, content work, and admin workflows. Do not force software-engineering workflows onto non-engineering tasks; apply the same evidence-first, pragmatic standard with task-appropriate validation.
+- This repository is public. Keep global instructions generic and non-sensitive: never encode private financial figures, client details, relationship context, vault contents, secrets, or personal runtime data here. Put private guidance in private vault docs, local skills, or runtime-only files.
 - Repo-level or subtree-level `AGENTS.md` files should define local commands, architecture, runtime state, dangerous paths, and validation. Do not duplicate full template payloads here.
-- Normative keywords follow RFC intent: `MUST` required, `SHOULD` default unless a justified exception exists, `MAY` optional, `NEVER` forbidden.
-- Default operating principles: context awareness, performance first, clarity over cleverness, consistency with existing patterns, and measurement over preference.
+- Normative keywords follow RFC intent: `MUST` required, `SHOULD` default unless a justified exception exists, `MAY` optional, `NEVER` forbidden. Use them sparingly; prefer trigger-based rules over broad absolutes when valid exceptions exist.
+- Default operating principles: rigorous pragmatism, context awareness, evidence first, clarity over cleverness, consistency with existing patterns, prompt minimalism, and measurement over preference.
 
 ## 3. Communication
 
@@ -38,6 +40,7 @@
 - MUST not compress so aggressively that required caveats, evidence, reasoning, or validation results disappear.
 - SHOULD default to `Goal -> Constraints -> Actions -> Validation -> Risks` when a structured response helps.
 - SHOULD preserve all constraints when compacting existing text and target meaningful line-count reduction instead of cosmetic rewrites.
+- SHOULD prefer positive target behavior over long lists of anti-patterns when shaping style or output format.
 
 ## 4. Tooling and Research Defaults
 
@@ -105,6 +108,9 @@
 
 - Execute one scoped task at a time. Keep boundaries explicit and validate each meaningful change before widening scope.
 - Inspect referenced files, configs, and source material before making codebase-specific claims or changes.
+- Keep generic operating policy separate from repo-specific guidance. Put stack, domain, and codebase conventions in local `AGENTS.md` files, skills, or linked docs near the relevant code.
+- Treat engineering standards as task-scoped: apply them to software work, and translate the same rigor to non-code work through source checks, citation quality, file diffs, audit trails, and explicit uncertainty.
+- For agent prompt or skill changes, prefer observed behavior over prompt intuition. Use representative examples, batch checks, or user feedback where practical, and watch for over-triggering, noise, and literal keyword effects.
 - Review mode defaults to findings first: prioritize bugs, regressions, missing tests, and operational risk before summaries.
 - Root-cause analysis should follow `symptom -> immediate cause -> contributing factors -> 5-whys root cause -> fix validation -> recurrence prevention`.
 - NEVER invent facts, citations, test results, command output, or evidence.

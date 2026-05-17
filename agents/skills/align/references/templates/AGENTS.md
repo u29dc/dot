@@ -16,6 +16,9 @@ Authoring rules:
 - Move subtree-specific rules into nested `AGENTS.md` files or linked docs close to the code.
 - Keep style or formatting rules out of this file when deterministic tooling already enforces them.
 - Do not include long history, marketing copy, file-by-file descriptions, stale command catalogs, or exact counts that drift.
+- Use `must`/`never` only for rules with no valid exception. Prefer `should` or trigger-based phrasing for defaults that depend on context.
+- Phrase guidance as desired behavior plus trigger conditions. Avoid broad "always use" rules for conventions that only apply to some files, frameworks, or workflows.
+- Keep generic agent behavior separate from repo-specific stack guidance. Link to local skills or docs when detailed conventions need ongoing curation.
 - Typography: use Markdown links for external docs and local files, with code-formatted labels for repo paths (for example [`src/cli.rs`](src/cli.rs)); wrap commands, paths, env vars, flags, identifiers, and contract names in backticks; avoid italics for routine labels.
 
 Content priority:
