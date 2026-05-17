@@ -200,8 +200,36 @@ upd() {
         return 1
     }
 
+    upd__has_tapped_formulae() {
+        local items="$1"
+        [ -n "$items" ] || return 1
+
+        printf '%s\n' "$items" | awk '
+            NF && $1 ~ /\// {
+                found = 1
+            }
+            END {
+                exit(found ? 0 : 1)
+            }
+        '
+    }
+
+    upd__tap_is_installed() {
+        local tap_name="$1"
+
+        brew tap 2>/dev/null | awk -v tap="$tap_name" '
+            $0 == tap {
+                found = 1
+            }
+            END {
+                exit(found ? 0 : 1)
+            }
+        '
+    }
+
     local overall_start=$SECONDS
     local failed=0
+    local homebrew_core_tap_ready=1
 
     # Include greedy cask checks so auto-updating casks can still be reported/upgraded.
     local formula_before
@@ -260,10 +288,24 @@ upd() {
     step_result=$?
     upd__apply_step_result "$step_result" || return $?
 
-    if [ "$formula_before_count" -gt 0 ]; then
-        upd__run_step "Upgrading formulae" brew upgrade --formula
+    # Third-party formula upgrades can lazily tap homebrew/core mid-upgrade; prepare it as a separate visible step.
+    if [ "$formula_before_count" -gt 0 ] && upd__has_tapped_formulae "$formula_before" && ! upd__tap_is_installed "homebrew/core"; then
+        upd__run_step --stream "Preparing Homebrew core tap" brew tap --force homebrew/core
         step_result=$?
+        if [ "$step_result" -ne 0 ]; then
+            homebrew_core_tap_ready=0
+        fi
         upd__apply_step_result "$step_result" || return $?
+    fi
+
+    if [ "$formula_before_count" -gt 0 ]; then
+        if [ "$homebrew_core_tap_ready" -eq 1 ]; then
+            upd__run_step "Upgrading formulae" brew upgrade --formula
+            step_result=$?
+            upd__apply_step_result "$step_result" || return $?
+        else
+            echo -e "${YELLOW}[SKIP]${RESET} Upgrading formulae (Homebrew core tap unavailable)."
+        fi
     else
         echo -e "${YELLOW}[SKIP]${RESET} Upgrading formulae (none outdated)."
     fi
