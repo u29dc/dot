@@ -3,7 +3,7 @@
 [user]
 	name = Han
 	email = han@u29dc.com
-	signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKwIYIvbrtcd7jqPOSrqoISMDhaL205cJ3LwG1qSAAMq
+	signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOAub7HJPRWWyYMLKKFS86eL7fjknHIYkjoO6rBbWriT
 
 [init]
 	defaultBranch = main
@@ -19,6 +19,7 @@
 
 [gpg "ssh"]
 	program = /Applications/1Password.app/Contents/MacOS/op-ssh-sign
+	allowedSignersFile = /Users/han/Git/dot/system/git-allowed-signers
 
 [core]
 	pager = delta
@@ -80,9 +81,3 @@
 	p = pull --rebase --autostash
 	ps = push
 	psf = push --force-with-lease
-[credential "https://github.com"]
-	helper = 
-	helper = !/opt/homebrew/bin/gh auth git-credential
-[credential "https://gist.github.com"]
-	helper = 
-	helper = !/opt/homebrew/bin/gh auth git-credential
