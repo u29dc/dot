@@ -15,14 +15,12 @@ export PATH="$PATH:/Applications/Obsidian.app/Contents/MacOS"
 export TOOLS_HOME="${TOOLS_HOME:-$HOME/.tools}"
 
 # Per-tool home directories
-export ASH_HOME="$TOOLS_HOME/ash"
 export BUF_HOME="$TOOLS_HOME/buf"
 export CHO_HOME="$TOOLS_HOME/cho"
 export FIN_HOME="$TOOLS_HOME/fin"
 export KAI_HOME="$TOOLS_HOME/kai"
 export LET_HOME="$TOOLS_HOME/let"
 export PDF_HOME="$TOOLS_HOME/pdf"
-export TAB_HOME="$TOOLS_HOME/tab"
 export TAO_HOME="$TOOLS_HOME/tao"
 
 # Agent skill directories
@@ -127,14 +125,12 @@ alias virtualenv='uv venv'
 # ------------------------------------------------------------------------------
 
 # Tool launchers
-:ash() { "$ASH_HOME/ash" "$@"; }
 :buf() { "$BUF_HOME/buf" "$@"; }
 :cho() { "$CHO_HOME/cho" "$@"; }
 :fin() { "$FIN_HOME/fin" "$@"; }
 :kai() { "$KAI_HOME/kai" "$@"; }
 :let() { "$LET_HOME/let" "$@"; }
 :pdf() { "$PDF_HOME/pdf" "$@"; }
-:tab() { "$TAB_HOME/tab" "$@"; }
 :tao() { "$TAO_HOME/tao" "$@"; }
 
 # AI assistant wrappers
