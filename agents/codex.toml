@@ -12,7 +12,7 @@ review_model = "gpt-5.5"
 personality = "pragmatic"
 # service_tier = "fast"
 
-model_reasoning_effort = "high"
+model_reasoning_effort = "xhigh"
 model_reasoning_summary = "detailed"
 model_verbosity = "low"
 plan_mode_reasoning_effort = "high"
@@ -79,7 +79,7 @@ enabled = false
 url = "http://127.0.0.1:29979/mcp"
 
 [marketplaces.openai-bundled]
-last_updated = "2026-05-19T08:53:13Z"
+last_updated = "2026-05-19T23:07:37Z"
 source_type = "local"
 source = "/Users/han/.codex/.tmp/bundled-marketplaces/openai-bundled"
 
@@ -191,4 +191,7 @@ trust_level = "trusted"
 trust_level = "trusted"
 
 [projects."/Users/han/Git/www"]
+trust_level = "trusted"
+
+[projects."/Users/han/Documents/Codex/2026-05-19/files-mentioned-by-the-user-2026"]
 trust_level = "trusted"
