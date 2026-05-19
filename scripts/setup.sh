@@ -30,7 +30,8 @@ set -e
 #   codex login
 #   amp login
 #
-#   # 7. (Optional) Apply macOS system preferences
+#   # 7. (Optional) Preview and apply macOS system preferences
+#   ~/.macos --audit
 #   ~/.macos
 #
 # ==============================================================================

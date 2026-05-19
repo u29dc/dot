@@ -142,6 +142,7 @@ cask "clop"                          # Image optimizer
 cask "coteditor"                     # Plain text editor
 cask "keka"                          # Archive utility
 cask "karabiner-elements"            # Keyboard customizer
+cask "logi-options+"                 # Logitech MX keyboard/mouse customization
 cask "monitorcontrol"                # External display control
 cask "transmission"                  # BitTorrent client
 cask "blender"                       # 3D creation suite
