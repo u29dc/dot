@@ -10,12 +10,12 @@
 model = "gpt-5.5"
 review_model = "gpt-5.5"
 personality = "pragmatic"
-service_tier = "fast"
+# service_tier = "fast"
 
-model_reasoning_effort = "xhigh"
+model_reasoning_effort = "high"
 model_reasoning_summary = "detailed"
 model_verbosity = "low"
-plan_mode_reasoning_effort = "xhigh"
+plan_mode_reasoning_effort = "high"
 model_supports_reasoning_summaries = true
 
 approval_policy = "never"
@@ -46,7 +46,7 @@ inherit = "all"
 apply_patch_freeform = true
 apps = false
 external_migration = false
-fast_mode = true
+fast_mode = false
 goals = true
 guardian_approval = true
 js_repl = true
@@ -79,12 +79,12 @@ enabled = false
 url = "http://127.0.0.1:29979/mcp"
 
 [marketplaces.openai-bundled]
-last_updated = "2026-05-17T08:08:53Z"
+last_updated = "2026-05-19T08:53:13Z"
 source_type = "local"
 source = "/Users/han/.codex/.tmp/bundled-marketplaces/openai-bundled"
 
 [marketplaces.openai-primary-runtime]
-last_updated = "2026-05-17T14:43:33Z"
+last_updated = "2026-05-19T09:43:26Z"
 source_type = "local"
 source = "/Users/han/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
 
