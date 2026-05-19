@@ -25,7 +25,7 @@ export TAO_HOME="$TOOLS_HOME/tao"
 
 # Agent skill directories
 export SKILLS_BASE="$HOME/Git/dot/agents/skills"
-export SKILLS_U29DC="$HOME/Library/CloudStorage/Dropbox/VAULT/WORK/15-STRATEGY/Skills"
+export SKILLS_U29DC="$HOME/Library/CloudStorage/Dropbox/VAULT/WORK/015-STRATEGY/Skills"
 
 # Silence Homebrew environment hints
 export HOMEBREW_NO_ENV_HINTS=1
