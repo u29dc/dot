@@ -26,7 +26,6 @@ export TAO_HOME="$TOOLS_HOME/tao"
 export BUF="$BUF_HOME/buf"
 export CHO="$CHO_HOME/cho"
 export FIN="$FIN_HOME/fin"
-export LET="$LET_HOME/let"
 export PDF="$PDF_HOME/pdf"
 export TAO="$TAO_HOME/tao"
 
@@ -135,7 +134,7 @@ alias virtualenv='uv venv'
 :buf() { "$BUF" "$@"; }
 :cho() { "$CHO" "$@"; }
 :fin() { "$FIN" "$@"; }
-:let() { "$LET" "$@"; }
+:let() { "$LET_HOME/let" "$@"; }
 :pdf() { "$PDF" "$@"; }
 :tao() { "$TAO" "$@"; }
 
