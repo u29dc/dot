@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+exec "${CHO:-$HOME/.tools/cho/cho}" "$@"

@@ -1,22 +1,31 @@
 #:schema https://developers.openai.com/codex/config-schema.json
 
-# Codex global configuration
-# ~/.codex/config.toml
+# Codex global configuration.
+# Symlink target for ~/.codex/config.toml; contains durable defaults plus local
+# Codex Desktop/runtime state. Keep secrets and private project details out.
 # https://developers.openai.com/codex/config-basic
 # https://developers.openai.com/codex/config-reference
 # https://developers.openai.com/codex/config-sample
 # https://developers.openai.com/codex/speed
+
+# -----------------------------------------------------------------------------
+# Model Defaults
+# -----------------------------------------------------------------------------
 
 model = "gpt-5.5"
 review_model = "gpt-5.5"
 personality = "pragmatic"
 # service_tier = "fast"
 
-model_reasoning_effort = "xhigh"
+model_reasoning_effort = "high"
 model_reasoning_summary = "detailed"
 model_verbosity = "low"
 plan_mode_reasoning_effort = "high"
 model_supports_reasoning_summaries = true
+
+# -----------------------------------------------------------------------------
+# Execution Policy
+# -----------------------------------------------------------------------------
 
 approval_policy = "never"
 approvals_reviewer = "auto_review"
@@ -34,12 +43,25 @@ project_doc_max_bytes = 64000
 show_raw_agent_reasoning = true
 suppress_unstable_features_warning = true
 
+notify = ["/Users/han/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
+
+# -----------------------------------------------------------------------------
+# Shell Environment
+# -----------------------------------------------------------------------------
+
 [shell_environment_policy]
 ignore_default_excludes = false
 inherit = "all"
 
+[shell_environment_policy.set]
+BUF = "/Users/han/.tools/buf/buf"
+CHO = "/Users/han/.tools/cho/cho"
+FIN = "/Users/han/.tools/fin/fin"
+PDF = "/Users/han/.tools/pdf/pdf"
+TAO = "/Users/han/.tools/tao/tao"
+
 # -----------------------------------------------------------------------------
-# Runtime Controls
+# Feature Flags
 # -----------------------------------------------------------------------------
 
 [features]
@@ -49,7 +71,7 @@ external_migration = false
 fast_mode = false
 goals = true
 guardian_approval = true
-js_repl = true
+js_repl = false
 memories = true
 multi_agent = true
 prevent_idle_sleep = true
@@ -57,6 +79,10 @@ shell_snapshot = true
 terminal_resize_reflow = true
 unified_exec = true
 hooks = true
+
+# -----------------------------------------------------------------------------
+# Agent Jobs and History
+# -----------------------------------------------------------------------------
 
 [agents]
 job_max_runtime_seconds = 7200
@@ -70,30 +96,52 @@ persistence = "save-all"
 [notice]
 hide_full_access_warning = true
 
+# -----------------------------------------------------------------------------
+# Terminal UI
+# -----------------------------------------------------------------------------
+
 [tui]
 status_line = ["five-hour-limit", "context-used", "model-with-reasoning", "current-dir", "git-branch"]
 theme = "github"
+
+# -----------------------------------------------------------------------------
+# MCP Servers
+# -----------------------------------------------------------------------------
 
 [mcp_servers.paper]
 enabled = false
 url = "http://127.0.0.1:29979/mcp"
 
+[mcp_servers.node_repl]
+args = []
+command = "/Applications/Codex.app/Contents/Resources/node_repl"
+startup_timeout_sec = 120
+
+[mcp_servers.node_repl.env]
+BROWSER_USE_AVAILABLE_BACKENDS = "iab"
+BROWSER_USE_MARKETPLACE_NAME = "openai-bundled"
+CODEX_CLI_PATH = "/Applications/Codex.app/Contents/Resources/codex"
+CODEX_HOME = "/Users/han/.codex"
+NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
+NODE_REPL_NODE_MODULE_DIRS = ""
+NODE_REPL_NODE_PATH = "/Applications/Codex.app/Contents/Resources/node"
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "167fdf579477181fba1773c1efb067b00c5a64fe85dafb50a2001bde198dc739"
+NODE_REPL_TRUSTED_CODE_PATHS = "/Users/han/.codex"
+NODE_REPL_UNTRUSTED_ENV_ALLOWLIST = "BROWSER_USE_MARKETPLACE_NAME"
+
+# -----------------------------------------------------------------------------
+# Plugin Marketplaces
+# -----------------------------------------------------------------------------
+
 [marketplaces.openai-bundled]
-last_updated = "2026-05-19T23:07:37Z"
+last_updated = "2026-05-23T13:52:03Z"
 source_type = "local"
 source = "/Users/han/.codex/.tmp/bundled-marketplaces/openai-bundled"
 
 [marketplaces.openai-primary-runtime]
-last_updated = "2026-05-19T09:43:26Z"
+last_updated = "2026-05-21T19:43:13Z"
 source_type = "local"
 source = "/Users/han/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
-
-# -----------------------------------------------------------------------------
-# Codex-Managed Local State
-# -----------------------------------------------------------------------------
-
-[tui.model_availability_nux]
-"gpt-5.5" = 4
 
 # -----------------------------------------------------------------------------
 # Plugins
@@ -127,6 +175,68 @@ enabled = true
 enabled = true
 
 # -----------------------------------------------------------------------------
+# Codex-Managed Local State
+# -----------------------------------------------------------------------------
+
+[tui.model_availability_nux]
+"gpt-5.5" = 4
+
+# -----------------------------------------------------------------------------
+# Desktop App Settings
+# -----------------------------------------------------------------------------
+
+[desktop]
+appearanceDarkCodeThemeId = "codex"
+appearanceLightCodeThemeId = "codex"
+codeFontSize = 11
+conversationDetailMode = "STEPS_EXECUTION"
+default-service-tier = "priority"
+followUpQueueMode = "steer"
+keepRemoteControlAwakeWhilePluggedIn = true
+notifications-turn-mode = "always"
+preventSleepWhileRunning = true
+reviewDelivery = "inline"
+usePointerCursors = true
+
+[desktop.appearanceDarkChromeTheme]
+accent = "#0169cc"
+contrast = 60
+ink = "#fcfcfc"
+opaqueWindows = true
+surface = "#111111"
+
+[desktop.appearanceDarkChromeTheme.fonts]
+code = '"Geist Mono", ui-monospace, "SFMono-Regular"'
+ui = "Inter"
+
+[desktop.appearanceDarkChromeTheme.semanticColors]
+diffAdded = "#00a240"
+diffRemoved = "#e02e2a"
+skill = "#b06dff"
+
+[desktop.appearanceLightChromeTheme]
+accent = "#0169cc"
+contrast = 40
+ink = "#0d0d0d"
+opaqueWindows = true
+surface = "#ffffff"
+
+[desktop.appearanceLightChromeTheme.fonts]
+code = '"Geist Mono", ui-monospace, "SFMono-Regular"'
+ui = "Inter"
+
+[desktop.appearanceLightChromeTheme.semanticColors]
+diffAdded = "#00a240"
+diffRemoved = "#e02e2a"
+skill = "#751ed9"
+
+[desktop.open-in-target-preferences]
+global = "fileManager"
+
+[desktop.open-in-target-preferences.perPath]
+"/Users/han/Library/CloudStorage/Dropbox/VAULT" = "fileManager"
+
+# -----------------------------------------------------------------------------
 # Trusted Projects
 # -----------------------------------------------------------------------------
 
@@ -142,9 +252,6 @@ trust_level = "trusted"
 [projects."/Users/han/Git/aix"]
 trust_level = "trusted"
 
-[projects."/Users/han/Git/ash"]
-trust_level = "trusted"
-
 [projects."/Users/han/Git/buf"]
 trust_level = "trusted"
 
@@ -155,15 +262,6 @@ trust_level = "trusted"
 trust_level = "trusted"
 
 [projects."/Users/han/Git/fin"]
-trust_level = "trusted"
-
-[projects."/Users/han/Git/gpt"]
-trust_level = "trusted"
-
-[projects."/Users/han/Git/kai"]
-trust_level = "trusted"
-
-[projects."/Users/han/Git/lea"]
 trust_level = "trusted"
 
 [projects."/Users/han/Git/let"]
@@ -178,20 +276,8 @@ trust_level = "trusted"
 [projects."/Users/han/Git/ray"]
 trust_level = "trusted"
 
-[projects."/Users/han/Git/res"]
-trust_level = "trusted"
-
-[projects."/Users/han/Git/tab"]
-trust_level = "trusted"
-
 [projects."/Users/han/Git/tao"]
 trust_level = "trusted"
 
-[projects."/Users/han/Git/tok"]
-trust_level = "trusted"
-
 [projects."/Users/han/Git/www"]
-trust_level = "trusted"
-
-[projects."/Users/han/Documents/Codex/2026-05-19/files-mentioned-by-the-user-2026"]
 trust_level = "trusted"

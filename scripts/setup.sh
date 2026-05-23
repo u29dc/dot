@@ -294,6 +294,11 @@ link_file "$DOTFILES_DIR/terminal/bottom.toml" "$HOME/.config/bottom/bottom.toml
 link_file "$DOTFILES_DIR/terminal/atuin.toml" "$HOME/.config/atuin/config.toml"
 link_file "$DOTFILES_DIR/terminal/bat" "$HOME/.config/bat/config"
 link_file "$DOTFILES_DIR/terminal/ignore" "$HOME/.ignore"
+link_file "$DOTFILES_DIR/terminal/bin/buf" "$HOME/.local/bin/buf"
+link_file "$DOTFILES_DIR/terminal/bin/cho" "$HOME/.local/bin/cho"
+link_file "$DOTFILES_DIR/terminal/bin/fin" "$HOME/.local/bin/fin"
+link_file "$DOTFILES_DIR/terminal/bin/pdf" "$HOME/.local/bin/pdf"
+link_file "$DOTFILES_DIR/terminal/bin/tao" "$HOME/.local/bin/tao"
 
 link_file "$DOTFILES_DIR/biome.json" "$HOME/.config/biome/biome.json"
 link_file "$DOTFILES_DIR/tsconfig.json" "$HOME/.config/typescript/tsconfig.json"
