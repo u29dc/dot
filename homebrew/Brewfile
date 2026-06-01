@@ -10,6 +10,7 @@ tap "cirruslabs/cli"
 tap "lightpanda-io/browser"
 tap "modem-dev/tap"
 tap "pluk-inc/tap"
+tap "rana-gmbh/netfluss"
 tap "steipete/tap"
 tap "yfedoseev/tap"
 tap "zahidcakici/tap"
@@ -95,6 +96,7 @@ brew "tldr"                           # Simplified man pages
 brew "shellcheck"                     # Shell script linter
 brew "shfmt"                          # Shell script formatter
 brew "cirruslabs/cli/tart"            # macOS VM sandbox
+brew "vnstat"                         # Lightweight network traffic accounting
 
 # AI & Cloud CLIs
 brew "anomalyco/tap/opencode"         # OpenCode AI coding agent
@@ -113,6 +115,7 @@ cask "font-jetbrains-mono-nerd-font"  # Terminal/programming font
 cask "font-new-computer-modern"       # Computer Modern font family
 cask "ghostty"                        # GPU-accelerated terminal
 cask "jordanbaird-ice"                # Menu bar manager
+cask "netfluss"                       # Menu bar network usage monitor
 
 # Productivity & Notes
 cask "1password"                      # Password manager (GUI version)
