@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+mode="${DELTA_THEME_MODE:-auto}"
+
+if [ "$mode" = "auto" ]; then
+    if command -v defaults >/dev/null 2>&1 && [ "$(defaults read -g AppleInterfaceStyle 2>/dev/null || true)" = "Dark" ]; then
+        mode="dark"
+    else
+        mode="light"
+    fi
+fi
+
+case "$mode" in
+    dark)
+        exec delta --dark --syntax-theme=TwoDark "$@"
+        ;;
+    light)
+        exec delta --light --syntax-theme=GitHub "$@"
+        ;;
+    *)
+        printf 'delta-themed: invalid DELTA_THEME_MODE=%s (expected auto, dark, or light)\n' "$mode" >&2
+        exit 2
+        ;;
+esac
