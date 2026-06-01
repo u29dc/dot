@@ -1,12 +1,22 @@
 {
 	"$schema": "https://json.schemastore.org/claude-code-settings.json",
 	"env": {
-		"ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-7[1m]",
+		"BUF": "/Users/han/.tools/buf/buf",
+		"CHO": "/Users/han/.tools/cho/cho",
+		"FIN": "/Users/han/.tools/fin/fin",
+		"PDF": "/Users/han/.tools/pdf/pdf",
+		"TAO": "/Users/han/.tools/tao/tao",
+		"ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-8[1m]",
+		"CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
 		"CLAUDE_CODE_EFFORT_LEVEL": "max",
 		"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-		"CLAUDE_CODE_SUBAGENT_MODEL": "opus"
+		"CLAUDE_CODE_SUBAGENT_MODEL": "opus",
+		"DISABLE_AUTO_COMPACT": "1"
 	},
-	"includeCoAuthoredBy": false,
+	"attribution": {
+		"commit": "",
+		"pr": ""
+	},
 	"permissions": {
 		"allow": [
 			"Read",
@@ -200,7 +210,7 @@
 		"ask": ["Bash(rm *)", "Bash(rm -rf *)", "Bash(rm -r *)", "Bash(sudo *)"],
 		"defaultMode": "auto"
 	},
-	"model": "claude-opus-4-7[1m]",
+	"model": "claude-opus-4-8[1m]",
 	"statusLine": {
 		"type": "command",
 		"command": "bunx -y ccstatusline@latest",
@@ -302,8 +312,12 @@
 	"spinnerTipsEnabled": false,
 	"alwaysThinkingEnabled": true,
 	"autoUpdatesChannel": "latest",
+	"voice": {
+		"enabled": true
+	},
 	"showThinkingSummaries": true,
 	"skipDangerousModePermissionPrompt": true,
+	"theme": "light",
 	"teammateMode": "in-process",
 	"skipAutoPermissionPrompt": true,
 	"autoMode": {
@@ -315,7 +329,5 @@
 			"Key internal services: none configured by default."
 		]
 	},
-	"voiceEnabled": true,
-	"theme": "light",
-	"autoCompactEnabled": false
+	"tui": "fullscreen"
 }
