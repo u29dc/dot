@@ -131,12 +131,12 @@ BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
 CODEX_CLI_PATH = "/Applications/Codex.app/Contents/Resources/codex"
 
 [marketplaces.openai-bundled]
-last_updated = "2026-06-01T13:06:13Z"
+last_updated = "2026-06-01T18:22:22Z"
 source_type = "local"
 source = "/Users/han/.codex/.tmp/bundled-marketplaces/openai-bundled"
 
 [marketplaces.openai-primary-runtime]
-last_updated = "2026-05-21T19:43:13Z"
+last_updated = "2026-06-01T18:43:47Z"
 source_type = "local"
 source = "/Users/han/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
 
@@ -193,6 +193,7 @@ notifications-turn-mode = "always"
 preventSleepWhileRunning = true
 reviewDelivery = "inline"
 usePointerCursors = true
+default-service-tier = "priority"
 
 [desktop.appearanceDarkChromeTheme]
 accent = "#0169cc"
