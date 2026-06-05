@@ -1,5 +1,9 @@
 {
-	"diff_view_style": "split",
+	"edit_predictions": {
+		"provider": "zed"
+	},
+
+	"diff_view_style": "unified",
 	"agent_servers": {
 		"codex-acp": {
 			"type": "registry"
@@ -19,6 +23,7 @@
 		"favorite_models": [],
 		"model_parameters": []
 	},
+
 	"theme": { "mode": "system", "light": "Github Plus Light", "dark": "Github Plus Dark" },
 	"ui_font_size": 15,
 	"buffer_font_size": 12,
@@ -41,8 +46,6 @@
 		"font_family": "SF Mono",
 		"working_directory": "current_project_directory"
 	},
-
-	"features": { "edit_prediction_provider": "zed" },
 	"telemetry": { "diagnostics": false, "metrics": false },
 
 	"lsp": {
