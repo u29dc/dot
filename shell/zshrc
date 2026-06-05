@@ -140,12 +140,19 @@ alias virtualenv='uv venv'
 
 # AI assistant wrappers
 cc() {
-    if [[ "$1" == "allow" || "$1" == "auto" ]]; then
-        shift
-        claude --enable-auto-mode --permission-mode auto "$@"
-    else
-        claude --enable-auto-mode "$@"
-    fi
+    case "$1" in
+        allow | bypass | danger)
+            shift
+            claude --permission-mode bypassPermissions "$@"
+            ;;
+        auto)
+            shift
+            claude --permission-mode auto "$@"
+            ;;
+        *)
+            claude "$@"
+            ;;
+    esac
 }
 
 # Auto-trust working paths under ~/Git and ~/Library/CloudStorage/Dropbox.
@@ -517,3 +524,6 @@ if [ -f ~/.zshrc.local ]; then
 fi
 # CF CLI completions
 [[ -f "/Users/han/.config/cf/completions/_cf.zsh" ]] && source "/Users/han/.config/cf/completions/_cf.zsh"
+
+# bun completions
+[ -s "/Users/han/.bun/_bun" ] && source "/Users/han/.bun/_bun"
