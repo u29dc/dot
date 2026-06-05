@@ -15,7 +15,7 @@
 model = "gpt-5.5"
 review_model = "gpt-5.5"
 personality = "pragmatic"
-# service_tier = "fast"
+service_tier = "priority"
 
 model_reasoning_effort = "xhigh"
 model_reasoning_summary = "detailed"
@@ -44,7 +44,6 @@ show_raw_agent_reasoning = true
 suppress_unstable_features_warning = true
 
 notify = ["/Users/han/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
-service_tier = "fast"
 
 # -----------------------------------------------------------------------------
 # Shell Environment
@@ -72,7 +71,6 @@ external_migration = false
 fast_mode = false
 goals = true
 guardian_approval = true
-js_repl = false
 memories = true
 multi_agent = true
 prevent_idle_sleep = true
@@ -80,6 +78,7 @@ shell_snapshot = true
 terminal_resize_reflow = true
 unified_exec = true
 hooks = true
+js_repl = false
 
 # -----------------------------------------------------------------------------
 # Agent Jobs and History
@@ -124,14 +123,15 @@ NODE_REPL_NODE_MODULE_DIRS = ""
 NODE_REPL_NODE_PATH = "/Applications/Codex.app/Contents/Resources/node"
 NODE_REPL_TRUSTED_CODE_PATHS = "/Users/han/.codex"
 CODEX_HOME = "/Users/han/.codex"
-NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "0b0d41e7a14a4903d2f95b0b3f427ed796b12c8edca2fa392a03df43997075ae"
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "2de792ebdf729e85542c94275f6654821dddce546d9c7374c915f2297529e313"
 BROWSER_USE_AVAILABLE_BACKENDS = "iab"
 NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
 BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
+BROWSER_USE_CODEX_APP_VERSION = "26.602.40724"
 CODEX_CLI_PATH = "/Applications/Codex.app/Contents/Resources/codex"
 
 [marketplaces.openai-bundled]
-last_updated = "2026-06-01T18:22:22Z"
+last_updated = "2026-06-05T19:51:52Z"
 source_type = "local"
 source = "/Users/han/.codex/.tmp/bundled-marketplaces/openai-bundled"
 
