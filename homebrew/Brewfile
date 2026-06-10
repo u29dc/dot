@@ -102,6 +102,7 @@ brew "vnstat"                         # Lightweight network traffic accounting
 brew "anomalyco/tap/opencode"         # OpenCode AI coding agent
 brew "agent-browser"                  # Browser automation CLI for AI agents
 cask "codex"                          # AI code assistant
+cask "codex-app"                      # Codex desktop app and iOS remote-control companion
 cask "codexbar"                       # Menu bar usage monitor for Codex and Claude
 brew "steipete/tap/gogcli"            # Google Workspace CLI
 brew "whisperkit-cli"                 # On-device speech recognition CLI

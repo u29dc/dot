@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 
 # OpenAI API Key | https://platform.openai.com/api-keys
-export OPENAI_API_KEY="sk-proj-..."
+# export OPENAI_API_KEY="sk-proj-..."
 
 # OpenRouter API Key | https://openrouter.ai/keys
 export OPENROUTER_API_KEY="sk-or-v1-..."

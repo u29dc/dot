@@ -5,5 +5,5 @@
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # >>> Codex installer >>>
-export PATH="/Users/han/.local/bin:$PATH"
+export PATH="/Users/han/.codex/packages/standalone/bin:$PATH"
 # <<< Codex installer <<<

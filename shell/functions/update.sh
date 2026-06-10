@@ -3,6 +3,8 @@
 
 # shellcheck source=shell/functions/progress.sh
 source "${DOTFILES_DIR:-$HOME/Git/dot}/shell/functions/progress.sh"
+# shellcheck source=shell/functions/homebrew.sh
+source "${DOTFILES_DIR:-$HOME/Git/dot}/shell/functions/homebrew.sh"
 
 upd() {
     # ANSI colors
@@ -145,10 +147,6 @@ upd() {
         ' <(printf '%s\n' "$excluded") <(printf '%s\n' "$items")
     }
 
-    upd__run_step() {
-        dot_progress_run_step "$@"
-    }
-
     upd__apply_step_result() {
         local step_result="$1"
         if [ "$step_result" -eq 130 ] || [ "$step_result" -eq 143 ]; then
@@ -227,9 +225,135 @@ upd() {
         '
     }
 
+    upd__codex_resolve_target() {
+        local path="$1"
+        local target
+
+        if [ -L "$path" ]; then
+            target="$(readlink "$path" 2>/dev/null || true)"
+            case "$target" in
+                /*) printf '%s\n' "$target" ;;
+                *) printf '%s/%s\n' "$(cd "$(dirname "$path")" && pwd)" "$target" ;;
+            esac
+        else
+            printf '%s\n' "$path"
+        fi
+    }
+
+    upd__codex_remove_installer_path_blocks() {
+        local file
+        local target
+        local dotfiles_dir="${DOTFILES_DIR:-$HOME/Git/dot}"
+
+        for file in "$HOME/.zprofile" "$dotfiles_dir/shell/zprofile"; do
+            [ -e "$file" ] || [ -L "$file" ] || continue
+            target="$(upd__codex_resolve_target "$file")"
+            [ -f "$target" ] || continue
+            grep -F '# >>> Codex installer >>>' "$target" >/dev/null 2>&1 || continue
+
+            perl -0pi -e 's/\n?# >>> Codex installer >>>\nexport PATH="[^"]+"\n# <<< Codex installer <<<\n?/\n/g' "$target" || return 1
+            printf '%b[FIX ]%b Removed Codex installer PATH block from %s\n' "$BLUE" "$RESET" "$target"
+        done
+    }
+
+    upd__codex_remove_standalone_shim() {
+        local bin="$HOME/.local/bin/codex"
+        local target
+
+        [ -L "$bin" ] || return 0
+        target="$(readlink "$bin" 2>/dev/null || true)"
+
+        case "$target" in
+            "$HOME/.codex/packages/standalone/"*)
+                rm -f "$bin" || return 1
+                printf '%b[FIX ]%b Removed standalone Codex shim from %s\n' "$BLUE" "$RESET" "$bin"
+                ;;
+        esac
+    }
+
+    upd__codex_doctor_status() {
+        command -v ruby >/dev/null 2>&1 || return 2
+
+        /opt/homebrew/bin/codex doctor --json 2>/dev/null | ruby -rjson -e '
+            begin
+              data = JSON.parse(STDIN.read)
+              status = data["overallStatus"]
+              exit 3 unless status.is_a?(String) && !status.empty?
+              puts(status)
+            rescue JSON::ParserError
+              exit 4
+            end
+        ' 2>/dev/null
+    }
+
+    upd__codex_postflight() {
+        local visible_codex=""
+        local doctor_status=""
+        local remote_control_json=""
+        local status=0
+        local install_dir="$HOME/.codex/packages/standalone/bin"
+
+        [ -x /opt/homebrew/bin/codex ] || {
+            echo -e "${YELLOW}[SKIP]${RESET} Codex postflight (Brew Codex CLI not installed)."
+            return 0
+        }
+
+        upd__codex_remove_standalone_shim || status=1
+        upd__codex_remove_installer_path_blocks || status=1
+
+        visible_codex="$(zsh -lic 'command -v codex' 2>/dev/null || true)"
+        if [ "$visible_codex" != "/opt/homebrew/bin/codex" ]; then
+            echo -e "${RED}[FAIL]${RESET} Codex resolves to ${visible_codex:-missing}; expected /opt/homebrew/bin/codex."
+            status=1
+        fi
+
+        if remote_control_json="$(CODEX_INSTALL_DIR="$install_dir" /opt/homebrew/bin/codex remote-control start --json 2>/dev/null)"; then
+            if printf '%s\n' "$remote_control_json" | grep -F '"status":"connected"' >/dev/null 2>&1; then
+                echo -e "${BLUE}[OK  ]${RESET} Codex remote-control is connected."
+            else
+                echo -e "${YELLOW}[WARN]${RESET} Codex remote-control status was not connected."
+                printf '%s\n' "$remote_control_json"
+                status=1
+            fi
+        else
+            echo -e "${YELLOW}[WARN]${RESET} Codex remote-control did not start; run 'codex login' or repair the standalone runtime manually."
+            status=1
+        fi
+
+        if /opt/homebrew/bin/codex doctor --summary; then
+            if doctor_status="$(upd__codex_doctor_status)"; then
+                if [ "$doctor_status" = "ok" ]; then
+                    echo -e "${BLUE}[OK  ]${RESET} Codex doctor reports ok."
+                else
+                    echo -e "${RED}[FAIL]${RESET} Codex doctor overallStatus=$doctor_status."
+                    status=1
+                fi
+            else
+                echo -e "${RED}[FAIL]${RESET} Codex doctor status unavailable; run '/opt/homebrew/bin/codex doctor --summary' for repair details."
+                status=1
+            fi
+        else
+            echo -e "${RED}[FAIL]${RESET} Codex doctor failed; run '/opt/homebrew/bin/codex doctor --summary' for repair details."
+            status=1
+        fi
+
+        return "$status"
+    }
+
     local overall_start=$SECONDS
     local failed=0
     local homebrew_core_tap_ready=1
+    local step_result=0
+
+    dot_progress_run "Trusting Brewfile tap items..."
+    dot_trust_brewfile_items
+    step_result=$?
+    if [ "$step_result" -eq 0 ]; then
+        dot_progress_ok "Trusting Brewfile tap items"
+    else
+        dot_progress_fail "Trusting Brewfile tap items"
+    fi
+    upd__apply_step_result "$step_result" || return $?
 
     # Include greedy cask checks so auto-updating casks can still be reported/upgraded.
     local formula_before
@@ -282,15 +406,13 @@ upd() {
 
     upd__ensure_sudo_session "$actionable_cask_before_count" "prompt" || return 1
 
-    local step_result=0
-
-    upd__run_step "Refreshing Homebrew metadata" brew update
+    dot_progress_run_step "Refreshing Homebrew metadata" brew update
     step_result=$?
     upd__apply_step_result "$step_result" || return $?
 
     # Third-party formula upgrades can lazily tap homebrew/core mid-upgrade; prepare it as a separate visible step.
     if [ "$formula_before_count" -gt 0 ] && upd__has_tapped_formulae "$formula_before" && ! upd__tap_is_installed "homebrew/core"; then
-        upd__run_step --stream "Preparing Homebrew core tap" brew tap --force homebrew/core
+        dot_progress_run_step --stream "Preparing Homebrew core tap" brew tap --force homebrew/core
         step_result=$?
         if [ "$step_result" -ne 0 ]; then
             homebrew_core_tap_ready=0
@@ -300,7 +422,7 @@ upd() {
 
     if [ "$formula_before_count" -gt 0 ]; then
         if [ "$homebrew_core_tap_ready" -eq 1 ]; then
-            upd__run_step "Upgrading formulae" brew upgrade --formula
+            dot_progress_run_step "Upgrading formulae" brew upgrade --formula
             step_result=$?
             upd__apply_step_result "$step_result" || return $?
         else
@@ -322,7 +444,7 @@ upd() {
 
         # Refresh ticket right before cask upgrades to reduce chance of mid-step prompts.
         upd__ensure_sudo_session "$actionable_cask_before_count" "refresh" || return 1
-        upd__run_step --stream "Upgrading casks (greedy)" brew upgrade --cask --greedy "${actionable_cask_args[@]}"
+        dot_progress_run_step --stream "Upgrading casks (greedy)" brew upgrade --cask --greedy "${actionable_cask_args[@]}"
         step_result=$?
         upd__apply_step_result "$step_result" || return $?
     elif [ "$cask_before_count" -gt 0 ]; then
@@ -331,12 +453,22 @@ upd() {
         echo -e "${YELLOW}[SKIP]${RESET} Upgrading casks (none outdated)."
     fi
 
-    upd__run_step "Removing stale dependencies" brew autoremove
+    dot_progress_run_step "Removing stale dependencies" brew autoremove
     step_result=$?
     upd__apply_step_result "$step_result" || return $?
 
-    upd__run_step "Cleaning old versions and cache" brew cleanup -s --prune=all
+    dot_progress_run_step "Cleaning old versions and cache" brew cleanup -s --prune=all
     step_result=$?
+    upd__apply_step_result "$step_result" || return $?
+
+    dot_progress_run "Checking Codex install and remote-control..."
+    upd__codex_postflight
+    step_result=$?
+    if [ "$step_result" -eq 0 ]; then
+        dot_progress_ok "Checking Codex install and remote-control"
+    else
+        dot_progress_fail "Checking Codex install and remote-control"
+    fi
     upd__apply_step_result "$step_result" || return $?
 
     local formula_after
