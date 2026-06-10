@@ -1,6 +1,6 @@
 ---
 name: compose
-description: Build/refactor CLIs into agent-native, composable primitives with strict discovery + JSON contracts
+description: Build/refactor CLIs into agent-native, composable primitives with strict discovery, JSON-default output, and optional Toon contracts
 argument-hint: [file|audit|migrate]
 allowed-tools: Bash, Read, Write, Glob, Grep, Edit
 ---
@@ -67,16 +67,18 @@ Apply when:
 ### 1. Orientation Surface
 
 - MUST provide:
-    - `<tool> tools --json`
-    - `<tool> health --json`
-    - `<tool> config show --json` (or equivalent capability/config introspection)
+    - `<tool> tools`
+    - `<tool> health`
+    - `<tool> config show` (or equivalent capability/config introspection)
+    - optional `<tool> tools --toon` and `<tool> health --toon` when Toon output is supported
 - `health` MUST return actionable remediation (`checks[].fix`) and lifecycle status (`ready|degraded|blocked`).
 
 ### 2. Capability Discovery (`tools`)
 
 - MUST expose full catalog and single-tool detail:
-    - `<tool> tools --json`
-    - `<tool> tools <name> --json` (or equivalent detail mode)
+    - `<tool> tools`
+    - `<tool> tools <name>` (or equivalent detail mode)
+    - optional `<tool> tools --toon`
 - MUST generate catalog from a single source registry; do not duplicate metadata.
 - MUST return deterministic order (category, then name).
 - MUST include `globalFlags` in catalog output.
@@ -95,15 +97,18 @@ Required per-tool metadata fields:
 - `rateLimit` (string or `null`)
 - `example`
 
-### 3. JSON Envelope
+### 3. Output Envelope
 
-- Every `--json` command MUST emit exactly one JSON line on `stdout`.
-- `stdout` in JSON mode MUST contain envelope only; logs/errors go to `stderr`.
+- Structured commands MUST emit exactly one compact JSON envelope on `stdout` by default.
+- CLIs MAY support `--toon` as the only alternate structured stdout format.
+- `--toon` MUST encode the same envelope object as default JSON.
+- `stdout` in structured mode MUST contain the envelope only; logs/errors go to `stderr`.
 - Success envelope:
     - `{ ok: true, data: <payload>, meta: { tool, elapsed, count?, total?, hasMore? } }`
 - Error envelope:
     - `{ ok: false, error: { code, message, hint }, meta: { tool, elapsed } }`
 - Envelope keys (`ok,data,error,meta`) MUST stay stable across projects.
+- Generic `--text`, `--format`, table, CSV, and TSV stdout presentation modes are anti-patterns for agent-native commands unless the format is the actual exported artifact.
 
 ### 4. Exit Codes + Error Semantics
 
@@ -116,7 +121,9 @@ Required per-tool metadata fields:
 
 ### 5. Command Behavior
 
-- Every data-bearing command MUST support `--json` (or `--format json` with same envelope).
+- Every data-bearing command MUST emit the default JSON envelope without requiring an output flag.
+- Commands that support an alternate structured format MUST use `--toon`.
+- Do not add generic presentation flags such as `--text`, `--format`, table, CSV, or TSV for structured stdout.
 - Commands MUST run fully non-interactively via args/flags.
 - Mutating commands SHOULD support `--dry-run`; if impossible, document why.
 - Command signatures and flag semantics MUST stay consistent across groups.
@@ -134,21 +141,21 @@ Required per-tool metadata fields:
 2. Build entity CRUD matrix; fill all required operations.
 3. Define command grammar (`group action`, shared flags, naming conventions).
 4. Implement envelope + exit code contract first.
-5. Implement tool registry wrapper and `tools --json`.
-6. Implement `health --json` and config/capability introspection.
+5. Implement tool registry wrapper and default-JSON `tools`.
+6. Implement default-JSON `health` and config/capability introspection.
 7. Implement primitives (read-only first, mutating second).
 8. Validate with real agent loops; add shortcuts only after repeated-chain evidence.
 
 ## Migration Playbook (Legacy CLI)
 
 1. Capture current surface (`--help`, common workflows, failure modes).
-2. Add JSON envelope without breaking text mode.
+2. Add or centralize the default JSON envelope.
 3. Introduce registry wrapper; backfill tool metadata incrementally.
-4. Add `tools --json` generated from registry.
-5. Add `health --json` with fix commands and blocked/degraded semantics.
+4. Add registry-generated `tools`.
+5. Add `health` with fix commands and blocked/degraded semantics.
 6. Split workflow commands into primitives; keep legacy command as thin compatibility wrapper.
 7. Mark wrappers as deprecated with explicit replacement commands.
-8. Preserve old flags where possible; normalize on new contract for new commands.
+8. Remove brittle presentation modes once downstream automation has moved to default JSON or optional Toon.
 9. Remove deprecated wrappers only after downstream automation migration window.
 
 ## Cross-Language Mapping
@@ -170,11 +177,11 @@ When auditing, produce:
 
 ## Acceptance Checks
 
-- Agent can discover full capability surface via `tools --json` only.
-- Agent can classify health readiness via `health --json` only.
+- Agent can discover full capability surface via default JSON `tools`.
+- Agent can classify health readiness via default JSON `health`.
 - Agent can run one realistic end-to-end workflow without scraping text output.
 - Error paths return stable `error.code` + `hint` and correct exit code.
-- JSON mode never leaks non-envelope output on `stdout`.
+- Structured modes never leak non-envelope output on `stdout`.
 
 ## Graduation Heuristic
 

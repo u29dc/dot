@@ -5,12 +5,14 @@ Rules for multi-tool ecosystems where one agent composes several CLIs in a singl
 ## Ecosystem Invariants
 
 - Every tool MUST expose orientation surface:
-    - `<tool> tools --json`
-    - `<tool> health --json`
-    - `<tool> config show --json` (or equivalent capability/config introspection)
-- Every tool MUST use the same JSON envelope keys: `ok`, `data` or `error`, `meta`.
+    - `<tool> tools`
+    - `<tool> health`
+    - `<tool> config show` (or equivalent capability/config introspection)
+    - optional `<tool> tools --toon` and `<tool> health --toon` for alternate structured output.
+- Every tool MUST use the same envelope keys: `ok`, `data` or `error`, `meta`.
 - Every tool MUST map blocked prerequisites to exit code `2`.
-- Every tool MUST keep JSON mode stdout envelope-only (no logs/tables mixed in).
+- Every tool MUST keep structured stdout envelope-only, with compact JSON as the default and logs/errors on `stderr`.
+- Every tool MUST avoid generic `--text`, `--format`, table, CSV, and TSV stdout modes unless the format is a real file/export artifact.
 
 ## Boundary Contract
 
@@ -57,8 +59,8 @@ Keep context concise and factual; this file is orchestration memory, not narrati
 ## New Tool Onboarding Checklist
 
 1. Implement envelope + exit code invariants.
-2. Implement registry-backed `tools --json`.
-3. Implement `health --json` with fix actions and readiness states.
+2. Implement registry-backed default-JSON `tools`.
+3. Implement default-JSON `health` with fix actions and readiness states.
 4. Normalize IDs/dates/pagination to ecosystem contracts.
 5. Prove one end-to-end agent workflow chaining existing tools + new tool.
 6. Add migration notes if any shared contract changed.
