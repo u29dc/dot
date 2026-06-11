@@ -39,8 +39,6 @@ set -e
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck source=shell/functions/progress.sh
 source "$DOTFILES_DIR/shell/functions/progress.sh"
-# shellcheck source=shell/functions/homebrew.sh
-source "$DOTFILES_DIR/shell/functions/homebrew.sh"
 
 AGENT_BROWSER_DIA_PORT="${AGENT_BROWSER_DIA_PORT:-9222}"
 AGENT_BROWSER_DIA_APP="/Applications/Dia.app"
@@ -127,31 +125,6 @@ link_skills() {
             link_file "${skill%/}" "$target/$name"
         done
     done
-}
-
-remove_codex_installer_path_blocks() {
-    local target="$DOTFILES_DIR/shell/zprofile"
-
-    [ -f "$target" ] || return 0
-    grep -F '# >>> Codex installer >>>' "$target" >/dev/null 2>&1 || return 0
-
-    perl -0pi -e 's/\n?# >>> Codex installer >>>\nexport PATH="[^"]+"\n# <<< Codex installer <<<\n?/\n/g' "$target"
-    dot_progress_status "FIX" "$DOT_PROGRESS_BLUE" "Removed Codex installer PATH block from $target"
-}
-
-remove_codex_standalone_shim() {
-    local bin="$HOME/.local/bin/codex"
-    local target
-
-    [ -L "$bin" ] || return 0
-    target="$(readlink "$bin" 2>/dev/null || true)"
-
-    case "$target" in
-        "$HOME/.codex/packages/standalone/"*)
-            rm -f "$bin"
-            dot_progress_status "FIX" "$DOT_PROGRESS_BLUE" "Removed standalone Codex shim from $bin"
-            ;;
-    esac
 }
 
 dia_cdp_url() {
@@ -296,7 +269,6 @@ if [ "$LINK_ONLY" = false ]; then
 
     # Install Homebrew packages
     if [ -f "$DOTFILES_DIR/homebrew/Brewfile" ]; then
-        dot_progress_run_step --stream "Trusting Brewfile tap items" dot_trust_brewfile_items
         dot_progress_run_step --stream "Installing Homebrew packages" brew bundle install --file="$DOTFILES_DIR/homebrew/Brewfile"
     else
         dot_progress_skip "Homebrew packages (Brewfile not found)"
@@ -313,8 +285,6 @@ dot_progress_section "Shell configurations"
 link_file "$DOTFILES_DIR/shell/zshrc" "$HOME/.zshrc"
 link_file "$DOTFILES_DIR/shell/zprofile" "$HOME/.zprofile"
 link_file "$DOTFILES_DIR/shell/zshrc.local" "$HOME/.zshrc.local"
-remove_codex_installer_path_blocks
-remove_codex_standalone_shim
 
 # Terminal configs
 dot_progress_section "Terminal configurations"

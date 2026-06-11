@@ -123,15 +123,15 @@ NODE_REPL_NODE_MODULE_DIRS = "/Applications/Codex.app/Contents/Resources/cua_nod
 NODE_REPL_NODE_PATH = "/Applications/Codex.app/Contents/Resources/cua_node/bin/node"
 NODE_REPL_TRUSTED_CODE_PATHS = "/Users/han/.codex"
 CODEX_HOME = "/Users/han/.codex"
-NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "72614174f4dad67a58d46a3ac759cffb45c92fa48a293af4c4ea35102ba391ba"
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "a3f3ca79fe2bff56076b895f1f13a8f673168160bd79d880cc34b4500e08a71c"
 BROWSER_USE_AVAILABLE_BACKENDS = "iab"
 NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
 BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
-BROWSER_USE_CODEX_APP_VERSION = "26.608.12217"
+BROWSER_USE_CODEX_APP_VERSION = "26.609.30741"
 CODEX_CLI_PATH = "/Applications/Codex.app/Contents/Resources/codex"
 
 [marketplaces.openai-bundled]
-last_updated = "2026-06-10T18:14:45Z"
+last_updated = "2026-06-11T20:34:18Z"
 source_type = "local"
 source = "/Users/han/.codex/.tmp/bundled-marketplaces/openai-bundled"
 
@@ -168,10 +168,10 @@ enabled = true
 [plugins."cloudflare@openai-curated"]
 enabled = true
 
-[plugins."browser@openai-bundled"]
+[plugins."codex-security@openai-curated"]
 enabled = true
 
-[plugins."codex-security@openai-curated"]
+[plugins."browser@openai-bundled"]
 enabled = true
 
 # -----------------------------------------------------------------------------

@@ -3,8 +3,6 @@
 
 # shellcheck source=shell/functions/progress.sh
 source "${DOTFILES_DIR:-$HOME/Git/dot}/shell/functions/progress.sh"
-# shellcheck source=shell/functions/homebrew.sh
-source "${DOTFILES_DIR:-$HOME/Git/dot}/shell/functions/homebrew.sh"
 
 upd() {
     # ANSI colors
@@ -225,52 +223,6 @@ upd() {
         '
     }
 
-    upd__codex_resolve_target() {
-        local path="$1"
-        local target
-
-        if [ -L "$path" ]; then
-            target="$(readlink "$path" 2>/dev/null || true)"
-            case "$target" in
-                /*) printf '%s\n' "$target" ;;
-                *) printf '%s/%s\n' "$(cd "$(dirname "$path")" && pwd)" "$target" ;;
-            esac
-        else
-            printf '%s\n' "$path"
-        fi
-    }
-
-    upd__codex_remove_installer_path_blocks() {
-        local file
-        local target
-        local dotfiles_dir="${DOTFILES_DIR:-$HOME/Git/dot}"
-
-        for file in "$HOME/.zprofile" "$dotfiles_dir/shell/zprofile"; do
-            [ -e "$file" ] || [ -L "$file" ] || continue
-            target="$(upd__codex_resolve_target "$file")"
-            [ -f "$target" ] || continue
-            grep -F '# >>> Codex installer >>>' "$target" >/dev/null 2>&1 || continue
-
-            perl -0pi -e 's/\n?# >>> Codex installer >>>\nexport PATH="[^"]+"\n# <<< Codex installer <<<\n?/\n/g' "$target" || return 1
-            printf '%b[FIX ]%b Removed Codex installer PATH block from %s\n' "$BLUE" "$RESET" "$target"
-        done
-    }
-
-    upd__codex_remove_standalone_shim() {
-        local bin="$HOME/.local/bin/codex"
-        local target
-
-        [ -L "$bin" ] || return 0
-        target="$(readlink "$bin" 2>/dev/null || true)"
-
-        case "$target" in
-            "$HOME/.codex/packages/standalone/"*)
-                rm -f "$bin" || return 1
-                printf '%b[FIX ]%b Removed standalone Codex shim from %s\n' "$BLUE" "$RESET" "$bin"
-                ;;
-        esac
-    }
-
     upd__codex_doctor_status() {
         command -v ruby >/dev/null 2>&1 || return 2
 
@@ -298,12 +250,9 @@ upd() {
             return 0
         }
 
-        upd__codex_remove_standalone_shim || status=1
-        upd__codex_remove_installer_path_blocks || status=1
-
         visible_codex="$(zsh -lic 'command -v codex' 2>/dev/null || true)"
         if [ "$visible_codex" != "/opt/homebrew/bin/codex" ]; then
-            echo -e "${RED}[FAIL]${RESET} Codex resolves to ${visible_codex:-missing}; expected /opt/homebrew/bin/codex."
+            echo -e "${RED}[FAIL]${RESET} Interactive login shell Codex resolves to ${visible_codex:-missing}; expected /opt/homebrew/bin/codex. Check shell/zshrc PATH ordering."
             status=1
         fi
 
@@ -316,7 +265,7 @@ upd() {
                 status=1
             fi
         else
-            echo -e "${YELLOW}[WARN]${RESET} Codex remote-control did not start; run 'codex login' or repair the standalone runtime manually."
+            echo -e "${YELLOW}[WARN]${RESET} Codex remote-control did not start; run '/opt/homebrew/bin/codex remote-control start --json' for details and verify the Codex app is signed in."
             status=1
         fi
 
@@ -344,16 +293,6 @@ upd() {
     local failed=0
     local homebrew_core_tap_ready=1
     local step_result=0
-
-    dot_progress_run "Trusting Brewfile tap items..."
-    dot_trust_brewfile_items
-    step_result=$?
-    if [ "$step_result" -eq 0 ]; then
-        dot_progress_ok "Trusting Brewfile tap items"
-    else
-        dot_progress_fail "Trusting Brewfile tap items"
-    fi
-    upd__apply_step_result "$step_result" || return $?
 
     # Include greedy cask checks so auto-updating casks can still be reported/upgraded.
     local formula_before
