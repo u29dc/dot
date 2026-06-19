@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+tools_home="${TOOLS_HOME:-$HOME/.tools}"
+tool="${LET:-$tools_home/let/let}"
+if [ ! -x "$tool" ]; then
+    printf 'let binary not found: %s\nSet LET or install it under TOOLS_HOME.\n' "$tool" >&2
+    exit 127
+fi
+exec "$tool" "$@"

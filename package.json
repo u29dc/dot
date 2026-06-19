@@ -11,7 +11,10 @@
 		"init---------------------------------": "",
 		"prepare": "husky",
 		"setup": "./scripts/setup.sh",
-		"setup:link": "./scripts/setup.sh --link-only",
+		"setup:profile1": "./scripts/setup.sh --profile profile1",
+		"setup:profile2": "./scripts/setup.sh --profile profile2",
+		"setup:dry": "./scripts/setup.sh --dry-run --no-brew",
+		"doctor": "./scripts/doctor.sh",
 		"check--------------------------------": "",
 		"util:format": "bunx biome format --write .",
 		"util:lint": "bunx biome check --write .",
@@ -20,7 +23,7 @@
 		"util:check": "STATUS=0; bun run util:format || STATUS=1; bun run util:format:shell || STATUS=1; bun run util:lint || STATUS=1; bun run util:lint:shell || STATUS=1; exit $STATUS"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.16",
+		"@biomejs/biome": "^2.5.0",
 		"@commitlint/cli": "^21.0.2",
 		"@commitlint/config-conventional": "^21.0.2",
 		"husky": "^9.1.7",

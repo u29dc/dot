@@ -1,0 +1,128 @@
+# Core development tools
+brew "git"
+brew "gh"
+brew "neovim"
+brew "oven-sh/bun/bun", trusted: true
+brew "node"
+brew "deno"
+# brew "rust"
+brew "zig"
+brew "go"
+brew "cmake"
+brew "typst"
+brew "lightpanda-io/browser/lightpanda", trusted: true
+
+# Modern CLI tools
+brew "starship"
+brew "eza"
+brew "bat"
+brew "fd"
+brew "bottom"
+brew "zoxide"
+brew "ripgrep"
+
+# Git tools
+brew "git-delta"
+brew "gitui"
+brew "lazygit"
+brew "git-open"
+brew "gitingest"
+brew "modem-dev/tap/hunk", trusted: true
+
+# Shell enhancements
+brew "atuin"
+brew "broot"
+brew "tmux"
+
+# Media and files
+brew "ffmpeg"
+brew "imagemagick"
+brew "graphicsmagick"
+brew "exiftool"
+brew "libraw"
+brew "dcraw"
+brew "gifsicle"
+brew "optipng"
+brew "sox"
+brew "webp"
+brew "openexr"
+brew "sevenzip"
+brew "yt-dlp"
+
+# Utilities
+brew "blueutil"
+brew "gnupg"
+brew "hyperfine"
+brew "neofetch"
+brew "uv"
+brew "pipx"
+brew "ruff"
+brew "poppler"
+brew "yfedoseev/tap/pdf-oxide", trusted: true
+brew "ghostscript"
+brew "qpdf"
+brew "parallel"
+brew "scc"
+brew "tokei"
+brew "wget"
+brew "sd"
+brew "dust"
+brew "procs"
+brew "jq"
+brew "jaq"
+brew "jsongrep"
+brew "yq"
+brew "just"
+brew "direnv"
+brew "tldr"
+brew "shellcheck"
+brew "shfmt"
+brew "cirruslabs/cli/softnet", trusted: true
+brew "cirruslabs/cli/tart", trusted: true
+brew "vnstat"
+
+# AI and cloud CLIs
+brew "anomalyco/tap/opencode", trusted: true
+brew "agent-browser"
+cask "codex"
+cask "codex-app"
+cask "codexbar"
+brew "openclaw/tap/gogcli", trusted: true
+brew "whisperkit-cli"
+brew "vercel-cli"
+
+# Shared applications
+cask "1password-cli"
+cask "1password"
+cask "font-jetbrains-mono-nerd-font"
+cask "font-new-computer-modern"
+cask "ghostty"
+cask "cursor"
+cask "google-chrome"
+cask "zed@preview"
+cask "slack"
+cask "jordanbaird-ice"
+cask "rana-gmbh/netfluss/netfluss", trusted: true
+cask "notion"
+cask "notion-calendar"
+cask "obsidian"
+cask "pluk-inc/tap/markdown-preview", trusted: true
+cask "thebrowsercompany-dia"
+cask "iina"
+cask "figma"
+cask "cleanshot"
+cask "clop"
+cask "coteditor"
+cask "keka"
+cask "karabiner-elements"
+cask "logi-options+"
+cask "monitorcontrol"
+cask "transmission"
+cask "blender"
+cask "spotify"
+cask "telegram"
+cask "whatsapp"
+cask "google-drive"
+cask "dropbox"
+cask "backblaze"
+cask "adguard"

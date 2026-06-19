@@ -1,8 +1,8 @@
-> Shared operating contract for Claude Code, Codex CLI, and AMP. Use this file for system-wide defaults on communication, tooling, research, implementation quality, and validation across coding and knowledge work. Let more local `AGENTS.md` files add repo-specific commands, architecture, domain context, and constraints.
+> Shared operating contract for Claude Code and Codex CLI. Use this file for system-wide defaults on communication, tooling, research, implementation quality, and validation across coding and knowledge work. Let more local `AGENTS.md` files add repo-specific commands, architecture, domain context, and constraints.
 
 ## 1. Documentation
 
-- Local source of truth: [`agents/AGENTS.md`](AGENTS.md), [`agents/claude.json`](claude.json), [`agents/codex.toml`](codex.toml), [`agents/amp.settings.json`](amp.settings.json)
+- Local source of truth: [`agents/AGENTS.md`](AGENTS.md), [`agents/claude.json`](claude.json), [`agents/codex.toml`](codex.toml)
 - Skill procedures live with the named skills: `align`, `compose`, `craft`, `create`, `ship`.
 - Canonical templates and repo-alignment references live with the `align` skill.
 - Preferred external docs: [Bun](https://bun.sh/docs/llms.txt), [Biome](https://biomejs.dev), [Zod](https://zod.dev/llms.txt), [Svelte](https://svelte.dev/llms.txt), [Next.js](https://nextjs.org/docs/llms.txt), [Vite](https://vite.dev/llms.txt), [Tailwind](https://tailwindcss.com/docs), [shadcn/ui](https://ui.shadcn.com/llms.txt), [Bits UI](https://bits-ui.com/llms.txt), [Convex](https://docs.convex.dev/llms.txt), [Clerk](https://clerk.com/docs/llms.txt), [Rust Book](https://doc.rust-lang.org/book/), [Rust Reference](https://doc.rust-lang.org/reference/), [Cargo Book](https://doc.rust-lang.org/cargo/), [Rust Standard Library](https://doc.rust-lang.org/std/), [Clippy](https://doc.rust-lang.org/clippy/), [Rust API Guidelines](https://rust-lang.github.io/api-guidelines/), [Tokio](https://tokio.rs/tokio/tutorial)

@@ -24,3 +24,4 @@ build/
 .zshrc.local
 .bashrc.local
 shell/zshrc.local
+profiles/local.env

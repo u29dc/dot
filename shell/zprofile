@@ -2,8 +2,12 @@
 
 # Add Homebrew to your PATH
 # This line is required for Homebrew to work correctly on Apple Silicon Macs.
-eval "$(/opt/homebrew/bin/brew shellenv)"
+if [ -x /opt/homebrew/bin/brew ]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
 
 # >>> Codex installer >>>
-export PATH="/Users/han/.codex/packages/standalone/bin:$PATH"
+if [ -d "$HOME/.codex/packages/standalone/bin" ]; then
+    export PATH="$HOME/.codex/packages/standalone/bin:$PATH"
+fi
 # <<< Codex installer <<<

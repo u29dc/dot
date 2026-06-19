@@ -1,2 +1,8 @@
 #!/usr/bin/env bash
-exec "${PDF:-$HOME/.tools/pdf/pdf}" "$@"
+tools_home="${TOOLS_HOME:-$HOME/.tools}"
+tool="${PDF:-$tools_home/pdf/pdf}"
+if [ ! -x "$tool" ]; then
+    printf 'pdf binary not found: %s\nSet PDF or install it under TOOLS_HOME.\n' "$tool" >&2
+    exit 127
+fi
+exec "$tool" "$@"

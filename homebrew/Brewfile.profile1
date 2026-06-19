@@ -1,0 +1,3 @@
+# Profile1 additions.
+# Empty for now. Keep the complete shared package inventory in Brewfile.base
+# until this profile needs packages that should not apply to every machine.

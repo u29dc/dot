@@ -72,7 +72,6 @@ ehthumbs.db
 .claude/
 .codex/
 .gemini/
-.amp/
 
 # Husky internals
 .husky/_/

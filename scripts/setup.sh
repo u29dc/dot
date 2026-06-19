@@ -1,44 +1,38 @@
 #!/usr/bin/env bash
-set -e
+set -Eeuo pipefail
 
-# ==============================================================================
-# DOTFILES SETUP
-# ==============================================================================
-#
-# NEW MACHINE SETUP
-# -----------------
-# On a fresh macOS install, run these commands:
-#
-#   # 1. Install Xcode CLI tools (provides git, compilers)
-#   xcode-select --install
-#
-#   # 2. Clone dotfiles (git is now available from step 1)
-#   git clone https://github.com/u29dc/dot.git ~/Git/dot
-#
-#   # 3. Run setup (auto-installs Homebrew if missing, then all packages + symlinks)
-#   bash ~/Git/dot/scripts/setup.sh
-#
-#   # 4. Reload shell
-#   source ~/.zshrc
-#
-#   # 5. Configure local secrets (API keys, machine-specific settings)
-#   cp ~/Git/dot/shell/zshrc.local.example ~/.zshrc.local
-#   # Edit ~/.zshrc.local to add your keys
-#
-#   # 6. Log in to AI coding agents
-#   claude login
-#   codex login
-#   amp login
-#
-#   # 7. (Optional) Preview and apply macOS system preferences
-#   ~/.macos --audit
-#   ~/.macos
-#
-# ==============================================================================
+# Dotfiles setup entrypoint. See AGENTS.md for the fresh-machine runbook.
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck source=shell/functions/progress.sh
 source "$DOTFILES_DIR/shell/functions/progress.sh"
+
+dot_setup_error() {
+    local status=$?
+    local line="${BASH_LINENO[0]:-${LINENO}}"
+    local command="${BASH_COMMAND:-unknown}"
+
+    dot_progress_fail "Setup failed (exit $status) at line $line: $command"
+    exit "$status"
+}
+
+trap dot_setup_error ERR
+
+DOT_KNOWN_ENV_VARS=(
+    DOT_PROFILE
+    DOT_TOOLS_HOME
+    TOOLS_HOME
+    DOT_SKILLS_PROFILE1
+    DOT_SKILLS_PROFILE2
+    DOT_SKILL_ROOTS_STATE
+    DOT_ENABLE_DIA
+    DOT_ENABLE_ONEPASSWORD
+    DOT_ENABLE_SYSTEM_EXTENSIONS
+    DOT_ENABLE_CODEX_CONFIG
+    DOT_ENABLE_LET_FUNCTION
+    CODEX_NODE_REPL_ENV_FILE
+    SKILLS_BASE
+)
 
 AGENT_BROWSER_DIA_PORT="${AGENT_BROWSER_DIA_PORT:-9222}"
 AGENT_BROWSER_DIA_APP="/Applications/Dia.app"
@@ -46,12 +40,175 @@ AGENT_BROWSER_DIA_BIN="$AGENT_BROWSER_DIA_APP/Contents/MacOS/Dia"
 AGENT_BROWSER_DIA_LAUNCH_AGENT="com.u29dc.dia-cdp"
 
 # Parse command line arguments
-LINK_ONLY=false
-for arg in "$@"; do
-    case "$arg" in
-        --link-only) LINK_ONLY=true ;;
+NO_BREW=false
+DRY_RUN=false
+CLI_DOT_PROFILE=""
+
+usage() {
+    cat <<'USAGE'
+Usage: setup.sh [--profile profile1|profile2] [--dry-run] [--no-brew]
+
+Profiles:
+  profile1  shared workstation setup plus profile1 extension layer
+  profile2  shared workstation setup plus profile2 extension layer
+USAGE
+}
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --no-brew)
+            NO_BREW=true
+            shift
+            ;;
+        --dry-run)
+            DRY_RUN=true
+            shift
+            ;;
+        --profile)
+            if [ "$#" -lt 2 ]; then
+                dot_progress_fail "--profile requires a value"
+                exit 2
+            fi
+            CLI_DOT_PROFILE="${2:-}"
+            shift 2
+            ;;
+        --profile=*)
+            CLI_DOT_PROFILE="${1#--profile=}"
+            shift
+            ;;
+        -h | --help)
+            usage
+            exit 0
+            ;;
+        *)
+            dot_progress_fail "Unknown argument: $1"
+            usage >&2
+            exit 2
+            ;;
     esac
 done
+
+capture_process_env() {
+    local var
+    for var in "${DOT_KNOWN_ENV_VARS[@]}"; do
+        eval "DOT_PROCESS_HAS_$var=\"\${$var+x}\""
+        eval "DOT_PROCESS_VAL_$var=\"\${$var-}\""
+    done
+}
+
+restore_process_env() {
+    local var has value
+    for var in "${DOT_KNOWN_ENV_VARS[@]}"; do
+        has="$(eval "printf '%s' \"\$DOT_PROCESS_HAS_$var\"")"
+        if [ -n "$has" ]; then
+            value="$(eval "printf '%s' \"\$DOT_PROCESS_VAL_$var\"")"
+            printf -v "$var" '%s' "$value"
+            export "${var?}"
+        fi
+    done
+}
+
+load_env_file() {
+    local path="$1"
+    [ -f "$path" ] || return 0
+    # shellcheck source=/dev/null
+    set -a
+    source "$path"
+    set +a
+    dot_progress_info "Loaded env: $path"
+}
+
+capture_process_env
+load_env_file "$HOME/.config/dot/local.env"
+load_env_file "$DOTFILES_DIR/profiles/local.env"
+restore_process_env
+
+if [ -n "$CLI_DOT_PROFILE" ]; then
+    DOT_PROFILE="$CLI_DOT_PROFILE"
+fi
+
+DOT_PROFILE="${DOT_PROFILE:-profile1}"
+case "$DOT_PROFILE" in
+    profile1 | profile2) ;;
+    *)
+        dot_progress_fail "Unsupported profile: $DOT_PROFILE"
+        exit 2
+        ;;
+esac
+
+dot_default() {
+    local name="$1"
+    local value="$2"
+    if [ -z "${!name+x}" ]; then
+        printf -v "$name" '%s' "$value"
+        export "${name?}"
+    fi
+}
+
+case "$DOT_PROFILE" in
+    profile1)
+        DOT_BREWFILES=("homebrew/Brewfile.base" "homebrew/Brewfile.profile1")
+        dot_default DOT_ENABLE_DIA 1
+        dot_default DOT_ENABLE_ONEPASSWORD 1
+        dot_default DOT_ENABLE_SYSTEM_EXTENSIONS 1
+        ;;
+    profile2)
+        DOT_BREWFILES=("homebrew/Brewfile.base" "homebrew/Brewfile.profile2")
+        dot_default DOT_ENABLE_DIA 1
+        dot_default DOT_ENABLE_ONEPASSWORD 1
+        dot_default DOT_ENABLE_SYSTEM_EXTENSIONS 1
+        ;;
+esac
+
+dot_default DOT_ENABLE_CODEX_CONFIG 1
+dot_default DOT_ENABLE_LET_FUNCTION 0
+
+DOT_ENABLE_DIA="${DOT_ENABLE_DIA:-0}"
+DOT_ENABLE_ONEPASSWORD="${DOT_ENABLE_ONEPASSWORD:-0}"
+DOT_ENABLE_SYSTEM_EXTENSIONS="${DOT_ENABLE_SYSTEM_EXTENSIONS:-0}"
+DOT_ENABLE_CODEX_CONFIG="${DOT_ENABLE_CODEX_CONFIG:-1}"
+
+if [ -n "${DOT_TOOLS_HOME:-}" ] && [ -z "${TOOLS_HOME:-}" ]; then
+    TOOLS_HOME="$DOT_TOOLS_HOME"
+    export TOOLS_HOME
+fi
+
+TOOLS_HOME="${TOOLS_HOME:-$HOME/.tools}"
+DOT_SKILL_ROOTS_STATE="${DOT_SKILL_ROOTS_STATE:-$HOME/.config/dot/extra-skill-roots}"
+DOT_RUN_ID="${DOT_RUN_ID:-$(date +%Y%m%d-%H%M%S)}"
+DOT_BACKUP_DIR="${DOT_BACKUP_DIR:-$HOME/.dotfiles-backups/$DOT_RUN_ID}"
+DOT_BACKUP_MANIFEST="$DOT_BACKUP_DIR/manifest.tsv"
+
+dot_truthy() {
+    [ "${1:-0}" = "1" ]
+}
+
+dot_dry_run() {
+    [ "$DRY_RUN" = true ]
+}
+
+dot_apply() {
+    if dot_dry_run; then
+        dot_progress_status "PLAN" "$DOT_PROGRESS_DIM" "$*"
+        return 0
+    fi
+
+    "$@"
+}
+
+dot_manifest_append() {
+    local action="$1"
+    local src="$2"
+    local dest="$3"
+    local backup="${4:-}"
+
+    dot_dry_run && return 0
+    mkdir -p "$DOT_BACKUP_DIR"
+    if [ ! -f "$DOT_BACKUP_MANIFEST" ]; then
+        printf 'action\tsource\tdestination\tbackup\n' >"$DOT_BACKUP_MANIFEST"
+    fi
+    printf '%s\t%s\t%s\t%s\n' "$action" "$src" "$dest" "$backup" >>"$DOT_BACKUP_MANIFEST"
+}
 
 install_homebrew() {
     local installer
@@ -59,10 +216,27 @@ install_homebrew() {
     /bin/bash -c "$installer"
 }
 
+install_brewfile() {
+    local file="$1"
+    if [ ! -f "$file" ]; then
+        dot_progress_skip "Homebrew layer not found: $file"
+        return 0
+    fi
+
+    if brew bundle check --no-upgrade --file="$file" >/dev/null; then
+        dot_progress_ok "Homebrew layer satisfied: ${file#"$DOTFILES_DIR"/}"
+        return 0
+    fi
+
+    dot_progress_run_step --stream "Installing ${file#"$DOTFILES_DIR"/}" brew bundle install --no-upgrade --file="$file"
+}
+
 # Function to create symlink with backup and verification
 link_file() {
     local src="$1"
     local dest="$2"
+    local backup
+    local rel
 
     # Skip if source doesn't exist
     if [ ! -e "$src" ]; then
@@ -70,24 +244,33 @@ link_file() {
         return 0
     fi
 
-    # Create parent directory if needed
-    mkdir -p "$(dirname "$dest")"
-
-    # Backup existing file if it exists and isn't a symlink
-    if [ -e "$dest" ] && [ ! -L "$dest" ]; then
-        dot_progress_status "BACKUP" "$DOT_PROGRESS_YELLOW" "$dest -> ${dest}.backup"
-        mv "$dest" "${dest}.backup"
-    fi
-
-    # Remove existing symlink if it exists
     if [ -L "$dest" ]; then
-        rm "$dest"
+        if [ "$(readlink "$dest")" = "$src" ]; then
+            dot_progress_ok "Already linked: $dest"
+            return 0
+        fi
+
+        dot_apply rm "$dest"
+        dot_manifest_append "remove-symlink" "$src" "$dest"
+    elif [ -e "$dest" ]; then
+        rel="${dest#/}"
+        backup="$DOT_BACKUP_DIR/$rel"
+        dot_progress_status "BACKUP" "$DOT_PROGRESS_YELLOW" "$dest -> $backup"
+        dot_apply mkdir -p "$(dirname "$backup")"
+        dot_apply mv "$dest" "$backup"
+        dot_manifest_append "backup" "$src" "$dest" "$backup"
     fi
 
-    # Create new symlink
-    ln -s "$src" "$dest"
+    dot_apply mkdir -p "$(dirname "$dest")"
+    dot_apply ln -s "$src" "$dest"
+    dot_manifest_append "link" "$src" "$dest"
 
     # Verify symlink was created correctly
+    if dot_dry_run; then
+        dot_progress_status "LINK" "$DOT_PROGRESS_BLUE" "$(basename "$src") -> $dest"
+        return 0
+    fi
+
     if [ -L "$dest" ] && [ "$(readlink "$dest")" = "$src" ]; then
         dot_progress_status "LINK" "$DOT_PROGRESS_BLUE" "$(basename "$src") -> $dest"
     else
@@ -104,8 +287,31 @@ link_file() {
 link_skills() {
     local target="$1"
     shift
+    local existing target_path
+    local source_dir
 
-    mkdir -p "$target"
+    dot_apply mkdir -p "$target"
+
+    for existing in "$target"/*; do
+        [ -L "$existing" ] || continue
+        [ -e "$existing" ] && continue
+        target_path="$(readlink "$existing" 2>/dev/null || true)"
+
+        local owned_by_active_source=0
+        for source_dir in "$@"; do
+            case "$target_path" in
+                "$source_dir" | "$source_dir"/*)
+                    owned_by_active_source=1
+                    break
+                    ;;
+            esac
+        done
+        [ "$owned_by_active_source" -eq 1 ] || continue
+
+        dot_progress_status "REMOVE" "$DOT_PROGRESS_YELLOW" "$existing"
+        dot_apply rm "$existing"
+        dot_manifest_append "remove-broken-skill" "$target_path" "$existing"
+    done
 
     for src_dir in "$@"; do
         if [ ! -d "$src_dir" ]; then
@@ -124,6 +330,107 @@ link_skills() {
 
             link_file "${skill%/}" "$target/$name"
         done
+    done
+}
+
+remove_inactive_extra_skill_links() {
+    local target="$1"
+    shift
+    local -a known_sources=("$@")
+    local -a active_sources=("${ACTIVE_EXTRA_SKILL_SOURCES[@]}")
+    local link target_path
+    local action configured known source
+
+    [ -d "$target" ] || return 0
+
+    for link in "$target"/*; do
+        [ -L "$link" ] || continue
+        target_path="$(readlink "$link")"
+        configured=0
+        known=0
+
+        for source in "$SKILLS_BASE" "${active_sources[@]}"; do
+            [ -n "$source" ] || continue
+            case "$target_path" in
+                "$source" | "$source"/*)
+                    configured=1
+                    break
+                    ;;
+            esac
+        done
+        [ "$configured" -eq 0 ] || continue
+
+        for source in "${known_sources[@]}"; do
+            case "$target_path" in
+                "$source" | "$source"/*)
+                    known=1
+                    break
+                    ;;
+            esac
+        done
+
+        if [ "$known" -eq 1 ]; then
+            action="remove-inactive-extra-skill"
+        else
+            action="remove-unconfigured-skill"
+        fi
+
+        dot_progress_status "REMOVE" "$DOT_PROGRESS_YELLOW" "$link"
+        dot_apply rm "$link"
+        dot_manifest_append "$action" "$target_path" "$link"
+    done
+}
+
+append_active_skill_sources() {
+    local list="${1:-}"
+    local source old_ifs
+
+    [ -n "$list" ] || return 0
+
+    old_ifs="$IFS"
+    IFS=':'
+    for source in $list; do
+        [ -n "$source" ] || continue
+        ACTIVE_EXTRA_SKILL_SOURCES+=("$source")
+    done
+    IFS="$old_ifs"
+}
+
+append_known_skill_sources() {
+    local list="${1:-}"
+    local source old_ifs
+
+    [ -n "$list" ] || return 0
+
+    old_ifs="$IFS"
+    IFS=':'
+    for source in $list; do
+        [ -n "$source" ] || continue
+        KNOWN_EXTRA_SKILL_SOURCES+=("$source")
+    done
+    IFS="$old_ifs"
+}
+
+append_previous_extra_skill_sources() {
+    local source
+
+    [ -f "$DOT_SKILL_ROOTS_STATE" ] || return 0
+
+    while IFS= read -r source; do
+        [ -n "$source" ] || continue
+        KNOWN_EXTRA_SKILL_SOURCES+=("$source")
+    done <"$DOT_SKILL_ROOTS_STATE"
+}
+
+write_extra_skill_sources_state() {
+    local source
+
+    dot_dry_run && return 0
+
+    mkdir -p "$(dirname "$DOT_SKILL_ROOTS_STATE")"
+    : >"$DOT_SKILL_ROOTS_STATE"
+    for source in "${VALID_EXTRA_SKILL_SOURCES[@]}"; do
+        printf '%s\n' "$source" >>"$DOT_SKILL_ROOTS_STATE"
     done
 }
 
@@ -195,6 +502,11 @@ setup_dia_cdp() {
     domain_target="$(dia_launch_agent_domain)"
     service_target="$(dia_launch_agent_service)"
 
+    if dot_dry_run; then
+        dot_progress_skip "Dia CDP startup (--dry-run)"
+        return 0
+    fi
+
     if [ ! -f "$plist_path" ]; then
         dot_progress_skip "Dia LaunchAgent not linked: $plist_path"
         return 0
@@ -250,13 +562,24 @@ setup_dia_cdp() {
 
 dot_progress_title "Dotfiles setup"
 dot_progress_info "Directory: $DOTFILES_DIR"
+dot_progress_info "Profile: $DOT_PROFILE"
+dot_progress_info "Backup dir: $DOT_BACKUP_DIR"
 
-if [ "$LINK_ONLY" = true ]; then
-    dot_progress_info "Mode: link-only"
+if dot_dry_run; then
+    dot_progress_info "Mode: dry-run"
 fi
 
+dot_progress_info "Homebrew layers:"
+for brewfile in "${DOT_BREWFILES[@]}"; do
+    dot_progress_info "  - $brewfile"
+done
+
 # Full setup: Install Homebrew and packages
-if [ "$LINK_ONLY" = false ]; then
+if [ "$NO_BREW" = true ]; then
+    dot_progress_skip "Homebrew packages (--no-brew)"
+elif dot_dry_run; then
+    dot_progress_skip "Homebrew packages (--dry-run)"
+else
     # Check prerequisites
     if ! command -v brew >/dev/null 2>&1; then
         dot_progress_run_step --stream "Installing Homebrew" install_homebrew
@@ -267,24 +590,30 @@ if [ "$LINK_ONLY" = false ]; then
         dot_progress_ok "Homebrew available"
     fi
 
-    # Install Homebrew packages
-    if [ -f "$DOTFILES_DIR/homebrew/Brewfile" ]; then
-        dot_progress_run_step --stream "Installing Homebrew packages" brew bundle install --file="$DOTFILES_DIR/homebrew/Brewfile"
-    else
-        dot_progress_skip "Homebrew packages (Brewfile not found)"
-    fi
-else
-    dot_progress_skip "Homebrew packages (--link-only)"
+    for brewfile in "${DOT_BREWFILES[@]}"; do
+        install_brewfile "$DOTFILES_DIR/$brewfile"
+    done
 fi
 
 # Create tool home directory
-dot_progress_run_step "Creating tool home" mkdir -p "${TOOLS_HOME:-$HOME/.tools}"
+if dot_dry_run; then
+    dot_progress_status "PLAN" "$DOT_PROGRESS_DIM" "mkdir -p $TOOLS_HOME"
+else
+    dot_progress_run_step "Creating tool home" mkdir -p "$TOOLS_HOME"
+fi
 
 # Shell configs
 dot_progress_section "Shell configurations"
 link_file "$DOTFILES_DIR/shell/zshrc" "$HOME/.zshrc"
 link_file "$DOTFILES_DIR/shell/zprofile" "$HOME/.zprofile"
-link_file "$DOTFILES_DIR/shell/zshrc.local" "$HOME/.zshrc.local"
+if [ -f "$HOME/.zshrc.local" ]; then
+    dot_progress_skip "Local shell overrides already exist: $HOME/.zshrc.local"
+elif dot_dry_run; then
+    dot_progress_status "PLAN" "$DOT_PROGRESS_DIM" "cp shell/zshrc.local.example $HOME/.zshrc.local"
+else
+    cp "$DOTFILES_DIR/shell/zshrc.local.example" "$HOME/.zshrc.local"
+    dot_progress_status "COPY" "$DOT_PROGRESS_BLUE" "zshrc.local.example -> $HOME/.zshrc.local"
+fi
 
 # Terminal configs
 dot_progress_section "Terminal configurations"
@@ -298,6 +627,8 @@ link_file "$DOTFILES_DIR/terminal/bin/buf" "$HOME/.local/bin/buf"
 link_file "$DOTFILES_DIR/terminal/bin/cho" "$HOME/.local/bin/cho"
 link_file "$DOTFILES_DIR/terminal/bin/delta-themed" "$HOME/.local/bin/delta-themed"
 link_file "$DOTFILES_DIR/terminal/bin/fin" "$HOME/.local/bin/fin"
+link_file "$DOTFILES_DIR/terminal/bin/grn" "$HOME/.local/bin/grn"
+link_file "$DOTFILES_DIR/terminal/bin/let" "$HOME/.local/bin/let"
 link_file "$DOTFILES_DIR/terminal/bin/pdf" "$HOME/.local/bin/pdf"
 link_file "$DOTFILES_DIR/terminal/bin/tao" "$HOME/.local/bin/tao"
 
@@ -321,11 +652,25 @@ link_file "$DOTFILES_DIR/terminal/agent-browser.chrome.json" "$HOME/.agent-brows
 
 dot_progress_section "System configurations"
 link_file "$DOTFILES_DIR/system/gitconfig" "$HOME/.gitconfig"
-link_file "$DOTFILES_DIR/system/karabiner" "$HOME/.config/karabiner/karabiner.json"
-link_file "$DOTFILES_DIR/system/1password" "$HOME/.config/1Password/ssh/agent.toml"
-link_file "$DOTFILES_DIR/system/launchagents/com.u29dc.dia-cdp.plist" "$HOME/Library/LaunchAgents/com.u29dc.dia-cdp.plist"
-link_file "$DOTFILES_DIR/macos/.macos" "$HOME/.macos"
-setup_dia_cdp
+if dot_truthy "$DOT_ENABLE_SYSTEM_EXTENSIONS"; then
+    link_file "$DOTFILES_DIR/system/karabiner" "$HOME/.config/karabiner/karabiner.json"
+    link_file "$DOTFILES_DIR/macos/.macos" "$HOME/.macos"
+else
+    dot_progress_skip "System extension configs (DOT_ENABLE_SYSTEM_EXTENSIONS!=1)"
+fi
+
+if dot_truthy "$DOT_ENABLE_ONEPASSWORD"; then
+    link_file "$DOTFILES_DIR/system/1password" "$HOME/.config/1Password/ssh/agent.toml"
+else
+    dot_progress_skip "1Password SSH agent config (DOT_ENABLE_ONEPASSWORD!=1)"
+fi
+
+if dot_truthy "$DOT_ENABLE_DIA"; then
+    link_file "$DOTFILES_DIR/system/launchagents/com.u29dc.dia-cdp.plist" "$HOME/Library/LaunchAgents/com.u29dc.dia-cdp.plist"
+    setup_dia_cdp
+else
+    dot_progress_skip "Dia CDP LaunchAgent (DOT_ENABLE_DIA!=1)"
+fi
 
 # Agent configurations
 dot_progress_section "Agent configurations"
@@ -333,19 +678,47 @@ dot_progress_section "Agent configurations"
 link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.claude/CLAUDE.md"
 link_file "$DOTFILES_DIR/agents/claude.json" "$HOME/.claude/settings.json"
 SKILLS_BASE="${SKILLS_BASE:-$DOTFILES_DIR/agents/skills}"
-link_skills "$HOME/.claude/skills" "$SKILLS_BASE" ${SKILLS_U29DC:+"$SKILLS_U29DC"}
+ACTIVE_EXTRA_SKILL_SOURCES=()
+VALID_EXTRA_SKILL_SOURCES=()
+KNOWN_EXTRA_SKILL_SOURCES=()
+append_previous_extra_skill_sources
+append_known_skill_sources "${DOT_SKILLS_PROFILE1:-}"
+append_known_skill_sources "${DOT_SKILLS_PROFILE2:-}"
+case "$DOT_PROFILE" in
+    profile1) append_active_skill_sources "${DOT_SKILLS_PROFILE1:-}" ;;
+    profile2) append_active_skill_sources "${DOT_SKILLS_PROFILE2:-}" ;;
+esac
+
+for source in "${ACTIVE_EXTRA_SKILL_SOURCES[@]}"; do
+    if [ -d "$source" ]; then
+        dot_progress_info "Extra skills: $source"
+        VALID_EXTRA_SKILL_SOURCES+=("$source")
+    else
+        dot_progress_skip "Extra skills source not found: $source"
+    fi
+done
+
+remove_inactive_extra_skill_links "$HOME/.claude/skills" "${KNOWN_EXTRA_SKILL_SOURCES[@]}"
+remove_inactive_extra_skill_links "$HOME/.codex/skills" "${KNOWN_EXTRA_SKILL_SOURCES[@]}"
+remove_inactive_extra_skill_links "$HOME/.agents/skills" "${KNOWN_EXTRA_SKILL_SOURCES[@]}"
+write_extra_skill_sources_state
+
+link_skills "$HOME/.claude/skills" "$SKILLS_BASE" "${VALID_EXTRA_SKILL_SOURCES[@]}"
 # Codex CLI
 link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.codex/AGENTS.md"
-link_file "$DOTFILES_DIR/agents/codex.toml" "$HOME/.codex/config.toml"
-link_skills "$HOME/.codex/skills" "$SKILLS_BASE" ${SKILLS_U29DC:+"$SKILLS_U29DC"}
-link_skills "$HOME/.agents/skills" "$SKILLS_BASE" ${SKILLS_U29DC:+"$SKILLS_U29DC"}
-# AMP CLI
-link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.config/amp/AGENTS.md"
-link_file "$DOTFILES_DIR/agents/amp.settings.json" "$HOME/.config/amp/settings.json"
+if dot_truthy "$DOT_ENABLE_CODEX_CONFIG"; then
+    if dot_dry_run; then
+        dot_progress_status "PLAN" "$DOT_PROGRESS_DIM" "scripts/codex.sh --profile $DOT_PROFILE --dest $HOME/.codex/config.toml"
+    else
+        DOT_BACKUP_DIR="$DOT_BACKUP_DIR" DOT_BACKUP_MANIFEST="$DOT_BACKUP_MANIFEST" TOOLS_HOME="$TOOLS_HOME" "$DOTFILES_DIR/scripts/codex.sh" --profile "$DOT_PROFILE" --dest "$HOME/.codex/config.toml"
+    fi
+else
+    dot_progress_skip "Codex config generation (DOT_ENABLE_CODEX_CONFIG!=1)"
+fi
+link_skills "$HOME/.codex/skills" "$SKILLS_BASE" "${VALID_EXTRA_SKILL_SOURCES[@]}"
+link_skills "$HOME/.agents/skills" "$SKILLS_BASE" "${VALID_EXTRA_SKILL_SOURCES[@]}"
 
 dot_progress_ok "Symlinks created successfully"
 
-if [ "$LINK_ONLY" = false ]; then
-    dot_progress_ok "Setup complete"
-    dot_progress_info "Restart terminal or run: source ~/.zshrc"
-fi
+dot_progress_ok "Setup complete"
+dot_progress_info "Restart terminal or run: source ~/.zshrc"

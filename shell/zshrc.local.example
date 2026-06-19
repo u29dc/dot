@@ -9,13 +9,13 @@
 # export OPENAI_API_KEY="sk-proj-..."
 
 # OpenRouter API Key | https://openrouter.ai/keys
-export OPENROUTER_API_KEY="sk-or-v1-..."
+# export OPENROUTER_API_KEY="sk-or-v1-..."
 
 # Anthropic API Key | https://console.anthropic.com/settings/keys
 # export ANTHROPIC_API_KEY="sk-ant-..."
 
 # ------------------------------------------------------------------------------
-# PERSONAL ALIASES
+# LOCAL ALIASES
 # ------------------------------------------------------------------------------
 
 # Cloud storage shortcuts (private)

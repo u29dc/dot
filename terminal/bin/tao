@@ -1,2 +1,8 @@
 #!/usr/bin/env bash
-exec "${TAO:-$HOME/.tools/tao/tao}" "$@"
+tools_home="${TOOLS_HOME:-$HOME/.tools}"
+tool="${TAO:-$tools_home/tao/tao}"
+if [ ! -x "$tool" ]; then
+    printf 'tao binary not found: %s\nSet TAO or install it under TOOLS_HOME.\n' "$tool" >&2
+    exit 127
+fi
+exec "$tool" "$@"

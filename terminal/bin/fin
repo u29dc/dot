@@ -1,2 +1,8 @@
 #!/usr/bin/env bash
-exec "${FIN:-$HOME/.tools/fin/fin}" "$@"
+tools_home="${TOOLS_HOME:-$HOME/.tools}"
+tool="${FIN:-$tools_home/fin/fin}"
+if [ ! -x "$tool" ]; then
+    printf 'fin binary not found: %s\nSet FIN or install it under TOOLS_HOME.\n' "$tool" >&2
+    exit 127
+fi
+exec "$tool" "$@"

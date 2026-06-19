@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+tools_home="${TOOLS_HOME:-$HOME/.tools}"
+tool="${GRN:-$tools_home/grn/grn}"
+if [ ! -x "$tool" ]; then
+    printf 'grn binary not found: %s\nSet GRN or install it under TOOLS_HOME.\n' "$tool" >&2
+    exit 127
+fi
+exec "$tool" "$@"

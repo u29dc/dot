@@ -1,2 +1,8 @@
 #!/usr/bin/env bash
-exec "${CHO:-$HOME/.tools/cho/cho}" "$@"
+tools_home="${TOOLS_HOME:-$HOME/.tools}"
+tool="${CHO:-$tools_home/cho/cho}"
+if [ ! -x "$tool" ]; then
+    printf 'cho binary not found: %s\nSet CHO or install it under TOOLS_HOME.\n' "$tool" >&2
+    exit 127
+fi
+exec "$tool" "$@"

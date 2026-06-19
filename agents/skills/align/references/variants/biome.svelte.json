@@ -1,5 +1,5 @@
 {
-	"extends": ["/Users/han/.config/biome/biome.json"],
+	"extends": ["../dot/biome.json"],
 	"overrides": [
 		{
 			"includes": ["**/*.svelte"],

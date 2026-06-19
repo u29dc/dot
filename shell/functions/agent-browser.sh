@@ -79,6 +79,10 @@ agent-browser-dia() {
         return 1
     fi
 
+    if ! agent_browser_dia__cdp_healthy; then
+        agent-browser-dia-on || return $?
+    fi
+
     command agent-browser --config "$cfg" "$@"
 }
 

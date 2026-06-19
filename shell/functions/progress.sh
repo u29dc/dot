@@ -266,7 +266,7 @@ dot_progress_run_step() {
             fi
 
             if [ $((frame_index % 10)) -eq 0 ]; then
-                process_state="$(ps -o stat= -p "$command_pid" 2>/dev/null | awk '{print $1}')"
+                process_state="$(ps -o stat= -p "$command_pid" 2>/dev/null | awk '{print $1}' || true)"
                 case "$process_state" in
                     T*)
                         paused_for_tty=1

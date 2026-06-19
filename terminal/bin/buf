@@ -1,2 +1,8 @@
 #!/usr/bin/env bash
-exec "${BUF:-$HOME/.tools/buf/buf}" "$@"
+tools_home="${TOOLS_HOME:-$HOME/.tools}"
+tool="${BUF:-$tools_home/buf/buf}"
+if [ ! -x "$tool" ]; then
+    printf 'buf binary not found: %s\nSet BUF or install it under TOOLS_HOME.\n' "$tool" >&2
+    exit 127
+fi
+exec "$tool" "$@"
