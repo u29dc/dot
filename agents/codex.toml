@@ -128,3 +128,6 @@ keepRemoteControlAwakeWhilePluggedIn = true
 notifications-turn-mode = "always"
 preventSleepWhileRunning = true
 reviewDelivery = "inline"
+
+[desktop.open-in-target-preferences]
+global = "zed"
