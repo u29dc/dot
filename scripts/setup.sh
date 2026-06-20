@@ -37,6 +37,10 @@ DOT_KNOWN_ENV_VARS=(
     DOT_CODEX_NOTIFY_COMMAND
     DOT_DIA_APP
     DOT_DIA_LOG_DIR
+    DOT_CLOUDSTORAGE_HOME
+    DOT_DROPBOX_HOME
+    DOT_VAULT_HOME
+    DOT_GDRIVE_HOME
     AGENT_BROWSER_DIA_PORT
     CODEX_NODE_REPL_ENV_FILE
     DOT_GIT_USER_NAME
@@ -1202,4 +1206,4 @@ link_skills "$HOME/.agents/skills"
 write_extra_skill_sources_state
 
 dot_progress_ok "Setup complete"
-dot_progress_info "Restart terminal, run: source ~/.zshrc, or start Fish with: fish"
+dot_progress_info "Restart terminal; use fish or zsh to switch shells explicitly"

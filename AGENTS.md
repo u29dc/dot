@@ -42,7 +42,7 @@ Factory-fresh Mac bootstrap:
 5. Fill `setup.env` with machine-local values and preferences.
 6. Preview setup: `bash ~/Git/dot/scripts/setup.sh --dry-run --no-brew`.
 7. Run setup: `bash ~/Git/dot/scripts/setup.sh`.
-8. Restart shell: `exec zsh -l`, or start Fish with `fish`.
+8. Restart the terminal; `setup.env.example` defaults to Fish, while Zsh remains available with `zsh`.
 9. Sign into human apps such as 1Password, Dropbox if allowed, Codex, Claude, backup, sync, and security tools.
 10. Verify with `./scripts/doctor.sh`, GitHub SSH, Codex MCP, and Dia/agent-browser checks.
 
@@ -52,8 +52,8 @@ Factory-fresh Mac bootstrap:
 - `bash ~/Git/dot/scripts/setup.sh --dry-run --no-brew` - preview setup without writes or package installation
 - `bash ~/Git/dot/scripts/setup.sh` - install packages, link shared config, and render machine-local config with run-id backups when needed
 - `bash ~/Git/dot/scripts/setup.sh --env-file ./other.env --dry-run` - preview a different local env file
-- `source ~/.zshrc` - reload Zsh config after setup
-- `fish` - start the side-by-side Fish setup without changing the login shell
+- `fish` - start the Fish setup explicitly
+- `zsh` - start the side-by-side Zsh setup explicitly
 - `bun install` - install repo-local tooling and husky hooks when working on the repo itself
 - `bun run setup` - run the full setup flow from the repository root
 - `bun run setup:dry` - preview link setup without Homebrew writes
@@ -65,8 +65,10 @@ Factory-fresh Mac bootstrap:
 - `agent-browser-dia-off` - unload the managed Dia CDP LaunchAgent
 - `agent-browser-dia-status` - inspect the Dia LaunchAgent and CDP endpoint health
 - `agent-browser-chrome ...` - force `agent-browser` to use Chrome `Default` instead of Dia
-- `bun run util:check` - format and lint repository files
+- `bun run util:check` - format and lint repository files; this command writes formatting fixes
 - `bun run util:lint:shell` - run `shellcheck` on setup scripts and shell functions
+- `bun run util:lint:zsh` - parse-check Zsh entrypoints and helper functions
+- `bun run util:lint:fish` - parse-check Fish config and functions
 
 ## 4. Architecture
 
@@ -89,6 +91,7 @@ Factory-fresh Mac bootstrap:
 - Local env precedence, highest to lowest: CLI operational flags, process env, `setup.env`, then setup defaults.
 - Setup flags: `--dry-run`, `--no-brew`, and `--env-file`.
 - Environment overrides: `TOOLS_HOME` changes the tool home directory, `SKILLS_BASE` changes the base skill source, `DOT_SKILL_SOURCES` adds colon-separated extra skill source folders, `DOT_BREWFILES` selects ordered Brew layers, and `DOT_DEFAULT_SHELL` can set `fish`, `zsh`, `none`, or an absolute login shell path.
+- Navigation overrides: `DOT_DROPBOX_HOME`, `DOT_VAULT_HOME`, and `DOT_GDRIVE_HOME` feed shared Fish/Zsh shortcuts such as `oo`, `vault`, `dropbox`, and `gdrive`. `DOT_CLOUDSTORAGE_HOME` is a reusable base path for local setup values. Leave them blank on machines without those locations.
 - Optional feature overrides use literal `1` for enabled and `0` for disabled.
 - Agent browser defaults live at `~/.agent-browser/config.json` and `~/.agent-browser/chrome.json`; the managed Dia service lives at `~/Library/LaunchAgents/com.u29dc.dia-cdp.plist` and reserves local port `9222`.
 - High-impact write targets include `~/.zshrc`, `~/.zprofile`, `~/.config/fish/*`, `~/.config/dot/env.*`, `~/.gitconfig`, `~/.ssh/config`, `~/.config/*`, `~/.agent-browser/*`, `~/.claude/*`, `~/.codex/*`, `~/Library/LaunchAgents/*`, and `~/Library/Application Support/com.mitchellh.ghostty/config` on host machines.
@@ -96,7 +99,7 @@ Factory-fresh Mac bootstrap:
 ## 6. Validation
 
 - Required repository gate: `bun run util:check`
-- If you change shell logic or setup behavior, also run `bun run util:lint:shell` and `bun run util:lint:fish`
+- If you change shell logic or setup behavior, also run `bun run util:lint:shell`, `bun run util:lint:zsh`, and `bun run util:lint:fish`
 - If you change [`scripts/setup.sh`](scripts/setup.sh), smoke-test `/bin/bash scripts/setup.sh --dry-run --no-brew` before running real setup
 - If you change setup env, generated config, or setup privacy behavior, run `bun run doctor`
 - If you change the Dia LaunchAgent or agent-browser defaults, verify `http://127.0.0.1:9222/json/version` and at least one `agent-browser` command against the managed Dia session
