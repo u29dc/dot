@@ -13,6 +13,7 @@ end
 
 set -q TOOLS_HOME; or set -gx TOOLS_HOME "$HOME/.tools"
 set -q SKILLS_BASE; or set -gx SKILLS_BASE "$DOTFILES_DIR/agents/skills"
+set -q CARGO_HOME; or set -gx CARGO_HOME "$HOME/.cargo"
 
 set -q BUF_HOME; or set -gx BUF_HOME "$TOOLS_HOME/buf"
 set -q CHO_HOME; or set -gx CHO_HOME "$TOOLS_HOME/cho"
@@ -42,6 +43,7 @@ fish_add_path --path --move "$HOME/bin"
 fish_add_path --path --move /opt/homebrew/bin
 fish_add_path --path --move /opt/homebrew/sbin
 fish_add_path --path --move "$HOME/.local/bin"
+fish_add_path --path --move "$CARGO_HOME/bin"
 fish_add_path --path --move "/Applications/Obsidian.app/Contents/MacOS"
 
 if test -f "$HOME/.config/fish/functions.fish"
