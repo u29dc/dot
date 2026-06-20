@@ -3,7 +3,7 @@
 
 AGENT_BROWSER_DIA_PORT="${AGENT_BROWSER_DIA_PORT:-9222}"
 AGENT_BROWSER_DIA_URL="http://127.0.0.1:${AGENT_BROWSER_DIA_PORT}/json/version"
-AGENT_BROWSER_DIA_APP="/Applications/Dia.app"
+AGENT_BROWSER_DIA_APP="${DOT_DIA_APP:-/Applications/Dia.app}"
 AGENT_BROWSER_DIA_BIN="$AGENT_BROWSER_DIA_APP/Contents/MacOS/Dia"
 AGENT_BROWSER_DIA_LAUNCH_AGENT="com.u29dc.dia-cdp"
 
@@ -50,7 +50,7 @@ agent_browser_dia__wait_for_cdp() {
 }
 
 agent_browser_dia__main_commands() {
-    ps -axo command= | awk '/\/Applications\/Dia.app\/Contents\/MacOS\/Dia( |$)/ { print }'
+    ps -axo command= | awk -v bin="$AGENT_BROWSER_DIA_BIN" 'index($0, bin) { print }'
 }
 
 agent_browser_dia__main_running_without_cdp() {

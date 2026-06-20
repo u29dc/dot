@@ -18,6 +18,7 @@ build/
 .env
 .env.*
 !.env.example
+setup.env
 .husky/_/
 
 # project
@@ -25,3 +26,4 @@ build/
 .bashrc.local
 shell/zshrc.local
 profiles/local.env
+homebrew/Brewfile.local

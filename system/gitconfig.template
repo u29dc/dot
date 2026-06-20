@@ -1,9 +1,10 @@
-# Git global configuration
+# dotfiles-managed: generated gitconfig
+# dotfiles-source: system/gitconfig.template
 
 [user]
-	name = Han
-	email = han@u29dc.com
-	signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOAub7HJPRWWyYMLKKFS86eL7fjknHIYkjoO6rBbWriT
+	name = __GIT_USER_NAME__
+	email = __GIT_USER_EMAIL__
+	signingkey = __GIT_SIGNING_KEY__
 
 [init]
 	defaultBranch = main
@@ -19,7 +20,7 @@
 
 [gpg "ssh"]
 	program = /Applications/1Password.app/Contents/MacOS/op-ssh-sign
-	allowedSignersFile = /Users/han/Git/dot/system/git-allowed-signers
+	allowedSignersFile = __GIT_ALLOWED_SIGNERS_FILE__
 
 [core]
 	pager = delta-themed

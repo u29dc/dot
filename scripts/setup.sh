@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2154
 set -Eeuo pipefail
 
 # Dotfiles setup entrypoint. See AGENTS.md for the fresh-machine runbook.
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+export DOTFILES_DIR
 # shellcheck source=shell/functions/progress.sh
 source "$DOTFILES_DIR/shell/functions/progress.sh"
 
@@ -19,37 +21,42 @@ dot_setup_error() {
 trap dot_setup_error ERR
 
 DOT_KNOWN_ENV_VARS=(
-    DOT_PROFILE
+    DOT_BREWFILES
     DOT_TOOLS_HOME
     TOOLS_HOME
-    DOT_SKILLS_PROFILE1
-    DOT_SKILLS_PROFILE2
+    SKILLS_BASE
+    DOT_SKILL_SOURCES
+    DOT_PRUNE_EXTRA_SKILLS
     DOT_SKILL_ROOTS_STATE
     DOT_ENABLE_DIA
     DOT_ENABLE_ONEPASSWORD
     DOT_ENABLE_SYSTEM_EXTENSIONS
     DOT_ENABLE_CODEX_CONFIG
+    DOT_ENABLE_GIT_CONFIG
+    DOT_CODEX_NOTIFY_COMMAND
+    DOT_DIA_APP
+    DOT_DIA_LOG_DIR
+    AGENT_BROWSER_DIA_PORT
     CODEX_NODE_REPL_ENV_FILE
-    SKILLS_BASE
+    DOT_GIT_USER_NAME
+    DOT_GIT_USER_EMAIL
+    DOT_GIT_SIGNING_KEY
+    DOT_GIT_ALLOWED_SIGNERS_FILE
+    DOT_OP_VAULT
+    DOT_OP_SSH_AUTH_ITEM
+    DOT_OP_SSH_SIGN_ITEM
 )
 
-AGENT_BROWSER_DIA_PORT="${AGENT_BROWSER_DIA_PORT:-9222}"
-AGENT_BROWSER_DIA_APP="/Applications/Dia.app"
-AGENT_BROWSER_DIA_BIN="$AGENT_BROWSER_DIA_APP/Contents/MacOS/Dia"
-AGENT_BROWSER_DIA_LAUNCH_AGENT="com.u29dc.dia-cdp"
-
-# Parse command line arguments
 NO_BREW=false
 DRY_RUN=false
-CLI_DOT_PROFILE=""
+DOT_ENV_FILE="${DOT_ENV_FILE:-$DOTFILES_DIR/setup.env}"
 
 usage() {
     cat <<'USAGE'
-Usage: setup.sh [--profile profile1|profile2] [--dry-run] [--no-brew]
+Usage: setup.sh [--dry-run] [--no-brew] [--env-file PATH]
 
-Profiles:
-  profile1  shared workstation setup plus profile1 extension layer
-  profile2  shared workstation setup plus profile2 extension layer
+Setup reads machine-local values from setup.env by default. Create it with:
+  cp setup.env.example setup.env
 USAGE
 }
 
@@ -63,16 +70,16 @@ while [ "$#" -gt 0 ]; do
             DRY_RUN=true
             shift
             ;;
-        --profile)
+        --env-file)
             if [ "$#" -lt 2 ]; then
-                dot_progress_fail "--profile requires a value"
+                dot_progress_fail "--env-file requires a value"
                 exit 2
             fi
-            CLI_DOT_PROFILE="${2:-}"
+            DOT_ENV_FILE="${2:-}"
             shift 2
             ;;
-        --profile=*)
-            CLI_DOT_PROFILE="${1#--profile=}"
+        --env-file=*)
+            DOT_ENV_FILE="${1#--env-file=}"
             shift
             ;;
         -h | --help)
@@ -109,7 +116,13 @@ restore_process_env() {
 
 load_env_file() {
     local path="$1"
-    [ -f "$path" ] || return 0
+
+    if [ ! -f "$path" ]; then
+        dot_progress_fail "Setup env not found: $path"
+        dot_progress_info "Create it from: cp setup.env.example setup.env"
+        exit 2
+    fi
+
     # shellcheck source=/dev/null
     set -a
     source "$path"
@@ -118,22 +131,8 @@ load_env_file() {
 }
 
 capture_process_env
-load_env_file "$HOME/.config/dot/local.env"
-load_env_file "$DOTFILES_DIR/profiles/local.env"
+load_env_file "$DOT_ENV_FILE"
 restore_process_env
-
-if [ -n "$CLI_DOT_PROFILE" ]; then
-    DOT_PROFILE="$CLI_DOT_PROFILE"
-fi
-
-DOT_PROFILE="${DOT_PROFILE:-profile1}"
-case "$DOT_PROFILE" in
-    profile1 | profile2) ;;
-    *)
-        dot_progress_fail "Unsupported profile: $DOT_PROFILE"
-        exit 2
-        ;;
-esac
 
 dot_default() {
     local name="$1"
@@ -144,38 +143,37 @@ dot_default() {
     fi
 }
 
-case "$DOT_PROFILE" in
-    profile1)
-        DOT_BREWFILES=("homebrew/Brewfile.base" "homebrew/Brewfile.profile1")
-        dot_default DOT_ENABLE_DIA 1
-        dot_default DOT_ENABLE_ONEPASSWORD 1
-        dot_default DOT_ENABLE_SYSTEM_EXTENSIONS 1
-        ;;
-    profile2)
-        DOT_BREWFILES=("homebrew/Brewfile.base" "homebrew/Brewfile.profile2")
-        dot_default DOT_ENABLE_DIA 1
-        dot_default DOT_ENABLE_ONEPASSWORD 1
-        dot_default DOT_ENABLE_SYSTEM_EXTENSIONS 1
-        ;;
-esac
-
+dot_default DOT_BREWFILES "homebrew/Brewfile.base"
+dot_default DOT_ENABLE_DIA 1
+dot_default DOT_ENABLE_ONEPASSWORD 1
+dot_default DOT_ENABLE_SYSTEM_EXTENSIONS 1
 dot_default DOT_ENABLE_CODEX_CONFIG 1
-
-DOT_ENABLE_DIA="${DOT_ENABLE_DIA:-0}"
-DOT_ENABLE_ONEPASSWORD="${DOT_ENABLE_ONEPASSWORD:-0}"
-DOT_ENABLE_SYSTEM_EXTENSIONS="${DOT_ENABLE_SYSTEM_EXTENSIONS:-0}"
-DOT_ENABLE_CODEX_CONFIG="${DOT_ENABLE_CODEX_CONFIG:-1}"
+dot_default DOT_ENABLE_GIT_CONFIG 1
 
 if [ -n "${DOT_TOOLS_HOME:-}" ] && [ -z "${TOOLS_HOME:-}" ]; then
     TOOLS_HOME="$DOT_TOOLS_HOME"
     export TOOLS_HOME
 fi
 
-TOOLS_HOME="${TOOLS_HOME:-$HOME/.tools}"
-DOT_SKILL_ROOTS_STATE="${DOT_SKILL_ROOTS_STATE:-$HOME/.config/dot/extra-skill-roots}"
+dot_default TOOLS_HOME "$HOME/.tools"
+dot_default SKILLS_BASE "$DOTFILES_DIR/agents/skills"
+dot_default DOT_SKILL_SOURCES ""
+dot_default DOT_PRUNE_EXTRA_SKILLS 0
+dot_default DOT_SKILL_ROOTS_STATE "$HOME/.config/dot/extra-skill-roots"
+dot_default DOT_DIA_APP "/Applications/Dia.app"
+dot_default DOT_DIA_LOG_DIR "$HOME/Library/Logs"
+dot_default AGENT_BROWSER_DIA_PORT 9222
+dot_default CODEX_NODE_REPL_ENV_FILE "$HOME/.config/dot/codex-node-repl.env.toml"
+dot_default DOT_CODEX_NOTIFY_COMMAND "$HOME/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient"
+dot_default DOT_GIT_ALLOWED_SIGNERS_FILE "$HOME/.config/git/allowed-signers"
+
 DOT_RUN_ID="${DOT_RUN_ID:-$(date +%Y%m%d-%H%M%S)}"
 DOT_BACKUP_DIR="${DOT_BACKUP_DIR:-$HOME/.dotfiles-backups/$DOT_RUN_ID}"
 DOT_BACKUP_MANIFEST="$DOT_BACKUP_DIR/manifest.tsv"
+
+AGENT_BROWSER_DIA_APP="$DOT_DIA_APP"
+AGENT_BROWSER_DIA_BIN="$AGENT_BROWSER_DIA_APP/Contents/MacOS/Dia"
+AGENT_BROWSER_DIA_LAUNCH_AGENT="com.u29dc.dia-cdp"
 
 dot_truthy() {
     [ "${1:-0}" = "1" ]
@@ -208,6 +206,217 @@ dot_manifest_append() {
     printf '%s\t%s\t%s\t%s\n' "$action" "$src" "$dest" "$backup" >>"$DOT_BACKUP_MANIFEST"
 }
 
+dot_require() {
+    local name="$1"
+    if [ -z "${!name:-}" ]; then
+        dot_progress_fail "Missing required setup env: $name"
+        return 1
+    fi
+}
+
+dot_validate_bool() {
+    local name="$1"
+    case "${!name:-}" in
+        0 | 1) ;;
+        *)
+            dot_progress_fail "$name must be 0 or 1"
+            return 1
+            ;;
+    esac
+}
+
+dot_abs_path() {
+    local path="$1"
+    case "$path" in
+        /*) printf '%s\n' "$path" ;;
+        *) printf '%s/%s\n' "$DOTFILES_DIR" "$path" ;;
+    esac
+}
+
+dot_each_colon_item() {
+    local list="$1"
+    local old_ifs item
+
+    old_ifs="$IFS"
+    IFS=':'
+    for item in $list; do
+        [ -n "$item" ] || continue
+        printf '%s\n' "$item"
+    done
+    IFS="$old_ifs"
+}
+
+dot_redact_path() {
+    local value="$1"
+    value="${value//$HOME/\$HOME}"
+    value="${value//$DOTFILES_DIR/\$DOTFILES_DIR}"
+    printf '%s\n' "$value"
+}
+
+dot_render_line() {
+    local line="$1"
+    local dia_bin="$AGENT_BROWSER_DIA_BIN"
+    local dia_stdout="$DOT_DIA_LOG_DIR/com.u29dc.dia-cdp.log"
+    local dia_stderr="$DOT_DIA_LOG_DIR/com.u29dc.dia-cdp.err"
+    local git_allowed_signer="${DOT_GIT_USER_EMAIL:-} ${DOT_GIT_SIGNING_KEY:-}"
+    local ssh_identity_agent="  # IdentityAgent disabled by DOT_ENABLE_ONEPASSWORD=0"
+
+    line="${line//__HOME__/$HOME}"
+    line="${line//__DOTFILES_DIR__/$DOTFILES_DIR}"
+    line="${line//__TOOLS_HOME__/$TOOLS_HOME}"
+    line="${line//__GIT_USER_NAME__/${DOT_GIT_USER_NAME:-}}"
+    line="${line//__GIT_USER_EMAIL__/${DOT_GIT_USER_EMAIL:-}}"
+    line="${line//__GIT_SIGNING_KEY__/${DOT_GIT_SIGNING_KEY:-}}"
+    line="${line//__GIT_ALLOWED_SIGNERS_FILE__/$DOT_GIT_ALLOWED_SIGNERS_FILE}"
+    line="${line//__GIT_ALLOWED_SIGNER__/$git_allowed_signer}"
+    line="${line//__OP_VAULT__/${DOT_OP_VAULT:-}}"
+    line="${line//__OP_SSH_AUTH_ITEM__/${DOT_OP_SSH_AUTH_ITEM:-}}"
+    line="${line//__OP_SSH_SIGN_ITEM__/${DOT_OP_SSH_SIGN_ITEM:-}}"
+    if dot_truthy "$DOT_ENABLE_ONEPASSWORD"; then
+        ssh_identity_agent='  IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"'
+    fi
+    line="${line//__SSH_IDENTITY_AGENT__/$ssh_identity_agent}"
+    line="${line//__DIA_APP_BIN__/$dia_bin}"
+    line="${line//__AGENT_BROWSER_DIA_PORT__/$AGENT_BROWSER_DIA_PORT}"
+    line="${line//__DIA_STDOUT_LOG__/$dia_stdout}"
+    line="${line//__DIA_STDERR_LOG__/$dia_stderr}"
+    printf '%s\n' "$line"
+}
+
+render_template_to_file() {
+    local template="$1"
+    local dest="$2"
+    local line
+
+    while IFS= read -r line || [ -n "$line" ]; do
+        dot_render_line "$line"
+    done <"$template" >"$dest"
+}
+
+backup_existing_target() {
+    local src="$1"
+    local dest="$2"
+    local action="$3"
+    local backup
+    local rel
+
+    [ -e "$dest" ] || [ -L "$dest" ] || return 0
+
+    rel="${dest#/}"
+    backup="$DOT_BACKUP_DIR/$rel"
+    dot_progress_status "BACKUP" "$DOT_PROGRESS_YELLOW" "$dest -> $backup"
+    dot_apply mkdir -p "$(dirname "$backup")"
+
+    if dot_dry_run; then
+        dot_manifest_append "$action" "$src" "$dest" "$backup"
+        return 0
+    fi
+
+    if [ -L "$dest" ]; then
+        cp -P "$dest" "$backup"
+        rm "$dest"
+    else
+        mv "$dest" "$backup"
+    fi
+    dot_manifest_append "$action" "$src" "$dest" "$backup"
+}
+
+write_managed_file() {
+    local template="$1"
+    local dest="$2"
+    local label="$3"
+    local tmp
+
+    if [ ! -f "$template" ]; then
+        dot_progress_fail "Template not found: $template"
+        return 1
+    fi
+
+    if [ -e "$dest" ] || [ -L "$dest" ]; then
+        if ! grep -Fq "dotfiles-managed:" "$dest" 2>/dev/null; then
+            backup_existing_target "$template" "$dest" "backup-generated"
+        fi
+    fi
+
+    dot_apply mkdir -p "$(dirname "$dest")"
+
+    if dot_dry_run; then
+        dot_progress_status "RENDER" "$DOT_PROGRESS_BLUE" "$label -> $dest"
+        return 0
+    fi
+
+    tmp="$(mktemp "${TMPDIR:-/tmp}/dot-render.XXXXXX")"
+    render_template_to_file "$template" "$tmp"
+    mv "$tmp" "$dest"
+    dot_manifest_append "render" "$template" "$dest"
+    dot_progress_status "RENDER" "$DOT_PROGRESS_BLUE" "$label -> $dest"
+}
+
+validate_setup_env() {
+    local status=0
+    local brewfile
+    local brewfile_path
+    local source
+
+    dot_validate_bool DOT_ENABLE_DIA || status=1
+    dot_validate_bool DOT_ENABLE_ONEPASSWORD || status=1
+    dot_validate_bool DOT_ENABLE_SYSTEM_EXTENSIONS || status=1
+    dot_validate_bool DOT_ENABLE_CODEX_CONFIG || status=1
+    dot_validate_bool DOT_ENABLE_GIT_CONFIG || status=1
+    dot_validate_bool DOT_PRUNE_EXTRA_SKILLS || status=1
+
+    if dot_truthy "$DOT_ENABLE_GIT_CONFIG"; then
+        dot_require DOT_GIT_USER_NAME || status=1
+        dot_require DOT_GIT_USER_EMAIL || status=1
+        dot_require DOT_GIT_SIGNING_KEY || status=1
+        dot_require DOT_GIT_ALLOWED_SIGNERS_FILE || status=1
+    fi
+
+    if dot_truthy "$DOT_ENABLE_ONEPASSWORD"; then
+        dot_require DOT_OP_VAULT || status=1
+        dot_require DOT_OP_SSH_AUTH_ITEM || status=1
+        dot_require DOT_OP_SSH_SIGN_ITEM || status=1
+    fi
+
+    if dot_truthy "$DOT_ENABLE_DIA"; then
+        dot_require DOT_DIA_APP || status=1
+        dot_require DOT_DIA_LOG_DIR || status=1
+        dot_require AGENT_BROWSER_DIA_PORT || status=1
+    fi
+
+    if [ -z "$DOT_BREWFILES" ]; then
+        dot_progress_fail "DOT_BREWFILES must contain at least one Brewfile"
+        status=1
+    fi
+
+    while IFS= read -r brewfile; do
+        [ -n "$brewfile" ] || continue
+        brewfile_path="$(dot_abs_path "$brewfile")"
+        if [ ! -f "$brewfile_path" ]; then
+            dot_progress_fail "Homebrew layer not found: $brewfile"
+            status=1
+        fi
+    done <<EOF
+$(dot_each_colon_item "$DOT_BREWFILES")
+EOF
+
+    if [ ! -d "$SKILLS_BASE" ]; then
+        dot_progress_fail "Base skill source not found: $SKILLS_BASE"
+        status=1
+    fi
+
+    while IFS= read -r source; do
+        [ -n "$source" ] || continue
+        if [ ! -d "$source" ]; then
+            dot_progress_warn "Extra skills source not found and will be skipped: $(dot_redact_path "$source")"
+        fi
+    done <<EOF
+$(dot_each_colon_item "$DOT_SKILL_SOURCES")
+EOF
+
+    return "$status"
+}
+
 install_homebrew() {
     local installer
     installer="$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || return $?
@@ -216,11 +425,6 @@ install_homebrew() {
 
 install_brewfile() {
     local file="$1"
-    if [ ! -f "$file" ]; then
-        dot_progress_skip "Homebrew layer not found: $file"
-        return 0
-    fi
-
     if brew bundle check --no-upgrade --file="$file" >/dev/null; then
         dot_progress_ok "Homebrew layer satisfied: ${file#"$DOTFILES_DIR"/}"
         return 0
@@ -229,14 +433,10 @@ install_brewfile() {
     dot_progress_run_step --stream "Installing ${file#"$DOTFILES_DIR"/}" brew bundle install --no-upgrade --file="$file"
 }
 
-# Function to create symlink with backup and verification
 link_file() {
     local src="$1"
     local dest="$2"
-    local backup
-    local rel
 
-    # Skip if source doesn't exist
     if [ ! -e "$src" ]; then
         dot_progress_skip "Source not found: $src"
         return 0
@@ -251,19 +451,13 @@ link_file() {
         dot_apply rm "$dest"
         dot_manifest_append "remove-symlink" "$src" "$dest"
     elif [ -e "$dest" ]; then
-        rel="${dest#/}"
-        backup="$DOT_BACKUP_DIR/$rel"
-        dot_progress_status "BACKUP" "$DOT_PROGRESS_YELLOW" "$dest -> $backup"
-        dot_apply mkdir -p "$(dirname "$backup")"
-        dot_apply mv "$dest" "$backup"
-        dot_manifest_append "backup" "$src" "$dest" "$backup"
+        backup_existing_target "$src" "$dest" "backup"
     fi
 
     dot_apply mkdir -p "$(dirname "$dest")"
     dot_apply ln -s "$src" "$dest"
     dot_manifest_append "link" "$src" "$dest"
 
-    # Verify symlink was created correctly
     if dot_dry_run; then
         dot_progress_status "LINK" "$DOT_PROGRESS_BLUE" "$(basename "$src") -> $dest"
         return 0
@@ -277,147 +471,103 @@ link_file() {
     fi
 }
 
-# Merge skills from multiple source directories into a single target.
-# Creates target as real directory; symlinks each valid skill subdirectory.
-# Skips sources that don't exist.
-#
-# Usage: link_skills <target_dir> <source_dir> [<source_dir>...]
-link_skills() {
+link_skills_from_source() {
     local target="$1"
-    shift
-    local existing target_path
-    local source_dir
+    local src_dir="$2"
+    local skill
+    local name
 
-    dot_apply mkdir -p "$target"
+    if [ ! -d "$src_dir" ]; then
+        dot_progress_skip "Skills source not found: $src_dir"
+        return 0
+    fi
 
-    for existing in "$target"/*; do
-        [ -L "$existing" ] || continue
-        [ -e "$existing" ] && continue
-        target_path="$(readlink "$existing" 2>/dev/null || true)"
-
-        local owned_by_active_source=0
-        for source_dir in "$@"; do
-            case "$target_path" in
-                "$source_dir" | "$source_dir"/*)
-                    owned_by_active_source=1
-                    break
-                    ;;
-            esac
-        done
-        [ "$owned_by_active_source" -eq 1 ] || continue
-
-        dot_progress_status "REMOVE" "$DOT_PROGRESS_YELLOW" "$existing"
-        dot_apply rm "$existing"
-        dot_manifest_append "remove-broken-skill" "$target_path" "$existing"
+    for skill in "$src_dir"/*/; do
+        [ -d "$skill" ] || continue
+        name="$(basename "$skill")"
+        case "$name" in .*) continue ;; esac
+        [ -f "$skill/SKILL.md" ] || continue
+        link_file "${skill%/}" "$target/$name"
     done
+}
 
-    for src_dir in "$@"; do
-        if [ ! -d "$src_dir" ]; then
-            dot_progress_skip "Skills source not found: $src_dir"
-            continue
-        fi
+is_source_configured() {
+    local target_path="$1"
+    local source
 
-        for skill in "$src_dir"/*/; do
-            [ -d "$skill" ] || continue
-            local name
-            name="$(basename "$skill")"
-            [[ "$name" == .* ]] && continue
+    case "$target_path" in
+        "$SKILLS_BASE" | "$SKILLS_BASE"/*) return 0 ;;
+    esac
 
-            # Only link directories containing SKILL.md
-            [ -f "$skill/SKILL.md" ] || continue
+    while IFS= read -r source; do
+        [ -n "$source" ] || continue
+        case "$target_path" in
+            "$source" | "$source"/*) return 0 ;;
+        esac
+    done <<EOF
+$(dot_each_colon_item "$DOT_SKILL_SOURCES")
+EOF
 
-            link_file "${skill%/}" "$target/$name"
-        done
-    done
+    return 1
+}
+
+is_source_known() {
+    local target_path="$1"
+    local source
+
+    while IFS= read -r source; do
+        [ -n "$source" ] || continue
+        case "$target_path" in
+            "$source" | "$source"/*) return 0 ;;
+        esac
+    done <<EOF
+$KNOWN_EXTRA_SKILL_SOURCES
+EOF
+
+    return 1
 }
 
 remove_inactive_extra_skill_links() {
     local target="$1"
-    shift
-    local -a known_sources=("$@")
-    local -a active_sources=("${ACTIVE_EXTRA_SKILL_SOURCES[@]}")
-    local link target_path
-    local action configured known source
+    local link
+    local target_path
+    local action
 
     [ -d "$target" ] || return 0
+    dot_truthy "$DOT_PRUNE_EXTRA_SKILLS" || return 0
 
     for link in "$target"/*; do
         [ -L "$link" ] || continue
         target_path="$(readlink "$link")"
-        configured=0
-        known=0
+        is_source_configured "$target_path" && continue
+        is_source_known "$target_path" || continue
 
-        for source in "$SKILLS_BASE" "${active_sources[@]}"; do
-            [ -n "$source" ] || continue
-            case "$target_path" in
-                "$source" | "$source"/*)
-                    configured=1
-                    break
-                    ;;
-            esac
-        done
-        [ "$configured" -eq 0 ] || continue
-
-        for source in "${known_sources[@]}"; do
-            case "$target_path" in
-                "$source" | "$source"/*)
-                    known=1
-                    break
-                    ;;
-            esac
-        done
-
-        if [ "$known" -eq 1 ]; then
-            action="remove-inactive-extra-skill"
-        else
-            action="remove-unconfigured-skill"
-        fi
-
+        action="remove-inactive-extra-skill"
         dot_progress_status "REMOVE" "$DOT_PROGRESS_YELLOW" "$link"
         dot_apply rm "$link"
         dot_manifest_append "$action" "$target_path" "$link"
     done
 }
 
-append_active_skill_sources() {
-    local list="${1:-}"
-    local source old_ifs
-
-    [ -n "$list" ] || return 0
-
-    old_ifs="$IFS"
-    IFS=':'
-    for source in $list; do
-        [ -n "$source" ] || continue
-        ACTIVE_EXTRA_SKILL_SOURCES+=("$source")
-    done
-    IFS="$old_ifs"
-}
-
-append_known_skill_sources() {
-    local list="${1:-}"
-    local source old_ifs
-
-    [ -n "$list" ] || return 0
-
-    old_ifs="$IFS"
-    IFS=':'
-    for source in $list; do
-        [ -n "$source" ] || continue
-        KNOWN_EXTRA_SKILL_SOURCES+=("$source")
-    done
-    IFS="$old_ifs"
-}
-
-append_previous_extra_skill_sources() {
+read_known_extra_skill_sources() {
     local source
+    KNOWN_EXTRA_SKILL_SOURCES=""
 
-    [ -f "$DOT_SKILL_ROOTS_STATE" ] || return 0
+    if [ -f "$DOT_SKILL_ROOTS_STATE" ]; then
+        while IFS= read -r source; do
+            [ -n "$source" ] || continue
+            KNOWN_EXTRA_SKILL_SOURCES="${KNOWN_EXTRA_SKILL_SOURCES}${source}
+"
+        done <"$DOT_SKILL_ROOTS_STATE"
+    fi
 
     while IFS= read -r source; do
         [ -n "$source" ] || continue
-        KNOWN_EXTRA_SKILL_SOURCES+=("$source")
-    done <"$DOT_SKILL_ROOTS_STATE"
+        KNOWN_EXTRA_SKILL_SOURCES="${KNOWN_EXTRA_SKILL_SOURCES}${source}
+"
+    done <<EOF
+$(dot_each_colon_item "$DOT_SKILL_SOURCES")
+EOF
 }
 
 write_extra_skill_sources_state() {
@@ -427,9 +577,31 @@ write_extra_skill_sources_state() {
 
     mkdir -p "$(dirname "$DOT_SKILL_ROOTS_STATE")"
     : >"$DOT_SKILL_ROOTS_STATE"
-    for source in "${VALID_EXTRA_SKILL_SOURCES[@]}"; do
+    while IFS= read -r source; do
+        [ -n "$source" ] || continue
+        [ -d "$source" ] || continue
         printf '%s\n' "$source" >>"$DOT_SKILL_ROOTS_STATE"
-    done
+    done <<EOF
+$(dot_each_colon_item "$DOT_SKILL_SOURCES")
+EOF
+}
+
+link_skills() {
+    local target="$1"
+    local source
+
+    dot_apply mkdir -p "$target"
+    remove_inactive_extra_skill_links "$target"
+    link_skills_from_source "$target" "$SKILLS_BASE"
+
+    while IFS= read -r source; do
+        [ -n "$source" ] || continue
+        [ -d "$source" ] || continue
+        dot_progress_info "Extra skills source active"
+        link_skills_from_source "$target" "$source"
+    done <<EOF
+$(dot_each_colon_item "$DOT_SKILL_SOURCES")
+EOF
 }
 
 dia_cdp_url() {
@@ -463,7 +635,7 @@ wait_for_dia_cdp() {
 }
 
 dia_main_commands() {
-    ps -axo command= | awk '/\/Applications\/Dia.app\/Contents\/MacOS\/Dia( |$)/ { print }'
+    ps -axo command= | awk -v bin="$AGENT_BROWSER_DIA_BIN" 'index($0, bin) { print }'
 }
 
 dia_running_without_cdp() {
@@ -506,7 +678,7 @@ setup_dia_cdp() {
     fi
 
     if [ ! -f "$plist_path" ]; then
-        dot_progress_skip "Dia LaunchAgent not linked: $plist_path"
+        dot_progress_skip "Dia LaunchAgent not rendered: $plist_path"
         return 0
     fi
 
@@ -558,9 +730,11 @@ setup_dia_cdp() {
     fi
 }
 
+validate_setup_env
+
 dot_progress_title "Dotfiles setup"
 dot_progress_info "Directory: $DOTFILES_DIR"
-dot_progress_info "Profile: $DOT_PROFILE"
+dot_progress_info "Env file: $DOT_ENV_FILE"
 dot_progress_info "Backup dir: $DOT_BACKUP_DIR"
 
 if dot_dry_run; then
@@ -568,39 +742,43 @@ if dot_dry_run; then
 fi
 
 dot_progress_info "Homebrew layers:"
-for brewfile in "${DOT_BREWFILES[@]}"; do
+while IFS= read -r brewfile; do
+    [ -n "$brewfile" ] || continue
     dot_progress_info "  - $brewfile"
-done
+done <<EOF
+$(dot_each_colon_item "$DOT_BREWFILES")
+EOF
 
-# Full setup: Install Homebrew and packages
 if [ "$NO_BREW" = true ]; then
     dot_progress_skip "Homebrew packages (--no-brew)"
 elif dot_dry_run; then
     dot_progress_skip "Homebrew packages (--dry-run)"
 else
-    # Check prerequisites
     if ! command -v brew >/dev/null 2>&1; then
         dot_progress_run_step --stream "Installing Homebrew" install_homebrew
-
-        # Add Homebrew to PATH for this session
-        eval "$(/opt/homebrew/bin/brew shellenv)"
+        if [ -x /opt/homebrew/bin/brew ]; then
+            eval "$(/opt/homebrew/bin/brew shellenv)"
+        elif [ -x /usr/local/bin/brew ]; then
+            eval "$(/usr/local/bin/brew shellenv)"
+        fi
     else
         dot_progress_ok "Homebrew available"
     fi
 
-    for brewfile in "${DOT_BREWFILES[@]}"; do
-        install_brewfile "$DOTFILES_DIR/$brewfile"
-    done
+    while IFS= read -r brewfile; do
+        [ -n "$brewfile" ] || continue
+        install_brewfile "$(dot_abs_path "$brewfile")"
+    done <<EOF
+$(dot_each_colon_item "$DOT_BREWFILES")
+EOF
 fi
 
-# Create tool home directory
 if dot_dry_run; then
     dot_progress_status "PLAN" "$DOT_PROGRESS_DIM" "mkdir -p $TOOLS_HOME"
 else
     dot_progress_run_step "Creating tool home" mkdir -p "$TOOLS_HOME"
 fi
 
-# Shell configs
 dot_progress_section "Shell configurations"
 link_file "$DOTFILES_DIR/shell/zshrc" "$HOME/.zshrc"
 link_file "$DOTFILES_DIR/shell/zprofile" "$HOME/.zprofile"
@@ -613,7 +791,6 @@ else
     dot_progress_status "COPY" "$DOT_PROGRESS_BLUE" "zshrc.local.example -> $HOME/.zshrc.local"
 fi
 
-# Terminal configs
 dot_progress_section "Terminal configurations"
 link_file "$DOTFILES_DIR/terminal/starship-dark.toml" "$HOME/.config/starship/starship-dark.toml"
 link_file "$DOTFILES_DIR/terminal/starship-light.toml" "$HOME/.config/starship/starship-light.toml"
@@ -640,7 +817,7 @@ link_file "$DOTFILES_DIR/editor/settings.json" "$HOME/.config/zed/settings.json"
 link_file "$DOTFILES_DIR/editor/keymap.json" "$HOME/.config/zed/keymap.json"
 
 dot_progress_section "Additional terminal configurations"
-link_file "$DOTFILES_DIR/terminal/ssh" "$HOME/.ssh/config"
+write_managed_file "$DOTFILES_DIR/terminal/ssh.template" "$HOME/.ssh/config" "SSH config"
 link_file "$DOTFILES_DIR/terminal/neofetch" "$HOME/.config/neofetch/config.conf"
 link_file "$DOTFILES_DIR/terminal/statusline" "$HOME/.config/ccstatusline/settings.json"
 link_file "$DOTFILES_DIR/terminal/ghostty" "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
@@ -649,7 +826,13 @@ link_file "$DOTFILES_DIR/terminal/agent-browser.json" "$HOME/.agent-browser/conf
 link_file "$DOTFILES_DIR/terminal/agent-browser.chrome.json" "$HOME/.agent-browser/chrome.json"
 
 dot_progress_section "System configurations"
-link_file "$DOTFILES_DIR/system/gitconfig" "$HOME/.gitconfig"
+if dot_truthy "$DOT_ENABLE_GIT_CONFIG"; then
+    write_managed_file "$DOTFILES_DIR/system/gitconfig.template" "$HOME/.gitconfig" "gitconfig"
+    write_managed_file "$DOTFILES_DIR/system/git-allowed-signers.template" "$DOT_GIT_ALLOWED_SIGNERS_FILE" "git allowed signers"
+else
+    dot_progress_skip "Git config generation (DOT_ENABLE_GIT_CONFIG!=1)"
+fi
+
 if dot_truthy "$DOT_ENABLE_SYSTEM_EXTENSIONS"; then
     link_file "$DOTFILES_DIR/system/karabiner" "$HOME/.config/karabiner/karabiner.json"
     link_file "$DOTFILES_DIR/macos/.macos" "$HOME/.macos"
@@ -658,65 +841,37 @@ else
 fi
 
 if dot_truthy "$DOT_ENABLE_ONEPASSWORD"; then
-    link_file "$DOTFILES_DIR/system/1password" "$HOME/.config/1Password/ssh/agent.toml"
+    write_managed_file "$DOTFILES_DIR/system/1password.agent.toml.template" "$HOME/.config/1Password/ssh/agent.toml" "1Password SSH agent"
 else
     dot_progress_skip "1Password SSH agent config (DOT_ENABLE_ONEPASSWORD!=1)"
 fi
 
 if dot_truthy "$DOT_ENABLE_DIA"; then
-    link_file "$DOTFILES_DIR/system/launchagents/com.u29dc.dia-cdp.plist" "$HOME/Library/LaunchAgents/com.u29dc.dia-cdp.plist"
+    write_managed_file "$DOTFILES_DIR/system/launchagents/com.u29dc.dia-cdp.plist.template" "$HOME/Library/LaunchAgents/com.u29dc.dia-cdp.plist" "Dia CDP LaunchAgent"
     setup_dia_cdp
 else
     dot_progress_skip "Dia CDP LaunchAgent (DOT_ENABLE_DIA!=1)"
 fi
 
-# Agent configurations
 dot_progress_section "Agent configurations"
-# Claude Code
 link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.claude/CLAUDE.md"
 link_file "$DOTFILES_DIR/agents/claude.json" "$HOME/.claude/settings.json"
-SKILLS_BASE="${SKILLS_BASE:-$DOTFILES_DIR/agents/skills}"
-ACTIVE_EXTRA_SKILL_SOURCES=()
-VALID_EXTRA_SKILL_SOURCES=()
-KNOWN_EXTRA_SKILL_SOURCES=()
-append_previous_extra_skill_sources
-append_known_skill_sources "${DOT_SKILLS_PROFILE1:-}"
-append_known_skill_sources "${DOT_SKILLS_PROFILE2:-}"
-case "$DOT_PROFILE" in
-    profile1) append_active_skill_sources "${DOT_SKILLS_PROFILE1:-}" ;;
-    profile2) append_active_skill_sources "${DOT_SKILLS_PROFILE2:-}" ;;
-esac
+read_known_extra_skill_sources
+link_skills "$HOME/.claude/skills"
 
-for source in "${ACTIVE_EXTRA_SKILL_SOURCES[@]}"; do
-    if [ -d "$source" ]; then
-        dot_progress_info "Extra skills: $source"
-        VALID_EXTRA_SKILL_SOURCES+=("$source")
-    else
-        dot_progress_skip "Extra skills source not found: $source"
-    fi
-done
-
-remove_inactive_extra_skill_links "$HOME/.claude/skills" "${KNOWN_EXTRA_SKILL_SOURCES[@]}"
-remove_inactive_extra_skill_links "$HOME/.codex/skills" "${KNOWN_EXTRA_SKILL_SOURCES[@]}"
-remove_inactive_extra_skill_links "$HOME/.agents/skills" "${KNOWN_EXTRA_SKILL_SOURCES[@]}"
-write_extra_skill_sources_state
-
-link_skills "$HOME/.claude/skills" "$SKILLS_BASE" "${VALID_EXTRA_SKILL_SOURCES[@]}"
-# Codex CLI
 link_file "$DOTFILES_DIR/agents/AGENTS.md" "$HOME/.codex/AGENTS.md"
 if dot_truthy "$DOT_ENABLE_CODEX_CONFIG"; then
     if dot_dry_run; then
-        dot_progress_status "PLAN" "$DOT_PROGRESS_DIM" "scripts/codex.sh --profile $DOT_PROFILE --dest $HOME/.codex/config.toml"
+        dot_progress_status "PLAN" "$DOT_PROGRESS_DIM" "scripts/codex.sh --dest $HOME/.codex/config.toml"
     else
-        DOT_BACKUP_DIR="$DOT_BACKUP_DIR" DOT_BACKUP_MANIFEST="$DOT_BACKUP_MANIFEST" TOOLS_HOME="$TOOLS_HOME" "$DOTFILES_DIR/scripts/codex.sh" --profile "$DOT_PROFILE" --dest "$HOME/.codex/config.toml"
+        DOT_BACKUP_DIR="$DOT_BACKUP_DIR" DOT_BACKUP_MANIFEST="$DOT_BACKUP_MANIFEST" TOOLS_HOME="$TOOLS_HOME" CODEX_NODE_REPL_ENV_FILE="$CODEX_NODE_REPL_ENV_FILE" DOT_CODEX_NOTIFY_COMMAND="$DOT_CODEX_NOTIFY_COMMAND" "$DOTFILES_DIR/scripts/codex.sh" --dest "$HOME/.codex/config.toml"
     fi
 else
     dot_progress_skip "Codex config generation (DOT_ENABLE_CODEX_CONFIG!=1)"
 fi
-link_skills "$HOME/.codex/skills" "$SKILLS_BASE" "${VALID_EXTRA_SKILL_SOURCES[@]}"
-link_skills "$HOME/.agents/skills" "$SKILLS_BASE" "${VALID_EXTRA_SKILL_SOURCES[@]}"
-
-dot_progress_ok "Symlinks created successfully"
+link_skills "$HOME/.codex/skills"
+link_skills "$HOME/.agents/skills"
+write_extra_skill_sources_state
 
 dot_progress_ok "Setup complete"
 dot_progress_info "Restart terminal or run: source ~/.zshrc"

@@ -10,10 +10,10 @@ path=("$HOME/.bun/bin" "$HOME/bin" "/opt/homebrew/bin" "/opt/homebrew/sbin" "$HO
 typeset -U path
 export PATH
 
-# Dotfiles checkout and machine-local profile facts.
+# Dotfiles checkout and machine-local setup facts.
 export DOTFILES_DIR="${DOTFILES_DIR:-$HOME/Git/dot}"
-[ -f "$HOME/.config/dot/local.env" ] && source "$HOME/.config/dot/local.env"
-[ -f "$DOTFILES_DIR/profiles/local.env" ] && source "$DOTFILES_DIR/profiles/local.env"
+export DOT_ENV_FILE="${DOT_ENV_FILE:-$DOTFILES_DIR/setup.env}"
+[ -f "$DOT_ENV_FILE" ] && source "$DOT_ENV_FILE"
 
 # Obsidian CLI
 export PATH="$PATH:/Applications/Obsidian.app/Contents/MacOS"
@@ -292,6 +292,3 @@ fi
 
 # CF CLI completions
 [[ -f "$HOME/.config/cf/completions/_cf.zsh" ]] && source "$HOME/.config/cf/completions/_cf.zsh"
-
-# bun completions
-[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"

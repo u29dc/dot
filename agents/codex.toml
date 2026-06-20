@@ -1,5 +1,5 @@
 # dotfiles-managed: codex-template
-# profile: shared
+# dotfiles-source: agents/codex.toml
 
 model = "gpt-5.5"
 review_model = "gpt-5.5"
@@ -24,7 +24,7 @@ project_doc_max_bytes = 64000
 show_raw_agent_reasoning = true
 suppress_unstable_features_warning = true
 
-notify = ["__HOME__/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
+notify = ["__CODEX_NOTIFY_COMMAND__", "turn-ended"]
 
 [shell_environment_policy]
 ignore_default_excludes = false
@@ -35,6 +35,7 @@ BUF = "__TOOLS_HOME__/buf/buf"
 CHO = "__TOOLS_HOME__/cho/cho"
 FIN = "__TOOLS_HOME__/fin/fin"
 GRN = "__TOOLS_HOME__/grn/grn"
+LET = "__TOOLS_HOME__/let/let"
 PDF = "__TOOLS_HOME__/pdf/pdf"
 TAO = "__TOOLS_HOME__/tao/tao"
 

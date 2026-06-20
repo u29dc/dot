@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- dotfiles-managed: generated dia-cdp -->
+<!-- dotfiles-source: system/launchagents/com.u29dc.dia-cdp.plist.template -->
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
@@ -7,8 +9,8 @@
 
 	<key>ProgramArguments</key>
 	<array>
-		<string>/Applications/Dia.app/Contents/MacOS/Dia</string>
-		<string>--remote-debugging-port=9222</string>
+		<string>__DIA_APP_BIN__</string>
+		<string>--remote-debugging-port=__AGENT_BROWSER_DIA_PORT__</string>
 	</array>
 
 	<key>RunAtLoad</key>
@@ -24,9 +26,9 @@
 	<string>Aqua</string>
 
 	<key>StandardOutPath</key>
-	<string>/Users/han/Library/Logs/com.u29dc.dia-cdp.log</string>
+	<string>__DIA_STDOUT_LOG__</string>
 
 	<key>StandardErrorPath</key>
-	<string>/Users/han/Library/Logs/com.u29dc.dia-cdp.err</string>
+	<string>__DIA_STDERR_LOG__</string>
 </dict>
 </plist>

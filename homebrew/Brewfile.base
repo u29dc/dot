@@ -30,6 +30,7 @@ brew "gitingest"
 brew "modem-dev/tap/hunk", trusted: true
 
 # Shell enhancements
+brew "fish"
 brew "atuin"
 brew "broot"
 brew "tmux"

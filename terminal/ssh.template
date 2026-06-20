@@ -1,3 +1,6 @@
+# dotfiles-managed: generated ssh-config
+# dotfiles-source: terminal/ssh.template
+
 # =============================================================================
 # SSH Configuration - Optimized for Git Operations
 # =============================================================================
@@ -8,8 +11,7 @@ Include ~/.ssh/config.local
 # Global Settings (applies to all hosts)
 # =============================================================================
 Host *
-  # 1Password SSH Agent Integration
-  IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+__SSH_IDENTITY_AGENT__
 
   # Modern Cryptography (security + performance)
   # Prefer curve25519 for key exchange (fast, quantum-resistant)
