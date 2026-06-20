@@ -3,7 +3,7 @@
 ## 1. Documentation
 
 - Bootstrap and symlink behavior: [`scripts/setup.sh`](scripts/setup.sh)
-- Package inventory: [`homebrew/Brewfile.base`](homebrew/Brewfile.base)
+- Package inventory: [`homebrew/Brewfile.primary`](homebrew/Brewfile.primary)
 - Local setup template: [`setup.env.example`](setup.env.example)
 - Agent policy and shared AI config: [`agents/AGENTS.md`](agents/AGENTS.md), [`agents/codex.toml`](agents/codex.toml), [`agents/claude.json`](agents/claude.json)
 - Agent browser defaults: [`terminal/agent-browser.json`](terminal/agent-browser.json), [`terminal/agent-browser.chrome.json`](terminal/agent-browser.chrome.json), [`system/launchagents/com.u29dc.dia-cdp.plist.template`](system/launchagents/com.u29dc.dia-cdp.plist.template)
@@ -87,8 +87,8 @@ Factory-fresh Mac bootstrap:
 - Create local-only secrets from the shell local examples and keep machine-specific keys out of the repository.
 - Setup copies `shell/zsh/zshrc.local.example` to `~/.zshrc.local` and `shell/fish/local.fish.example` to `~/.config/fish/local.fish` only when those files do not already exist; it does not link ignored local secrets from the repository.
 - `setup.env.example` is the only tracked local setup template. Keep actual `setup.env` ignored and local-only.
-- `homebrew/Brewfile.base` currently contains the complete shared workstation package inventory. Optional local Brewfiles may be listed in `DOT_BREWFILES` but should be ignored unless intentionally promoted.
-- Local env precedence, highest to lowest: CLI operational flags, process env, `setup.env`, then setup defaults.
+- `homebrew/Brewfile.primary` currently contains the complete shared workstation package inventory. Optional local Brewfiles may be listed in `DOT_BREWFILES` but should be ignored unless intentionally promoted.
+- Local env precedence, highest to lowest: CLI operational flags, `setup.env`, inherited process env for values absent from `setup.env`, then setup defaults.
 - Setup flags: `--dry-run`, `--no-brew`, and `--env-file`.
 - Environment overrides: `TOOLS_HOME` changes the tool home directory, `SKILLS_BASE` changes the base skill source, `DOT_SKILL_SOURCES` adds colon-separated extra skill source folders, `DOT_BREWFILES` selects ordered Brew layers, and `DOT_DEFAULT_SHELL` can set `fish`, `zsh`, `none`, or an absolute login shell path.
 - Navigation overrides: `DOT_DROPBOX_HOME`, `DOT_VAULT_HOME`, and `DOT_GDRIVE_HOME` feed shared Fish/Zsh shortcuts such as `oo`, `vault`, `dropbox`, and `gdrive`. `DOT_CLOUDSTORAGE_HOME` is a reusable base path for local setup values. Leave them blank on machines without those locations.

@@ -20,38 +20,6 @@ dot_setup_error() {
 
 trap dot_setup_error ERR
 
-DOT_KNOWN_ENV_VARS=(
-    DOT_BREWFILES
-    DOT_DEFAULT_SHELL
-    DOT_TOOLS_HOME
-    TOOLS_HOME
-    SKILLS_BASE
-    DOT_SKILL_SOURCES
-    DOT_PRUNE_EXTRA_SKILLS
-    DOT_SKILL_ROOTS_STATE
-    DOT_ENABLE_DIA
-    DOT_ENABLE_ONEPASSWORD
-    DOT_ENABLE_SYSTEM_EXTENSIONS
-    DOT_ENABLE_CODEX_CONFIG
-    DOT_ENABLE_GIT_CONFIG
-    DOT_CODEX_NOTIFY_COMMAND
-    DOT_DIA_APP
-    DOT_DIA_LOG_DIR
-    DOT_CLOUDSTORAGE_HOME
-    DOT_DROPBOX_HOME
-    DOT_VAULT_HOME
-    DOT_GDRIVE_HOME
-    AGENT_BROWSER_DIA_PORT
-    CODEX_NODE_REPL_ENV_FILE
-    DOT_GIT_USER_NAME
-    DOT_GIT_USER_EMAIL
-    DOT_GIT_SIGNING_KEY
-    DOT_GIT_ALLOWED_SIGNERS_FILE
-    DOT_OP_VAULT
-    DOT_OP_SSH_AUTH_ITEM
-    DOT_OP_SSH_SIGN_ITEM
-)
-
 NO_BREW=false
 DRY_RUN=false
 DOT_ENV_FILE="${DOT_ENV_FILE:-$DOTFILES_DIR/setup.env}"
@@ -99,26 +67,6 @@ while [ "$#" -gt 0 ]; do
     esac
 done
 
-capture_process_env() {
-    local var
-    for var in "${DOT_KNOWN_ENV_VARS[@]}"; do
-        eval "DOT_PROCESS_HAS_$var=\"\${$var+x}\""
-        eval "DOT_PROCESS_VAL_$var=\"\${$var-}\""
-    done
-}
-
-restore_process_env() {
-    local var has value
-    for var in "${DOT_KNOWN_ENV_VARS[@]}"; do
-        has="$(eval "printf '%s' \"\$DOT_PROCESS_HAS_$var\"")"
-        if [ -n "$has" ]; then
-            value="$(eval "printf '%s' \"\$DOT_PROCESS_VAL_$var\"")"
-            printf -v "$var" '%s' "$value"
-            export "${var?}"
-        fi
-    done
-}
-
 load_env_file() {
     local path="$1"
 
@@ -135,9 +83,7 @@ load_env_file() {
     dot_progress_info "Loaded env: $path"
 }
 
-capture_process_env
 load_env_file "$DOT_ENV_FILE"
-restore_process_env
 
 dot_default() {
     local name="$1"
@@ -148,7 +94,7 @@ dot_default() {
     fi
 }
 
-dot_default DOT_BREWFILES "homebrew/Brewfile.base"
+dot_default DOT_BREWFILES "homebrew/Brewfile.primary"
 dot_default DOT_DEFAULT_SHELL "none"
 dot_default DOT_ENABLE_DIA 1
 dot_default DOT_ENABLE_ONEPASSWORD 1

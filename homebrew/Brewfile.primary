@@ -1,0 +1,138 @@
+# 00 Terminal and shell
+brew "fish"
+brew "starship"
+brew "zoxide"
+brew "atuin"
+brew "tmux"
+brew "broot"
+
+cask "ghostty"
+cask "font-jetbrains-mono-nerd-font"
+cask "font-new-computer-modern"
+
+# 10 Git and source control
+brew "git"
+brew "gh"
+brew "git-delta"
+brew "gitui"
+brew "lazygit"
+brew "git-open"
+brew "gitingest"
+
+# 20 Editors and browsers
+brew "neovim"
+
+cask "cursor"
+cask "google-chrome"
+cask "zed@preview"
+cask "thebrowsercompany-dia"
+
+# 30 Languages and build tools
+brew "oven-sh/bun/bun", trusted: true
+brew "node"
+brew "deno"
+brew "zig"
+brew "go"
+brew "cmake"
+brew "typst"
+brew "uv"
+brew "pipx"
+brew "ruff"
+
+# 40 CLI utilities and data tools
+brew "eza"
+brew "bat"
+brew "fd"
+brew "bottom"
+brew "ripgrep"
+brew "hyperfine"
+brew "neofetch"
+brew "parallel"
+brew "scc"
+brew "tokei"
+brew "wget"
+brew "sd"
+brew "dust"
+brew "procs"
+brew "jq"
+brew "jaq"
+brew "jsongrep"
+brew "yq"
+brew "just"
+brew "direnv"
+brew "tldr"
+brew "shellcheck"
+brew "shfmt"
+
+# 50 Documents, media, and assets
+brew "ffmpeg"
+brew "imagemagick"
+brew "graphicsmagick"
+brew "exiftool"
+brew "libraw"
+brew "dcraw"
+brew "gifsicle"
+brew "optipng"
+brew "sox"
+brew "webp"
+brew "openexr"
+brew "sevenzip"
+brew "yt-dlp"
+brew "poppler"
+brew "yfedoseev/tap/pdf-oxide", trusted: true
+brew "ghostscript"
+brew "qpdf"
+
+cask "pluk-inc/tap/markdown-preview", trusted: true
+cask "iina"
+cask "keka"
+cask "blender"
+
+# 60 AI and agent tools
+brew "anomalyco/tap/opencode", trusted: true
+brew "agent-browser"
+brew "lightpanda-io/browser/lightpanda", trusted: true
+brew "openclaw/tap/gogcli", trusted: true
+brew "whisperkit-cli"
+brew "vercel-cli"
+
+cask "codex"
+cask "codex-app"
+cask "codexbar"
+
+# 70 Work and productivity
+brew "gnupg"
+
+cask "1password-cli"
+cask "1password"
+cask "slack"
+cask "notion"
+cask "notion-calendar"
+cask "obsidian"
+cask "figma"
+cask "cleanshot"
+cask "clop"
+cask "coteditor"
+
+# 80 System, input, and hardware
+brew "blueutil"
+
+cask "karabiner-elements"
+cask "logi-options+"
+cask "monitorcontrol"
+
+# 90 Sync, backup, network, and personal
+brew "cirruslabs/cli/softnet", trusted: true
+brew "cirruslabs/cli/tart", trusted: true
+brew "vnstat"
+
+cask "jordanbaird-ice"
+cask "rana-gmbh/netfluss/netfluss", trusted: true
+cask "transmission"
+cask "spotify"
+cask "telegram"
+cask "whatsapp"
+cask "google-drive"
+cask "dropbox"
+cask "backblaze"
+cask "adguard"

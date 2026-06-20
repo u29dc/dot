@@ -50,7 +50,7 @@ apply_defaults() {
         export TOOLS_HOME
     fi
 
-    dot_default DOT_BREWFILES "homebrew/Brewfile.base"
+    dot_default DOT_BREWFILES "homebrew/Brewfile.primary"
     dot_default DOT_DEFAULT_SHELL "none"
     dot_default DOT_ENABLE_DIA 1
     dot_default DOT_ENABLE_ONEPASSWORD 1
@@ -528,7 +528,7 @@ apply_defaults
 validate_setup_env
 
 check_file "setup.env.example"
-check_file "homebrew/Brewfile.base"
+check_file "homebrew/Brewfile.primary"
 check_file "agents/codex.toml"
 check_file "shell/zsh/zshrc"
 check_file "shell/zsh/zprofile"
