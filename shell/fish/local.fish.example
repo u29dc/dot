@@ -1,0 +1,6 @@
+# ~/.config/fish/local.fish - machine-local Fish overrides and secrets.
+# This file is copied by setup.sh when missing. Keep real values local-only.
+
+# set -gx OPENAI_API_KEY "sk-proj-..."
+# set -gx OPENROUTER_API_KEY "sk-or-v1-..."
+# set -gx ANTHROPIC_API_KEY "sk-ant-..."

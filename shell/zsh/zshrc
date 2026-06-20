@@ -10,10 +10,16 @@ path=("$HOME/.bun/bin" "$HOME/bin" "/opt/homebrew/bin" "/opt/homebrew/sbin" "$HO
 typeset -U path
 export PATH
 
-# Dotfiles checkout and machine-local setup facts.
+# Dotfiles checkout and machine-local setup facts. setup.sh renders env.zsh
+# from setup.env; sourcing setup.env directly is only a bootstrap fallback.
 export DOTFILES_DIR="${DOTFILES_DIR:-$HOME/Git/dot}"
 export DOT_ENV_FILE="${DOT_ENV_FILE:-$DOTFILES_DIR/setup.env}"
-[ -f "$DOT_ENV_FILE" ] && source "$DOT_ENV_FILE"
+DOT_ZSH_ENV_FILE="${DOT_ZSH_ENV_FILE:-$HOME/.config/dot/env.zsh}"
+if [ -f "$DOT_ZSH_ENV_FILE" ]; then
+    source "$DOT_ZSH_ENV_FILE"
+elif [ -f "$DOT_ENV_FILE" ]; then
+    source "$DOT_ENV_FILE"
+fi
 
 # Obsidian CLI
 export PATH="$PATH:/Applications/Obsidian.app/Contents/MacOS"
@@ -147,6 +153,35 @@ let() { "$LET" "$@"; }
 pdf() { "$PDF" "$@"; }
 tao() { "$TAO" "$@"; }
 
+# Navigation and app shortcuts. Paths are optional and come from setup.env.
+_dot_cd_required() {
+    local label="$1"
+    local path="$2"
+
+    if [[ -z "$path" ]]; then
+        printf '%s is not configured in setup.env\n' "$label" >&2
+        return 1
+    fi
+
+    cd "$path" || return $?
+}
+
+gdrive() { _dot_cd_required DOT_GDRIVE_HOME "$DOT_GDRIVE_HOME"; }
+dropbox() { _dot_cd_required DOT_DROPBOX_HOME "$DOT_DROPBOX_HOME"; }
+dd() { dropbox "$@"; }
+oo() { _dot_cd_required DOT_VAULT_HOME "$DOT_VAULT_HOME"; }
+vault() { oo "$@"; }
+
+obsidian() {
+    if (( $# > 0 )); then
+        command open -a Obsidian "$@"
+    elif [[ -n "$DOT_VAULT_HOME" ]]; then
+        command open -a Obsidian "$DOT_VAULT_HOME"
+    else
+        command open -a Obsidian
+    fi
+}
+
 # Repo maintenance helpers
 _local_biome_info() {
     (
@@ -241,12 +276,12 @@ pip3() { uv pip "$@"; }
 # Load repo-managed shell helpers
 # ------------------------------------------------------------------------------
 
-if [[ -f "$DOTFILES_DIR/shell/functions/update.sh" ]]; then
-    source "$DOTFILES_DIR/shell/functions/update.sh"
+if [[ -f "$DOTFILES_DIR/shell/zsh/functions/update.sh" ]]; then
+    source "$DOTFILES_DIR/shell/zsh/functions/update.sh"
 fi
 
-if [[ -f "$DOTFILES_DIR/shell/functions/agent-browser.sh" ]]; then
-    source "$DOTFILES_DIR/shell/functions/agent-browser.sh"
+if [[ -f "$DOTFILES_DIR/shell/zsh/functions/agent-browser.sh" ]]; then
+    source "$DOTFILES_DIR/shell/zsh/functions/agent-browser.sh"
 fi
 
 # ------------------------------------------------------------------------------
@@ -260,8 +295,10 @@ command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh)"
 # Initialize Atuin (magical shell history)
 command -v atuin >/dev/null 2>&1 && eval "$(atuin init zsh)"
 
-# Initialize Starship prompt
-command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
+# Initialize Starship prompt in real interactive terminals.
+if [[ "$TERM" != "dumb" ]]; then
+    command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
+fi
 
 # Initialize uv completions
 command -v uv >/dev/null 2>&1 && eval "$(uv generate-shell-completion zsh)"
@@ -282,8 +319,8 @@ GCLOUD_SDK_HOME="${GCLOUD_SDK_HOME:-$HOME/google-cloud-sdk}"
 # ------------------------------------------------------------------------------
 # LOCAL OVERRIDES
 # Machine-specific settings like API keys, aliases, PATH modifications
-# Configure your secrets and machine-specific settings in ~/.zshrc.local
-# See shell/zshrc.local.example for a template
+# Configure your secrets and machine-specific settings in ~/.zshrc.local.
+# See shell/zsh/zshrc.local.example for a template.
 # ------------------------------------------------------------------------------
 
 if [ -f "$HOME/.zshrc.local" ]; then

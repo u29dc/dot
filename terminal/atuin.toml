@@ -38,7 +38,7 @@ workspaces = true
 # Database settings
 db_path = "~/.local/share/atuin/history.db"
 
-# Import history from zsh on first run
+# Import existing shell history on first run
 import_on_launch = true
 
 # Keybindings - using Ctrl-R for search

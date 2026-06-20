@@ -15,9 +15,10 @@
 		"doctor": "./scripts/doctor.sh",
 		"util:format": "bunx biome format --write .",
 		"util:lint": "bunx biome check --write .",
-		"util:format:shell": "shfmt -w -i 4 -ci scripts/ shell/ macos/.macos",
-		"util:lint:shell": "shellcheck scripts/*.sh shell/functions/*.sh macos/.macos",
-		"util:check": "STATUS=0; bun run util:format || STATUS=1; bun run util:format:shell || STATUS=1; bun run util:lint || STATUS=1; bun run util:lint:shell || STATUS=1; exit $STATUS"
+		"util:format:shell": "shfmt -w -i 4 -ci scripts/*.sh scripts/lib/*.sh shell/zsh/functions/*.sh terminal/bin/* macos/.macos",
+		"util:lint:shell": "shellcheck scripts/*.sh scripts/lib/*.sh shell/zsh/functions/*.sh terminal/bin/* macos/.macos",
+		"util:lint:fish": "fish --no-config --no-execute shell/fish/config.fish shell/fish/functions.fish shell/fish/local.fish.example",
+		"util:check": "STATUS=0; bun run util:format || STATUS=1; bun run util:format:shell || STATUS=1; bun run util:lint || STATUS=1; bun run util:lint:shell || STATUS=1; bun run util:lint:fish || STATUS=1; exit $STATUS"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.0",

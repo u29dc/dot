@@ -1,0 +1,6 @@
+# ~/.zshrc.local - Machine-specific shell configuration
+# This file is sourced by ~/.zshrc for local overrides and secrets
+
+# export OPENAI_API_KEY="sk-proj-..."
+# export OPENROUTER_API_KEY="sk-or-v1-..."
+# export ANTHROPIC_API_KEY="sk-ant-..."

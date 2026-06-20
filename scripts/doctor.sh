@@ -51,6 +51,7 @@ apply_defaults() {
     fi
 
     dot_default DOT_BREWFILES "homebrew/Brewfile.base"
+    dot_default DOT_DEFAULT_SHELL "none"
     dot_default DOT_ENABLE_DIA 1
     dot_default DOT_ENABLE_ONEPASSWORD 1
     dot_default DOT_ENABLE_SYSTEM_EXTENSIONS 1
@@ -129,6 +130,11 @@ validate_setup_env() {
     dot_validate_bool DOT_ENABLE_GIT_CONFIG || true
     dot_validate_bool DOT_PRUNE_EXTRA_SKILLS || true
 
+    case "${DOT_DEFAULT_SHELL:-}" in
+        "" | none | zsh | fish | /*) ;;
+        *) fail "DOT_DEFAULT_SHELL must be fish, zsh, none, blank, or an absolute shell path" ;;
+    esac
+
     if truthy "${DOT_ENABLE_GIT_CONFIG:-}"; then
         dot_require DOT_GIT_USER_NAME || true
         dot_require DOT_GIT_USER_EMAIL || true
@@ -174,6 +180,85 @@ EOF
     done <<EOF
 $(dot_each_colon_item "${DOT_SKILL_SOURCES:-}")
 EOF
+}
+
+resolve_default_shell_path() {
+    case "${DOT_DEFAULT_SHELL:-}" in
+        "" | none)
+            return 1
+            ;;
+        zsh)
+            if [ -x /bin/zsh ]; then
+                printf '%s\n' /bin/zsh
+            else
+                command -v zsh
+            fi
+            ;;
+        fish)
+            if command -v fish >/dev/null 2>&1; then
+                command -v fish
+            elif [ -x /opt/homebrew/bin/fish ]; then
+                printf '%s\n' /opt/homebrew/bin/fish
+            elif [ -x /usr/local/bin/fish ]; then
+                printf '%s\n' /usr/local/bin/fish
+            else
+                return 1
+            fi
+            ;;
+        /*)
+            printf '%s\n' "$DOT_DEFAULT_SHELL"
+            ;;
+    esac
+}
+
+current_login_shell() {
+    local shell=""
+
+    if command -v dscl >/dev/null 2>&1 && [ -n "${USER:-}" ]; then
+        shell="$(dscl . -read "/Users/$USER" UserShell 2>/dev/null | awk '{print $2}')"
+    fi
+
+    if [ -z "$shell" ]; then
+        shell="${SHELL:-}"
+    fi
+
+    printf '%s\n' "$shell"
+}
+
+check_default_shell() {
+    local shell_path
+    local current_shell
+    local shell_entry_count
+
+    if [ -z "${DOT_DEFAULT_SHELL:-}" ] || [ "$DOT_DEFAULT_SHELL" = "none" ]; then
+        ok "default login shell unmanaged"
+        return 0
+    fi
+
+    if ! shell_path="$(resolve_default_shell_path)"; then
+        fail "requested default shell unavailable: $DOT_DEFAULT_SHELL"
+        return 0
+    fi
+
+    if [ ! -x "$shell_path" ]; then
+        fail "requested default shell is not executable: $shell_path"
+    fi
+
+    shell_entry_count="$(grep -Fxc "$shell_path" /etc/shells 2>/dev/null || printf '0')"
+    if [ "$shell_entry_count" -eq 1 ]; then
+        ok "default shell allowed: $shell_path"
+    elif [ "$shell_entry_count" -gt 1 ]; then
+        warn "default shell appears $shell_entry_count times in /etc/shells: $shell_path"
+    else
+        warn "default shell missing from /etc/shells: $shell_path"
+    fi
+
+    current_shell="$(current_login_shell)"
+    if [ "$current_shell" = "$shell_path" ]; then
+        ok "default login shell active: $shell_path"
+    else
+        warn "default login shell is $current_shell; expected $shell_path"
+    fi
 }
 
 check_file() {
@@ -405,6 +490,38 @@ check_dia() {
     fi
 }
 
+check_fish_syntax() {
+    if ! command -v fish >/dev/null 2>&1; then
+        warn "fish unavailable; skipped Fish syntax checks"
+        return
+    fi
+
+    if fish --no-config --no-execute \
+        "$DOTFILES_DIR/shell/fish/config.fish" \
+        "$DOTFILES_DIR/shell/fish/functions.fish" \
+        "$DOTFILES_DIR/shell/fish/local.fish.example" >/dev/null 2>&1; then
+        ok "Fish config parses"
+    else
+        fail "Fish config does not parse"
+    fi
+}
+
+check_no_legacy_fish_split_links() {
+    local dest
+    local link_target
+
+    for dest in "$HOME"/.config/fish/conf.d/*.fish "$HOME"/.config/fish/functions/*.fish; do
+        [ -e "$dest" ] || [ -L "$dest" ] || continue
+        [ -L "$dest" ] || continue
+        link_target="$(readlink "$dest")"
+        case "$link_target" in
+            "$DOTFILES_DIR/shell/fish/conf.d"/* | "$DOTFILES_DIR/shell/fish/functions"/*)
+                fail "legacy Fish split symlink remains: $dest"
+                ;;
+        esac
+    done
+}
+
 say "Dot doctor"
 load_setup_env
 apply_defaults
@@ -413,6 +530,12 @@ validate_setup_env
 check_file "setup.env.example"
 check_file "homebrew/Brewfile.base"
 check_file "agents/codex.toml"
+check_file "shell/zsh/zshrc"
+check_file "shell/zsh/zprofile"
+check_file "shell/zsh/zshrc.local.example"
+check_file "shell/fish/config.fish"
+check_file "shell/fish/functions.fish"
+check_file "shell/fish/local.fish.example"
 check_file "system/gitconfig.template"
 check_file "system/git-allowed-signers.template"
 check_file "system/1password.agent.toml.template"
@@ -423,7 +546,7 @@ check_legacy_local_files
 
 say ""
 say "Tool wrappers"
-for tool in buf cho fin grn let pdf tao; do
+for tool in agent-browser-chrome agent-browser-dia agent-browser-dia-off agent-browser-dia-on agent-browser-dia-status buf cho fin grn let pdf tao upd; do
     check_wrapper "$tool"
 done
 
@@ -433,8 +556,15 @@ check_brewfiles
 
 say ""
 say "Linked config"
-check_symlink "$HOME/.zshrc" "$DOTFILES_DIR/shell/zshrc"
-check_symlink "$HOME/.zprofile" "$DOTFILES_DIR/shell/zprofile"
+check_managed_file "$HOME/.config/dot/env.zsh" "Zsh env"
+check_managed_file "$HOME/.config/dot/env.fish" "Fish env"
+check_symlink "$HOME/.zshrc" "$DOTFILES_DIR/shell/zsh/zshrc"
+check_symlink "$HOME/.zprofile" "$DOTFILES_DIR/shell/zsh/zprofile"
+check_symlink "$HOME/.config/fish/config.fish" "$DOTFILES_DIR/shell/fish/config.fish"
+check_symlink "$HOME/.config/fish/functions.fish" "$DOTFILES_DIR/shell/fish/functions.fish"
+check_no_legacy_fish_split_links
+check_fish_syntax
+check_default_shell
 check_managed_file "$HOME/.ssh/config" "SSH config"
 check_symlink "$HOME/.agent-browser/config.json" "$DOTFILES_DIR/terminal/agent-browser.json"
 check_symlink "$HOME/.agent-browser/chrome.json" "$DOTFILES_DIR/terminal/agent-browser.chrome.json"

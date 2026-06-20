@@ -7,7 +7,7 @@
 - Local setup template: [`setup.env.example`](setup.env.example)
 - Agent policy and shared AI config: [`agents/AGENTS.md`](agents/AGENTS.md), [`agents/codex.toml`](agents/codex.toml), [`agents/claude.json`](agents/claude.json)
 - Agent browser defaults: [`terminal/agent-browser.json`](terminal/agent-browser.json), [`terminal/agent-browser.chrome.json`](terminal/agent-browser.chrome.json), [`system/launchagents/com.u29dc.dia-cdp.plist.template`](system/launchagents/com.u29dc.dia-cdp.plist.template)
-- Local secrets template: [`shell/zshrc.local.example`](shell/zshrc.local.example)
+- Local secrets templates: [`shell/zsh/zshrc.local.example`](shell/zsh/zshrc.local.example), [`shell/fish/local.fish.example`](shell/fish/local.fish.example)
 - Root quality tooling: [`package.json`](package.json), [`biome.json`](biome.json), [`commitlint.config.js`](commitlint.config.js), [`lint-staged.config.js`](lint-staged.config.js)
 
 ## 2. Repository Structure
@@ -15,7 +15,7 @@
 ```text
 .
 ├── agents/                  AI assistant policy, settings, and skills
-├── shell/                   zsh config and extracted shell functions
+├── shell/                   zsh and fish config, split by shell
 ├── terminal/                CLI and terminal tool config
 ├── editor/                  editor settings and keymaps
 ├── system/                  git, launchagent, karabiner, and 1Password config
@@ -42,7 +42,7 @@ Factory-fresh Mac bootstrap:
 5. Fill `setup.env` with machine-local values and preferences.
 6. Preview setup: `bash ~/Git/dot/scripts/setup.sh --dry-run --no-brew`.
 7. Run setup: `bash ~/Git/dot/scripts/setup.sh`.
-8. Restart shell: `exec zsh -l`.
+8. Restart shell: `exec zsh -l`, or start Fish with `fish`.
 9. Sign into human apps such as 1Password, Dropbox if allowed, Codex, Claude, backup, sync, and security tools.
 10. Verify with `./scripts/doctor.sh`, GitHub SSH, Codex MCP, and Dia/agent-browser checks.
 
@@ -52,7 +52,8 @@ Factory-fresh Mac bootstrap:
 - `bash ~/Git/dot/scripts/setup.sh --dry-run --no-brew` - preview setup without writes or package installation
 - `bash ~/Git/dot/scripts/setup.sh` - install packages, link shared config, and render machine-local config with run-id backups when needed
 - `bash ~/Git/dot/scripts/setup.sh --env-file ./other.env --dry-run` - preview a different local env file
-- `source ~/.zshrc` - reload shell config after setup
+- `source ~/.zshrc` - reload Zsh config after setup
+- `fish` - start the side-by-side Fish setup without changing the login shell
 - `bun install` - install repo-local tooling and husky hooks when working on the repo itself
 - `bun run setup` - run the full setup flow from the repository root
 - `bun run setup:dry` - preview link setup without Homebrew writes
@@ -73,27 +74,29 @@ Factory-fresh Mac bootstrap:
 - The repository is declarative: top-level folders hold the desired config state, and setup materializes that state into `$HOME` via symlinks and generated local config.
 - Existing non-symlink targets are moved into `~/.dotfiles-backups/<run-id>/` and recorded in a manifest before links are created.
 - Setup links GUI and macOS-specific config such as Ghostty, Karabiner, 1Password, Zed, and `~/.macos` alongside shared shell, terminal, and agent config.
+- `setup.env` is the single machine-local input. Setup renders shell-specific env files at `~/.config/dot/env.zsh` and `~/.config/dot/env.fish`; Zsh and Fish should consume those rendered files instead of duplicating defaults.
+- Keep Zsh and Fish side by side under `shell/zsh` and `shell/fish`. Fish intentionally uses one `config.fish` plus one `functions.fish`, not `conf.d` or one-file-per-function autoloading. Do not translate setup or doctor into Fish; bootstrap scripts stay Bash for factory-fresh reproducibility.
 - Agent skills are merged from the repo skill directory and optional external skill paths into `~/.claude/skills`, `~/.codex/skills`, and `~/.agents/skills`.
 - Codex config is generated locally from the single shared template at `agents/codex.toml`; machine-local setup values must not change Codex intelligence, access, reasoning, or sandbox settings.
 - Keep volatile Codex app state out of tracked config: auth state, remote-control IDs, trusted project lists, marketplace caches, browser client hashes, app build numbers, private vault paths, and machine-specific notification paths.
 
 ## 5. Runtime and State
 
-- Create local-only secrets from [`shell/zshrc.local.example`](shell/zshrc.local.example) and keep machine-specific keys out of the repository.
-- Setup copies `shell/zshrc.local.example` to `~/.zshrc.local` only when that file does not already exist; it does not link ignored local secrets from the repository.
+- Create local-only secrets from the shell local examples and keep machine-specific keys out of the repository.
+- Setup copies `shell/zsh/zshrc.local.example` to `~/.zshrc.local` and `shell/fish/local.fish.example` to `~/.config/fish/local.fish` only when those files do not already exist; it does not link ignored local secrets from the repository.
 - `setup.env.example` is the only tracked local setup template. Keep actual `setup.env` ignored and local-only.
 - `homebrew/Brewfile.base` currently contains the complete shared workstation package inventory. Optional local Brewfiles may be listed in `DOT_BREWFILES` but should be ignored unless intentionally promoted.
 - Local env precedence, highest to lowest: CLI operational flags, process env, `setup.env`, then setup defaults.
 - Setup flags: `--dry-run`, `--no-brew`, and `--env-file`.
-- Environment overrides: `TOOLS_HOME` changes the tool home directory, `SKILLS_BASE` changes the base skill source, `DOT_SKILL_SOURCES` adds colon-separated extra skill source folders, and `DOT_BREWFILES` selects ordered Brew layers.
+- Environment overrides: `TOOLS_HOME` changes the tool home directory, `SKILLS_BASE` changes the base skill source, `DOT_SKILL_SOURCES` adds colon-separated extra skill source folders, `DOT_BREWFILES` selects ordered Brew layers, and `DOT_DEFAULT_SHELL` can set `fish`, `zsh`, `none`, or an absolute login shell path.
 - Optional feature overrides use literal `1` for enabled and `0` for disabled.
 - Agent browser defaults live at `~/.agent-browser/config.json` and `~/.agent-browser/chrome.json`; the managed Dia service lives at `~/Library/LaunchAgents/com.u29dc.dia-cdp.plist` and reserves local port `9222`.
-- High-impact write targets include `~/.zshrc`, `~/.gitconfig`, `~/.ssh/config`, `~/.config/*`, `~/.agent-browser/*`, `~/.claude/*`, `~/.codex/*`, `~/Library/LaunchAgents/*`, and `~/Library/Application Support/com.mitchellh.ghostty/config` on host machines.
+- High-impact write targets include `~/.zshrc`, `~/.zprofile`, `~/.config/fish/*`, `~/.config/dot/env.*`, `~/.gitconfig`, `~/.ssh/config`, `~/.config/*`, `~/.agent-browser/*`, `~/.claude/*`, `~/.codex/*`, `~/Library/LaunchAgents/*`, and `~/Library/Application Support/com.mitchellh.ghostty/config` on host machines.
 
 ## 6. Validation
 
 - Required repository gate: `bun run util:check`
-- If you change shell logic or setup behavior, also run `bun run util:lint:shell`
+- If you change shell logic or setup behavior, also run `bun run util:lint:shell` and `bun run util:lint:fish`
 - If you change [`scripts/setup.sh`](scripts/setup.sh), smoke-test `/bin/bash scripts/setup.sh --dry-run --no-brew` before running real setup
 - If you change setup env, generated config, or setup privacy behavior, run `bun run doctor`
 - If you change the Dia LaunchAgent or agent-browser defaults, verify `http://127.0.0.1:9222/json/version` and at least one `agent-browser` command against the managed Dia session
@@ -103,4 +106,4 @@ Factory-fresh Mac bootstrap:
 
 - [`homebrew/`](homebrew/) - shared package inventory
 - [`agents/AGENTS.md`](agents/AGENTS.md) - repo-wide agent operating contract
-- [`shell/`](shell/) and [`terminal/`](terminal/) - most frequently changed day-to-day config surfaces
+- [`shell/zsh/`](shell/zsh/), [`shell/fish/`](shell/fish/), and [`terminal/`](terminal/) - most frequently changed day-to-day config surfaces

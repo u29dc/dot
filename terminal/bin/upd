@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+DOTFILES_DIR="${DOTFILES_DIR:-$HOME/Git/dot}"
+# shellcheck source=shell/zsh/functions/update.sh
+source "$DOTFILES_DIR/shell/zsh/functions/update.sh"
+
+upd "$@"

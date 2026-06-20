@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # System update function
 
-# shellcheck source=shell/functions/progress.sh
-source "${DOTFILES_DIR:-$HOME/Git/dot}/shell/functions/progress.sh"
+# shellcheck source=scripts/lib/progress.sh
+source "${DOTFILES_DIR:-$HOME/Git/dot}/scripts/lib/progress.sh"
 
 upd() {
     # ANSI colors
@@ -252,7 +252,7 @@ upd() {
 
         visible_codex="$(zsh -lic 'command -v codex' 2>/dev/null || true)"
         if [ "$visible_codex" != "/opt/homebrew/bin/codex" ]; then
-            echo -e "${RED}[FAIL]${RESET} Interactive login shell Codex resolves to ${visible_codex:-missing}; expected /opt/homebrew/bin/codex. Check shell/zshrc PATH ordering."
+            echo -e "${RED}[FAIL]${RESET} Interactive login shell Codex resolves to ${visible_codex:-missing}; expected /opt/homebrew/bin/codex. Check shell/zsh/zshrc PATH ordering."
             status=1
         fi
 
