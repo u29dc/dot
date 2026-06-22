@@ -892,8 +892,23 @@ wait_for_dia_cdp() {
     return 1
 }
 
+dia_main_pids() {
+    pgrep -x Dia 2>/dev/null || true
+}
+
 dia_main_commands() {
-    ps -axo command= | awk -v bin="$AGENT_BROWSER_DIA_BIN" 'index($0, bin) { print }'
+    local pid
+    local process_command
+
+    while IFS= read -r pid; do
+        [ -n "$pid" ] || continue
+        process_command="$(ps -p "$pid" -o command= 2>/dev/null || true)"
+        case "$process_command" in
+            "$AGENT_BROWSER_DIA_BIN" | "$AGENT_BROWSER_DIA_BIN "*)
+                printf '%s\n' "$process_command"
+                ;;
+        esac
+    done < <(dia_main_pids)
 }
 
 dia_running_without_cdp() {

@@ -5,6 +5,7 @@ AGENT_BROWSER_DIA_PORT="${AGENT_BROWSER_DIA_PORT:-9222}"
 AGENT_BROWSER_DIA_URL="http://127.0.0.1:${AGENT_BROWSER_DIA_PORT}/json/version"
 AGENT_BROWSER_DIA_APP="${DOT_DIA_APP:-/Applications/Dia.app}"
 AGENT_BROWSER_DIA_BIN="$AGENT_BROWSER_DIA_APP/Contents/MacOS/Dia"
+AGENT_BROWSER_DIA_SESSION="${AGENT_BROWSER_DIA_SESSION:-dia}"
 AGENT_BROWSER_DIA_LAUNCH_AGENT="com.u29dc.dia-cdp"
 
 agent_browser_dia__domain_target() {
@@ -49,8 +50,23 @@ agent_browser_dia__wait_for_cdp() {
     return 1
 }
 
+agent_browser_dia__main_pids() {
+    pgrep -x Dia 2>/dev/null || true
+}
+
 agent_browser_dia__main_commands() {
-    ps -axo command= | awk -v bin="$AGENT_BROWSER_DIA_BIN" 'index($0, bin) { print }'
+    local pid
+    local process_command
+
+    while IFS= read -r pid; do
+        [ -n "$pid" ] || continue
+        process_command="$(ps -p "$pid" -o command= 2>/dev/null || true)"
+        case "$process_command" in
+            "$AGENT_BROWSER_DIA_BIN" | "$AGENT_BROWSER_DIA_BIN "*)
+                printf '%s\n' "$process_command"
+                ;;
+        esac
+    done < <(agent_browser_dia__main_pids)
 }
 
 agent_browser_dia__main_running_without_cdp() {
@@ -70,6 +86,10 @@ agent_browser_dia__main_running_with_cdp() {
     printf '%s\n' "$commands" | grep -F -- "--remote-debugging-port=${AGENT_BROWSER_DIA_PORT}" >/dev/null 2>&1
 }
 
+agent_browser_dia__connect_session() {
+    command agent-browser --session "$AGENT_BROWSER_DIA_SESSION" connect "$AGENT_BROWSER_DIA_PORT" >/dev/null
+}
+
 agent-browser-dia() {
     local cfg
     cfg="$HOME/.agent-browser/config.json"
@@ -82,6 +102,8 @@ agent-browser-dia() {
     if ! agent_browser_dia__cdp_healthy; then
         agent-browser-dia-on || return $?
     fi
+
+    agent_browser_dia__connect_session || return $?
 
     command agent-browser --config "$cfg" "$@"
 }
@@ -120,6 +142,7 @@ agent-browser-dia-on() {
     fi
 
     if agent_browser_dia__cdp_healthy; then
+        agent_browser_dia__connect_session || return $?
         echo "Dia CDP already available on port $AGENT_BROWSER_DIA_PORT."
         return 0
     fi
@@ -131,6 +154,7 @@ agent-browser-dia-on() {
 
     if agent_browser_dia__main_running_with_cdp; then
         if agent_browser_dia__wait_for_cdp 20; then
+            agent_browser_dia__connect_session || return $?
             echo "Dia CDP became healthy on port $AGENT_BROWSER_DIA_PORT."
             return 0
         fi
@@ -146,6 +170,7 @@ agent-browser-dia-on() {
     fi
 
     if agent_browser_dia__wait_for_cdp; then
+        agent_browser_dia__connect_session || return $?
         echo "Dia CDP ready on port $AGENT_BROWSER_DIA_PORT."
         return 0
     fi
