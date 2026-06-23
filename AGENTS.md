@@ -3,6 +3,7 @@
 ## 1. Documentation
 
 - Bootstrap and symlink behavior: [`scripts/setup.sh`](scripts/setup.sh)
+- Full fresh-machine setup guide: [`SETUP.md`](SETUP.md)
 - Package inventory: [`homebrew/Brewfile.primary`](homebrew/Brewfile.primary)
 - Local setup template: [`setup.env.example`](setup.env.example)
 - Agent policy and shared AI config: [`agents/AGENTS.md`](agents/AGENTS.md), [`agents/codex.toml`](agents/codex.toml), [`agents/claude.json`](agents/claude.json)
@@ -31,33 +32,9 @@
 
 ## 3. Commands
 
-Fresh machine setup does not require Bun; use the setup script directly. Day-to-day repo maintenance can use the Bun wrappers.
+Fresh machine setup belongs in [`SETUP.md`](SETUP.md). Keep this section limited to day-to-day repository maintenance and runtime checks.
 
-Factory-fresh Mac bootstrap:
-
-1. Complete macOS first-run setup and sign in to Apple ID.
-2. Install Apple command line tools: `xcode-select --install`.
-3. Clone over HTTPS first: `git clone https://github.com/u29dc/dot.git ~/Git/dot`.
-4. Create local setup answers: `cd ~/Git/dot && cp setup.env.example setup.env`.
-5. Fill `setup.env` with machine-local values and preferences.
-6. Preview setup: `bash ~/Git/dot/scripts/setup.sh --dry-run --no-brew`.
-7. Run setup: `bash ~/Git/dot/scripts/setup.sh`.
-8. Restart the terminal; `setup.env.example` defaults to Fish, while Zsh remains available with `zsh`.
-9. Sign into human apps such as 1Password, Dropbox if allowed, Codex, Claude, backup, sync, and security tools.
-10. Verify with `./scripts/doctor.sh`, GitHub SSH, Codex MCP, and Dia/agent-browser checks.
-
-- `xcode-select --install` - install Apple command line tools on a new macOS machine
-- `git clone https://github.com/u29dc/dot.git ~/Git/dot` - clone the repository
-- `cp setup.env.example setup.env` - create the ignored machine-local setup form
-- `bash ~/Git/dot/scripts/setup.sh --dry-run --no-brew` - preview setup without writes or package installation
-- `bash ~/Git/dot/scripts/setup.sh` - install packages, link shared config, and render machine-local config with run-id backups when needed
-- `bash ~/Git/dot/scripts/setup.sh --env-file ./other.env --dry-run` - preview a different local env file
-- `fish` - start the Fish setup explicitly
-- `zsh` - start the side-by-side Zsh setup explicitly
 - `bun install` - install repo-local tooling and husky hooks when working on the repo itself
-- `bun run setup` - run the full setup flow from the repository root
-- `bun run setup:dry` - preview link setup without Homebrew writes
-- `bun run setup:nobrew` - run setup without Homebrew package installation
 - `bun run doctor` - run read-only dotfiles structure and privacy checks
 - `agent-browser ...` - browser automation against the managed Dia CDP endpoint on `127.0.0.1:9222`
 - `agent-browser-dia ...` - force `agent-browser` to use the managed Dia config explicitly
