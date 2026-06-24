@@ -55,13 +55,39 @@ end
 set -g fish_greeting
 functions -q starship_theme; and starship_theme
 
-if status is-interactive
-    command -q zoxide; and zoxide init fish | source
-    command -q atuin; and atuin init fish | source
-    if test "$TERM" != dumb
-        command -q starship; and starship init fish | source
+function _dot_source_cached_init --argument-names cache_name command_name
+    set -l cmd_args $argv[3..-1]
+    set -l bin_path (command -s "$command_name" 2>/dev/null)
+    test -n "$bin_path"; or return 0
+
+    set -l cache_dir "$HOME/.cache/dot/shell"
+    if set -q XDG_CACHE_HOME
+        set cache_dir "$XDG_CACHE_HOME/dot/shell"
     end
-    command -q uv; and uv generate-shell-completion fish | source
+
+    set -l cache_file "$cache_dir/$cache_name.fish"
+    mkdir -p "$cache_dir"; or return 0
+
+    if not test -s "$cache_file"; or test "$bin_path" -nt "$cache_file"
+        set -l temp_file "$cache_file.$fish_pid.tmp"
+
+        if command "$command_name" $cmd_args >"$temp_file" 2>/dev/null
+            command mv -f "$temp_file" "$cache_file"
+        else
+            command rm -f "$temp_file"
+        end
+    end
+
+    test -s "$cache_file"; and source "$cache_file"
+end
+
+if status is-interactive
+    _dot_source_cached_init zoxide-init zoxide init fish
+    _dot_source_cached_init atuin-init atuin init fish
+    if test "$TERM" != dumb
+        _dot_source_cached_init starship-init starship init fish
+    end
+    _dot_source_cached_init uv-completion uv generate-shell-completion fish
 
     if test -f "$HOME/.config/broot/launcher/fish/br"
         source "$HOME/.config/broot/launcher/fish/br"

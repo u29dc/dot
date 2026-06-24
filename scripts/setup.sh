@@ -1168,3 +1168,4 @@ write_extra_skill_sources_state
 
 dot_progress_ok "Setup complete"
 dot_progress_info "Restart terminal; use fish or zsh to switch shells explicitly"
+dot_progress_info "Next verification: bun run doctor"

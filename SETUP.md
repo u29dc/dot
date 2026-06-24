@@ -120,8 +120,8 @@ Optional local paths:
 
 ```sh
 DOT_CLOUDSTORAGE_HOME="$HOME/Library/CloudStorage"
-DOT_DROPBOX_HOME="$HOME/Library/CloudStorage/Dropbox"
-DOT_VAULT_HOME="$HOME/Library/CloudStorage/Dropbox/<vault-folder>"
+DOT_DROPBOX_HOME="$DOT_CLOUDSTORAGE_HOME/Dropbox"
+DOT_VAULT_HOME="$DOT_DROPBOX_HOME/<vault-folder>"
 DOT_GDRIVE_HOME=""
 DOT_SKILL_SOURCES="$HOME/path/to/skills:$HOME/other/skills"
 ```

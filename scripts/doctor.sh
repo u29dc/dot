@@ -317,6 +317,10 @@ check_managed_file() {
     fi
 }
 
+filter_privacy_allowlist() {
+    grep -Ev '^SETUP\.md:[0-9]+:(ssh -T git@github\.com|git remote set-url origin git@github\.com:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+\.git)$' || true
+}
+
 privacy_scan() {
     local pattern_file="${DOT_PRIVACY_BLOCKLIST:-}"
     local matches=""
@@ -338,7 +342,8 @@ privacy_scan() {
     matches="$(
         cd "$DOTFILES_DIR" &&
             printf '%s\n' "$files" |
-            xargs rg -n --hidden --no-messages -e "$base_pattern" 2>/dev/null || true
+            xargs rg -n --hidden --no-messages -e "$base_pattern" 2>/dev/null |
+                filter_privacy_allowlist || true
     )"
 
     if [ -n "$pattern_file" ] && [ -f "$pattern_file" ]; then
@@ -351,7 +356,8 @@ privacy_scan() {
                     (
                         cd "$DOTFILES_DIR" &&
                             printf '%s\n' "$files" |
-                            xargs rg -n --hidden --fixed-strings --no-messages -e "$pattern" 2>/dev/null || true
+                            xargs rg -n --hidden --fixed-strings --no-messages -e "$pattern" 2>/dev/null |
+                                filter_privacy_allowlist || true
                     )
                 done <"$pattern_file"
             } | awk 'NF'
@@ -367,7 +373,8 @@ privacy_scan() {
     if ! git -C "$DOTFILES_DIR" diff --cached --quiet --exit-code; then
         cached_matches="$(
             cd "$DOTFILES_DIR" &&
-                git grep --cached -n -E "$base_pattern" -- . ':!scripts/doctor.sh' 2>/dev/null || true
+                git grep --cached -n -E "$base_pattern" -- . ':!scripts/doctor.sh' 2>/dev/null |
+                filter_privacy_allowlist || true
         )"
 
         if [ -n "$cached_matches" ]; then
@@ -522,6 +529,132 @@ check_no_legacy_fish_split_links() {
     done
 }
 
+count_skill_entries() {
+    local dir="$1"
+    local entry
+    local count=0
+
+    if [ ! -d "$dir" ]; then
+        printf '0\n'
+        return
+    fi
+
+    for entry in "$dir"/*; do
+        [ -e "$entry" ] || [ -L "$entry" ] || continue
+        if [ -f "$entry/SKILL.md" ]; then
+            count=$((count + 1))
+        fi
+    done
+
+    printf '%s\n' "$count"
+}
+
+check_skill_source() {
+    local label="$1"
+    local path="$2"
+    local count
+
+    if [ -z "$path" ]; then
+        ok "$label not configured"
+        return
+    fi
+
+    if [ ! -d "$path" ]; then
+        warn "$label missing: $(dot_redact_path "$path")"
+        return
+    fi
+
+    count="$(count_skill_entries "$path")"
+    if [ "$count" -gt 0 ]; then
+        ok "$label contains $count skills"
+    else
+        warn "$label has no direct child SKILL.md folders: $(dot_redact_path "$path")"
+    fi
+}
+
+check_skill_target() {
+    local path="$1"
+    local label="$2"
+    local count
+
+    if [ ! -d "$path" ]; then
+        warn "$label missing: $path"
+        return
+    fi
+
+    count="$(count_skill_entries "$path")"
+    if [ "$count" -gt 0 ]; then
+        ok "$label has $count linked skills"
+    else
+        warn "$label has no linked skills"
+    fi
+}
+
+check_configured_path() {
+    local name="$1"
+    local label="$2"
+    local value="${!name:-}"
+
+    if [ -z "$value" ]; then
+        ok "$label not configured"
+        return
+    fi
+
+    if [ -e "$value" ]; then
+        ok "$label exists: $(dot_redact_path "$value")"
+    else
+        warn "$label configured but missing: $(dot_redact_path "$value")"
+    fi
+}
+
+check_git_signing_readiness() {
+    local signing_key
+
+    if ! truthy "${DOT_ENABLE_GIT_CONFIG:-0}"; then
+        ok "git signing unmanaged"
+        return
+    fi
+
+    signing_key="$(git config --global --get user.signingkey 2>/dev/null || true)"
+    if [ -n "$signing_key" ]; then
+        ok "git signing key configured"
+    else
+        warn "git signing key missing from global config"
+    fi
+
+    if [ -s "${DOT_GIT_ALLOWED_SIGNERS_FILE:-$HOME/.config/git/allowed-signers}" ]; then
+        ok "git allowed signers file is nonempty"
+    else
+        warn "git allowed signers file empty or missing"
+    fi
+}
+
+check_post_setup_checklist() {
+    local source
+
+    say ""
+    say "Post-setup checklist"
+
+    check_configured_path DOT_DROPBOX_HOME "Dropbox home"
+    check_configured_path DOT_VAULT_HOME "Vault home"
+    check_configured_path DOT_GDRIVE_HOME "Google Drive home"
+
+    check_skill_source "base skill source" "${SKILLS_BASE:-}"
+    while IFS= read -r source; do
+        [ -n "$source" ] || continue
+        check_skill_source "extra skill source" "$source"
+    done <<EOF
+$(dot_each_colon_item "${DOT_SKILL_SOURCES:-}")
+EOF
+
+    check_skill_target "$HOME/.claude/skills" "Claude skills"
+    check_skill_target "$HOME/.codex/skills" "Codex skills"
+    check_skill_target "$HOME/.agents/skills" "Shared agent skills"
+    check_git_signing_readiness
+
+    ok "manual app sign-in remains external: 1Password, Codex, Dia, Dropbox, and Google Drive"
+}
+
 say "Dot doctor"
 load_setup_env
 apply_defaults
@@ -581,6 +714,8 @@ fi
 if truthy "${DOT_ENABLE_DIA:-0}"; then
     check_dia
 fi
+
+check_post_setup_checklist
 
 if ! privacy_scan; then
     status=1
