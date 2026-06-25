@@ -1,5 +1,9 @@
 # Fish function parity layer for the Zsh setup.
 
+function fish_title
+    pwd
+end
+
 function starship_theme
     set -l style (defaults read -g AppleInterfaceStyle 2>/dev/null)
     if test "$style" = Dark

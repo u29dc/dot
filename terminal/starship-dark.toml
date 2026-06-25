@@ -47,7 +47,7 @@ Debian = "󰣚"
 disabled = true
 
 [directory]
-truncation_length = 3
+truncation_length = 1
 truncate_to_repo = false
 format = "[  $path  ]($style)"
 style = "fg:color_fg bg:color_segment2"
