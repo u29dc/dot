@@ -1,7 +1,7 @@
 {
 	"engine": "chrome",
 	"session": "dia",
-	"cdp": "9222",
+    "cdp": "__AGENT_BROWSER_DIA_PORT__",
 	"contentBoundaries": true,
 	"maxOutput": 50000
 }

@@ -7,7 +7,7 @@
 - Package inventory: [`homebrew/Brewfile.primary`](homebrew/Brewfile.primary)
 - Local setup template: [`setup.env.example`](setup.env.example)
 - Agent policy and shared AI config: [`agents/AGENTS.md`](agents/AGENTS.md), [`agents/codex.toml`](agents/codex.toml), [`agents/claude.json`](agents/claude.json)
-- Agent browser defaults: [`terminal/agent-browser.json`](terminal/agent-browser.json), [`terminal/agent-browser.chrome.json`](terminal/agent-browser.chrome.json), [`system/launchagents/com.u29dc.dia-cdp.plist.template`](system/launchagents/com.u29dc.dia-cdp.plist.template)
+- Agent browser defaults: [`terminal/agent-browser.json.template`](terminal/agent-browser.json.template), [`terminal/agent-browser.chrome.json`](terminal/agent-browser.chrome.json), [`system/launchagents/com.u29dc.dia-cdp.plist.template`](system/launchagents/com.u29dc.dia-cdp.plist.template)
 - Local secrets templates: [`shell/zsh/zshrc.local.example`](shell/zsh/zshrc.local.example), [`shell/fish/local.fish.example`](shell/fish/local.fish.example)
 - Root quality tooling: [`package.json`](package.json), [`biome.json`](biome.json), [`commitlint.config.js`](commitlint.config.js), [`lint-staged.config.js`](lint-staged.config.js)
 
@@ -49,7 +49,7 @@ Fresh machine setup belongs in [`SETUP.md`](SETUP.md). Keep this section limited
 
 ## 4. Architecture
 
-- [`scripts/setup.sh`](scripts/setup.sh) is the source of truth for link targets and setup behavior; keep this file subordinate to the script.
+- [`scripts/setup.sh`](scripts/setup.sh) is the source of truth for setup orchestration; one-word libraries under [`scripts/lib/`](scripts/lib/) own the reusable setup behavior.
 - The repository is declarative: top-level folders hold the desired config state, and setup materializes that state into `$HOME` via symlinks and generated local config.
 - Existing non-symlink targets are moved into `~/.dotfiles-backups/<run-id>/` and recorded in a manifest before links are created.
 - Setup links GUI and macOS-specific config such as Ghostty, Karabiner, 1Password, Zed, and `~/.macos` alongside shared shell, terminal, and agent config.

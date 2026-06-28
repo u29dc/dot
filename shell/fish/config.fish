@@ -36,15 +36,16 @@ set -q BAT_PAGER; or set -gx BAT_PAGER ""
 set -q BAT_STYLE; or set -gx BAT_STYLE "numbers,changes"
 set -q EZA_DEFAULT_IGNORE; or set -gx EZA_DEFAULT_IGNORE "node_modules|.cache|cache|dist|build|.next|.nuxt|.turbo|coverage|.pytest_cache|__pycache__|.venv|venv|.env"
 
-# Runtime PATH. Use --path so setup remains declarative instead of mutating Fish
-# universal variables.
-fish_add_path --path --move "$HOME/.bun/bin"
-fish_add_path --path --move "$HOME/bin"
-fish_add_path --path --move /opt/homebrew/bin
-fish_add_path --path --move /opt/homebrew/sbin
-fish_add_path --path --move "$HOME/.local/bin"
-fish_add_path --path --move "$CARGO_HOME/bin"
-fish_add_path --path --move "/Applications/Obsidian.app/Contents/MacOS"
+# Runtime PATH. One ordered call preserves Zsh parity while --path avoids
+# mutating Fish universal variables.
+fish_add_path --path --move \
+    "$HOME/.bun/bin" \
+    "$HOME/bin" \
+    /opt/homebrew/bin \
+    /opt/homebrew/sbin \
+    "$HOME/.local/bin" \
+    "$CARGO_HOME/bin" \
+    "/Applications/Obsidian.app/Contents/MacOS"
 
 if test -f "$HOME/.config/fish/functions.fish"
     source "$HOME/.config/fish/functions.fish"

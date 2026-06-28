@@ -53,10 +53,10 @@ apply_defaults() {
     dot_default DOT_BREWFILES "homebrew/Brewfile.primary"
     dot_default DOT_DEFAULT_SHELL "none"
     dot_default DOT_ENABLE_DIA 1
-    dot_default DOT_ENABLE_ONEPASSWORD 1
+    dot_default DOT_ENABLE_ONEPASSWORD 0
     dot_default DOT_ENABLE_SYSTEM_EXTENSIONS 1
     dot_default DOT_ENABLE_CODEX_CONFIG 1
-    dot_default DOT_ENABLE_GIT_CONFIG 1
+    dot_default DOT_ENABLE_GIT_CONFIG 0
     dot_default DOT_PRUNE_EXTRA_SKILLS 0
     dot_default TOOLS_HOME "$HOME/.tools"
     dot_default SKILLS_BASE "$DOTFILES_DIR/agents/skills"
@@ -88,6 +88,18 @@ dot_validate_bool() {
             return 1
             ;;
     esac
+}
+
+dot_validate_port() {
+    local name="$1"
+    local value="${!name:-}"
+
+    if [[ "$value" =~ ^[0-9]+$ ]] && [ "$value" -ge 1 ] && [ "$value" -le 65535 ]; then
+        return 0
+    fi
+
+    fail "$name must be an integer TCP port from 1 to 65535"
+    return 1
 }
 
 dot_abs_path() {
@@ -152,6 +164,7 @@ validate_setup_env() {
         dot_require DOT_DIA_APP || true
         dot_require DOT_DIA_LOG_DIR || true
         dot_require AGENT_BROWSER_DIA_PORT || true
+        dot_validate_port AGENT_BROWSER_DIA_PORT || true
     fi
 
     if [ -z "${DOT_BREWFILES:-}" ]; then
@@ -317,6 +330,94 @@ check_managed_file() {
     fi
 }
 
+json_get() {
+    local path="$1"
+    local expr="$2"
+
+    python3 - "$path" "$expr" <<'PY'
+import json
+import sys
+
+path, expr = sys.argv[1], sys.argv[2]
+with open(path, "r", encoding="utf-8") as handle:
+    value = json.load(handle)
+
+for part in expr.split("."):
+    if isinstance(value, list):
+        value = value[int(part)]
+    else:
+        value = value[part]
+
+if isinstance(value, (dict, list)):
+    print(json.dumps(value, separators=(",", ":")))
+else:
+    print(value)
+PY
+}
+
+toml_get() {
+    local path="$1"
+    local expr="$2"
+
+    python3 - "$path" "$expr" <<'PY'
+import sys
+
+try:
+    import tomllib
+except ModuleNotFoundError:
+    try:
+        import tomli as tomllib
+    except ModuleNotFoundError as exc:
+        raise SystemExit("Python TOML parser unavailable") from exc
+
+path, expr = sys.argv[1], sys.argv[2]
+with open(path, "rb") as handle:
+    value = tomllib.load(handle)
+
+for part in expr.split("."):
+    if isinstance(value, list):
+        value = value[int(part)]
+    else:
+        value = value[part]
+
+if isinstance(value, (dict, list)):
+    raise SystemExit(f"{expr} is not scalar")
+print(value)
+PY
+}
+
+check_json_file() {
+    local path="$1"
+    local label="$2"
+
+    if [ ! -f "$path" ]; then
+        fail "$label missing: $path"
+        return
+    fi
+
+    if python3 -m json.tool "$path" >/dev/null 2>&1; then
+        ok "$label parses as JSON"
+    else
+        fail "$label does not parse as JSON: $path"
+    fi
+}
+
+check_bash_parse() {
+    local path="$1"
+    local label="$2"
+
+    if [ ! -f "$path" ]; then
+        fail "$label missing: $path"
+        return
+    fi
+
+    if /bin/bash -n "$path" >/dev/null 2>&1; then
+        ok "$label parses as Bash"
+    else
+        fail "$label does not parse as Bash: $path"
+    fi
+}
+
 filter_privacy_allowlist() {
     grep -Ev '^SETUP\.md:[0-9]+:(ssh -T git@github\.com|git remote set-url origin git@github\.com:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+\.git)$' || true
 }
@@ -441,6 +542,12 @@ check_brewfiles() {
 
 check_codex_config() {
     local config="$HOME/.codex/config.toml"
+    local notify_command
+    local node_repl_command
+    local codex_cli_path
+    local node_path
+    local module_dirs
+    local module_dir
     check_managed_file "$config" "Codex config"
     if command -v python3 >/dev/null 2>&1; then
         if python3 - "$config" <<'PY' >/dev/null 2>&1; then
@@ -458,7 +565,26 @@ PY
         fi
     else
         warn "python3 unavailable; skipped Codex TOML parse"
+        return
     fi
+
+    notify_command="$(toml_get "$config" "notify.0" 2>/dev/null || true)"
+    node_repl_command="$(toml_get "$config" "mcp_servers.node_repl.command" 2>/dev/null || true)"
+    codex_cli_path="$(toml_get "$config" "mcp_servers.node_repl.env.CODEX_CLI_PATH" 2>/dev/null || true)"
+    node_path="$(toml_get "$config" "mcp_servers.node_repl.env.NODE_REPL_NODE_PATH" 2>/dev/null || true)"
+    module_dirs="$(toml_get "$config" "mcp_servers.node_repl.env.NODE_REPL_NODE_MODULE_DIRS" 2>/dev/null || true)"
+
+    check_executable_path "$notify_command" "Codex notify command"
+    check_executable_path "$node_repl_command" "Codex node REPL command"
+    check_executable_path "$codex_cli_path" "Codex CLI path"
+    check_executable_path "$node_path" "Codex node path"
+
+    while IFS= read -r module_dir; do
+        [ -n "$module_dir" ] || continue
+        check_directory_path "$module_dir" "Codex node module dir"
+    done <<EOF
+$(printf '%s\n' "$module_dirs" | tr ':' '\n')
+EOF
 }
 
 check_onepassword() {
@@ -484,12 +610,39 @@ check_git_setup() {
 check_dia() {
     local plist="$HOME/Library/LaunchAgents/com.u29dc.dia-cdp.plist"
     local port="${AGENT_BROWSER_DIA_PORT:-9222}"
+    local config="$HOME/.agent-browser/config.json"
+    local rendered_port
+    local listeners
     check_managed_file "$plist" "Dia LaunchAgent"
+    check_abs_file "$config"
+    check_json_file "$config" "agent-browser Dia config"
+    rendered_port="$(json_get "$config" "cdp" 2>/dev/null || true)"
+    if [ "$rendered_port" = "$port" ]; then
+        ok "agent-browser Dia port matches setup env: $port"
+    else
+        fail "agent-browser Dia port mismatch: config=${rendered_port:-missing} env=$port"
+    fi
+
     if curl -fsS "http://127.0.0.1:$port/json/version" >/dev/null 2>&1; then
         ok "Dia CDP healthy on port $port"
     else
         warn "Dia CDP not healthy on port $port"
     fi
+
+    if command -v lsof >/dev/null 2>&1; then
+        listeners="$(lsof -nP -iTCP:"$port" -sTCP:LISTEN 2>/dev/null || true)"
+        if printf '%s\n' "$listeners" | grep -Eq '127\.0\.0\.1|::1'; then
+            ok "Dia CDP listener is loopback-bound"
+        elif [ -n "$listeners" ]; then
+            warn "Dia CDP listener may not be loopback-only"
+            printf '%s\n' "$listeners"
+        else
+            warn "Dia CDP listener not found by lsof"
+        fi
+    else
+        warn "lsof unavailable; skipped Dia listener binding check"
+    fi
+
     if command -v agent-browser >/dev/null 2>&1; then
         ok "agent-browser available"
     else
@@ -590,6 +743,61 @@ check_skill_target() {
     fi
 }
 
+check_broken_skill_links() {
+    local path="$1"
+    local label="$2"
+    local broken=""
+
+    if [ ! -d "$path" ]; then
+        warn "$label missing: $path"
+        return
+    fi
+
+    broken="$(find "$path" -type l ! -exec test -e {} \; -print 2>/dev/null || true)"
+    if [ -n "$broken" ]; then
+        fail "$label contains broken skill symlinks"
+        printf '%s\n' "$broken"
+    else
+        ok "$label has no broken skill symlinks"
+    fi
+}
+
+check_duplicate_skill_sources() {
+    local temp
+    local source
+    local skill
+    local name
+    local duplicates
+
+    temp="$(mktemp "${TMPDIR:-/tmp}/dot-skill-sources.XXXXXX")"
+    {
+        printf '%s\n' "${SKILLS_BASE:-}"
+        dot_each_colon_item "${DOT_SKILL_SOURCES:-}"
+    } | while IFS= read -r source; do
+        [ -d "$source" ] || continue
+        for skill in "$source"/*; do
+            [ -f "$skill/SKILL.md" ] || continue
+            name="$(basename "$skill")"
+            printf '%s\t%s\n' "$name" "$skill"
+        done
+    done >"$temp"
+
+    duplicates="$(cut -f1 "$temp" | sort | uniq -d || true)"
+    if [ -n "$duplicates" ]; then
+        warn "duplicate skill names across configured sources"
+        while IFS= read -r name; do
+            [ -n "$name" ] || continue
+            grep -F "${name}"$'\t' "$temp"
+        done <<EOF
+$duplicates
+EOF
+    else
+        ok "no duplicate skill names across configured sources"
+    fi
+
+    rm -f "$temp"
+}
+
 check_configured_path() {
     local name="$1"
     local label="$2"
@@ -604,6 +812,38 @@ check_configured_path() {
         ok "$label exists: $(dot_redact_path "$value")"
     else
         warn "$label configured but missing: $(dot_redact_path "$value")"
+    fi
+}
+
+check_executable_path() {
+    local path="$1"
+    local label="$2"
+
+    if [ -z "$path" ]; then
+        warn "$label not configured"
+        return
+    fi
+
+    if [ -x "$path" ]; then
+        ok "$label executable: $(dot_redact_path "$path")"
+    else
+        fail "$label missing or not executable: $(dot_redact_path "$path")"
+    fi
+}
+
+check_directory_path() {
+    local path="$1"
+    local label="$2"
+
+    if [ -z "$path" ]; then
+        warn "$label not configured"
+        return
+    fi
+
+    if [ -d "$path" ]; then
+        ok "$label directory exists: $(dot_redact_path "$path")"
+    else
+        fail "$label directory missing: $(dot_redact_path "$path")"
     fi
 }
 
@@ -650,6 +890,10 @@ EOF
     check_skill_target "$HOME/.claude/skills" "Claude skills"
     check_skill_target "$HOME/.codex/skills" "Codex skills"
     check_skill_target "$HOME/.agents/skills" "Shared agent skills"
+    check_broken_skill_links "$HOME/.claude/skills" "Claude skills"
+    check_broken_skill_links "$HOME/.codex/skills" "Codex skills"
+    check_broken_skill_links "$HOME/.agents/skills" "Shared agent skills"
+    check_duplicate_skill_sources
     check_git_signing_readiness
 
     ok "manual app sign-in remains external: 1Password, Codex, Dia, Dropbox, and Google Drive"
@@ -673,9 +917,14 @@ check_file "system/gitconfig.template"
 check_file "system/git-allowed-signers.template"
 check_file "system/1password.agent.toml.template"
 check_file "system/launchagents/com.u29dc.dia-cdp.plist.template"
+check_file "system/karabiner"
+check_file "macos/.macos"
 check_file "terminal/ssh.template"
+check_file "terminal/agent-browser.json.template"
 check_gitignore
 check_legacy_local_files
+check_json_file "$DOTFILES_DIR/system/karabiner" "Karabiner source"
+check_bash_parse "$DOTFILES_DIR/macos/.macos" "macOS preferences source"
 
 say ""
 say "Tool wrappers"
@@ -695,11 +944,15 @@ check_symlink "$HOME/.zshrc" "$DOTFILES_DIR/shell/zsh/zshrc"
 check_symlink "$HOME/.zprofile" "$DOTFILES_DIR/shell/zsh/zprofile"
 check_symlink "$HOME/.config/fish/config.fish" "$DOTFILES_DIR/shell/fish/config.fish"
 check_symlink "$HOME/.config/fish/functions.fish" "$DOTFILES_DIR/shell/fish/functions.fish"
+if truthy "${DOT_ENABLE_SYSTEM_EXTENSIONS:-0}"; then
+    check_symlink "$HOME/.config/karabiner/karabiner.json" "$DOTFILES_DIR/system/karabiner"
+    check_symlink "$HOME/.macos" "$DOTFILES_DIR/macos/.macos"
+fi
 check_no_legacy_fish_split_links
 check_fish_syntax
 check_default_shell
 check_managed_file "$HOME/.ssh/config" "SSH config"
-check_symlink "$HOME/.agent-browser/config.json" "$DOTFILES_DIR/terminal/agent-browser.json"
+check_abs_file "$HOME/.agent-browser/config.json"
 check_symlink "$HOME/.agent-browser/chrome.json" "$DOTFILES_DIR/terminal/agent-browser.chrome.json"
 
 if truthy "${DOT_ENABLE_GIT_CONFIG:-0}"; then

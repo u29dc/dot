@@ -56,11 +56,61 @@ if [ ! -f "$template" ]; then
     exit 1
 fi
 
+toml_escape_string() {
+    local value="$1"
+    value="${value//\\/\\\\}"
+    value="${value//\"/\\\"}"
+    value="${value//$'\n'/\\n}"
+    value="${value//$'\r'/\\r}"
+    value="${value//$'\t'/\\t}"
+    printf '%s' "$value"
+}
+
+validate_toml_file() {
+    local path="$1"
+
+    python3 - "$path" <<'PY'
+import sys
+
+try:
+    import tomllib
+except ModuleNotFoundError:
+    try:
+        import tomli as tomllib
+    except ModuleNotFoundError as exc:
+        raise SystemExit("Python TOML parser unavailable: install Python 3.11+ or tomli") from exc
+
+with open(sys.argv[1], "rb") as handle:
+    tomllib.load(handle)
+PY
+}
+
+emit_node_repl_env_fragment() {
+    local line
+    local trimmed
+
+    [ -f "$node_repl_env_file" ] || return 0
+
+    while IFS= read -r line || [ -n "$line" ]; do
+        trimmed="${line#"${line%%[![:space:]]*}"}"
+        case "$trimmed" in
+            "" | \#*) continue ;;
+        esac
+
+        if [[ ! "$trimmed" =~ ^[A-Za-z_][A-Za-z0-9_]*[[:space:]]*= ]]; then
+            printf 'Invalid Codex node REPL env line in %s: %s\n' "$node_repl_env_file" "$trimmed" >&2
+            return 1
+        fi
+
+        printf '%s\n' "$trimmed"
+    done <"$node_repl_env_file"
+}
+
 render_line() {
     local line="$1"
-    line="${line//__HOME__/$HOME}"
-    line="${line//__TOOLS_HOME__/$tools_home}"
-    line="${line//__CODEX_NOTIFY_COMMAND__/$codex_notify_command}"
+    line="${line//__HOME__/$(toml_escape_string "$HOME")}"
+    line="${line//__TOOLS_HOME__/$(toml_escape_string "$tools_home")}"
+    line="${line//__CODEX_NOTIFY_COMMAND__/$(toml_escape_string "$codex_notify_command")}"
     printf '%s\n' "$line"
 }
 
@@ -73,7 +123,7 @@ render_config() {
     while IFS= read -r line || [ -n "$line" ]; do
         render_line "$line"
         if [ "$line" = "# dotfiles-managed: codex-node-repl-env" ] && [ -f "$node_repl_env_file" ]; then
-            sed '/^[[:space:]]*$/d; /^[[:space:]]*#/d' "$node_repl_env_file"
+            emit_node_repl_env_fragment
         fi
     done <"$template"
 }
@@ -107,14 +157,30 @@ backup_existing() {
 }
 
 if [ "$dry_run" = true ]; then
-    render_config >/dev/null
+    tmp="$(mktemp "${TMPDIR:-/tmp}/codex-config.XXXXXX")"
+    if ! render_config >"$tmp"; then
+        rm -f "$tmp"
+        exit 1
+    fi
+    if ! validate_toml_file "$tmp"; then
+        rm -f "$tmp"
+        exit 1
+    fi
+    rm -f "$tmp"
     printf 'Would render Codex config: %s\n' "$dest"
     exit 0
 fi
 
+tmp="$(mktemp "${TMPDIR:-/tmp}/codex-config.XXXXXX")"
+if ! render_config >"$tmp"; then
+    rm -f "$tmp"
+    exit 1
+fi
+if ! validate_toml_file "$tmp"; then
+    rm -f "$tmp"
+    exit 1
+fi
 backup_existing
 mkdir -p "$(dirname "$dest")"
-tmp="$(mktemp "${TMPDIR:-/tmp}/codex-config.XXXXXX")"
-render_config >"$tmp"
 mv "$tmp" "$dest"
 printf 'Rendered Codex config: %s\n' "$dest"
