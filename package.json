@@ -22,10 +22,10 @@
 		"util:check": "STATUS=0; bun run util:format || STATUS=1; bun run util:format:shell || STATUS=1; bun run util:lint || STATUS=1; bun run util:lint:shell || STATUS=1; bun run util:lint:zsh || STATUS=1; bun run util:lint:fish || STATUS=1; exit $STATUS"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.5.0",
-		"@commitlint/cli": "^21.0.2",
-		"@commitlint/config-conventional": "^21.0.2",
+		"@biomejs/biome": "^2.5.2",
+		"@commitlint/cli": "^21.2.0",
+		"@commitlint/config-conventional": "^21.2.0",
 		"husky": "^9.1.7",
-		"lint-staged": "^17.0.7"
+		"lint-staged": "^17.0.8"
 	}
 }
