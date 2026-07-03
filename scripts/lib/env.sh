@@ -164,7 +164,7 @@ dot_each_colon_item() {
     local old_ifs item
 
     old_ifs="$IFS"
-    IFS=':'
+    IFS=':;'
     for item in $list; do
         [ -n "$item" ] || continue
         printf '%s\n' "$item"

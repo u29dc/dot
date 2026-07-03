@@ -24,6 +24,7 @@ setup.env
 # project
 .zshrc.local
 .bashrc.local
-shell/zshrc.local
+shell/zsh/zshrc.local
+shell/fish/local.fish
 profiles/local.env
 homebrew/Brewfile.local

@@ -67,7 +67,7 @@ Fresh machine setup belongs in [`SETUP.md`](SETUP.md). Keep this section limited
 - `homebrew/Brewfile.primary` currently contains the complete shared workstation package inventory. Optional local Brewfiles may be listed in `DOT_BREWFILES` but should be ignored unless intentionally promoted.
 - Local env precedence, highest to lowest: CLI operational flags, `setup.env`, inherited process env for values absent from `setup.env`, then setup defaults.
 - Setup flags: `--dry-run`, `--no-brew`, and `--env-file`.
-- Environment overrides: `TOOLS_HOME` changes the tool home directory, `SKILLS_BASE` changes the base skill source, `DOT_SKILL_SOURCES` adds colon-separated extra skill source folders, `DOT_BREWFILES` selects ordered Brew layers, and `DOT_DEFAULT_SHELL` can set `fish`, `zsh`, `none`, or an absolute login shell path.
+- Environment overrides: `TOOLS_HOME` changes the tool home directory, `SKILLS_BASE` changes the base skill source, `DOT_SKILL_SOURCES` adds extra skill sources, `DOT_BREWFILES` selects ordered Brew layers, and `DOT_DEFAULT_SHELL` can set `fish`, `zsh`, `none`, or an absolute login shell path.
 - Navigation overrides: `DOT_DROPBOX_HOME`, `DOT_VAULT_HOME`, and `DOT_GDRIVE_HOME` feed shared Fish/Zsh shortcuts such as `oo`, `vault`, `dropbox`, and `gdrive`. `DOT_CLOUDSTORAGE_HOME` is a reusable base path for local setup values. Leave them blank on machines without those locations.
 - Optional feature overrides use literal `1` for enabled and `0` for disabled.
 - Agent browser defaults live at `~/.agent-browser/config.json` and `~/.agent-browser/chrome.json`; the managed Dia service lives at `~/Library/LaunchAgents/com.u29dc.dia-cdp.plist` and reserves local port `9222`.

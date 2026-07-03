@@ -115,7 +115,7 @@ dot_each_colon_item() {
     local old_ifs item
 
     old_ifs="$IFS"
-    IFS=':'
+    IFS=':;'
     for item in $list; do
         [ -n "$item" ] || continue
         printf '%s\n' "$item"
@@ -692,6 +692,11 @@ count_skill_entries() {
         return
     fi
 
+    if [ -f "$dir/SKILL.md" ]; then
+        printf '1\n'
+        return
+    fi
+
     for entry in "$dir"/*; do
         [ -e "$entry" ] || [ -L "$entry" ] || continue
         if [ -f "$entry/SKILL.md" ]; then
@@ -721,7 +726,7 @@ check_skill_source() {
     if [ "$count" -gt 0 ]; then
         ok "$label contains $count skills"
     else
-        warn "$label has no direct child SKILL.md folders: $(dot_redact_path "$path")"
+        warn "$label has no direct SKILL.md or child skill folders: $(dot_redact_path "$path")"
     fi
 }
 
@@ -775,6 +780,11 @@ check_duplicate_skill_sources() {
         dot_each_colon_item "${DOT_SKILL_SOURCES:-}"
     } | while IFS= read -r source; do
         [ -d "$source" ] || continue
+        if [ -f "$source/SKILL.md" ]; then
+            name="$(basename "$source")"
+            printf '%s\t%s\n' "$name" "$source"
+            continue
+        fi
         for skill in "$source"/*; do
             [ -f "$skill/SKILL.md" ] || continue
             name="$(basename "$skill")"

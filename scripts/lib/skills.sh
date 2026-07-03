@@ -12,6 +12,13 @@ link_skills_from_source() {
         return 0
     fi
 
+    if [ -f "$src_dir/SKILL.md" ]; then
+        name="$(basename "$src_dir")"
+        case "$name" in .*) return 0 ;; esac
+        link_file "$src_dir" "$target/$name"
+        return 0
+    fi
+
     for skill in "$src_dir"/*/; do
         [ -d "$skill" ] || continue
         name="$(basename "$skill")"

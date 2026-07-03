@@ -123,10 +123,11 @@ DOT_CLOUDSTORAGE_HOME="$HOME/Library/CloudStorage"
 DOT_DROPBOX_HOME="$DOT_CLOUDSTORAGE_HOME/Dropbox"
 DOT_VAULT_HOME="$DOT_DROPBOX_HOME/<vault-folder>"
 DOT_GDRIVE_HOME=""
-DOT_SKILL_SOURCES="$HOME/path/to/skills:$HOME/other/skills"
+DOT_SKILL_SOURCES="$HOME/path/to/skills:$HOME/other/skill"
 ```
 
 Leave unavailable paths blank.
+Use `:` between multiple skill sources. Each source may be a parent folder that contains skills or one direct skill folder that contains `SKILL.md`.
 
 ## 7. Final Setup
 
