@@ -20,6 +20,7 @@ build/
 !.env.example
 setup.env
 .husky/_/
+.clawpatch/
 
 # project
 .zshrc.local
