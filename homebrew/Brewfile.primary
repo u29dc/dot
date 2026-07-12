@@ -24,6 +24,7 @@ brew "neovim"
 
 cask "cursor"
 cask "google-chrome"
+cask "arc"
 cask "zed@preview"
 cask "thebrowsercompany-dia"
 
@@ -100,7 +101,11 @@ brew "vercel-cli"
 
 cask "codex"
 cask "chatgpt"
+cask "claude"
 cask "codexbar"
+cask "granola"
+cask "macwhisper"
+cask "ollama-app"
 
 # 70 Work and productivity
 brew "gnupg"
@@ -115,6 +120,7 @@ cask "obsidian"
 cask "figma"
 cask "adobe-creative-cloud"
 cask "cleanshot"
+cask "pixelsnap"
 cask "clop"
 cask "coteditor"
 
@@ -122,16 +128,19 @@ cask "coteditor"
 brew "blueutil"
 
 cask "karabiner-elements"
+cask "moves"
 cask "logi-options+"
 cask "monitorcontrol"
+cask "display-pilot"
+cask "vivid-app"
+cask "cleanmymac"
 
 # 90 Sync, backup, network, and personal
-brew "cirruslabs/cli/softnet", trusted: true
-brew "cirruslabs/cli/tart", trusted: true
 brew "vnstat"
 
 cask "jordanbaird-ice"
 cask "rana-gmbh/netfluss/netfluss", trusted: true
+cask "nordvpn"
 cask "transmission"
 cask "spotify"
 cask "telegram"
@@ -140,3 +149,8 @@ cask "google-drive"
 cask "dropbox"
 cask "backblaze"
 cask "adguard"
+
+# Unmanaged applications
+# App Store: Dato, Dropover, Folder Preview, Keystroke Pro, NextDNS, NotchPrompter, Spaced
+# Vendor or manual install: DaVinci Resolve, Paper, Umbra, Writer
+# Prerelease channel: Raycast Beta
