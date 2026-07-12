@@ -109,6 +109,11 @@ setup_dia_cdp() {
         return 0
     fi
 
+    if dia_launch_agent_loaded; then
+        dot_progress_run "Reloading Dia CDP LaunchAgent"
+        launchctl bootout "$service_target"
+    fi
+
     if dia_cdp_healthy; then
         dot_progress_ok "Dia CDP already available on port $AGENT_BROWSER_DIA_PORT"
         return 0
@@ -133,6 +138,7 @@ setup_dia_cdp() {
         launchctl kickstart -k "$service_target"
     else
         launchctl bootstrap "$domain_target" "$plist_path"
+        launchctl kickstart -k "$service_target"
     fi
 
     if wait_for_dia_cdp; then

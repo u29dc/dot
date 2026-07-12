@@ -148,6 +148,9 @@ agent-browser-dia-on() {
     fi
 
     if agent_browser_dia__main_running_without_cdp; then
+        if agent_browser_dia__service_loaded; then
+            launchctl bootout "$service_target"
+        fi
         echo "Dia is already running without CDP. Quit Dia, then run agent-browser-dia-on." >&2
         return 1
     fi
@@ -167,6 +170,7 @@ agent-browser-dia-on() {
         launchctl kickstart -k "$service_target"
     else
         launchctl bootstrap "$domain_target" "$plist_path"
+        launchctl kickstart -k "$service_target"
     fi
 
     if agent_browser_dia__wait_for_cdp; then
