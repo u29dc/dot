@@ -10,7 +10,7 @@ Setup is staged because a fresh Mac does not yet have Homebrew, 1Password SSH ke
 macOS
  -> Apple command line tools
  -> Homebrew
- -> 1Password and Codex
+ -> 1Password and ChatGPT
  -> clone this repo over HTTPS
  -> create setup.env
  -> first setup pass
@@ -30,7 +30,7 @@ xcode-select --install
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
-brew install --cask 1password 1password-cli codex codex-app
+brew install --cask 1password 1password-cli codex chatgpt
 
 mkdir -p ~/Git
 git clone https://github.com/u29dc/dot.git ~/Git/dot
@@ -38,7 +38,7 @@ cd ~/Git/dot
 cp setup.env.example setup.env
 ```
 
-Open and sign in to 1Password and Codex before continuing.
+Open and sign in to 1Password and ChatGPT, then select Codex before continuing.
 
 ## 3. Agent Prompt
 

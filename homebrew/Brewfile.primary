@@ -99,7 +99,7 @@ brew "whisperkit-cli"
 brew "vercel-cli"
 
 cask "codex"
-cask "codex-app"
+cask "chatgpt"
 cask "codexbar"
 
 # 70 Work and productivity
