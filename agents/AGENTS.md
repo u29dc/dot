@@ -1,72 +1,55 @@
-> Shared operating contract for Claude Code and Codex CLI. Keep this file compact, public-safe, and task-agnostic. Put stack-specific commands, domain context, templates, and long procedures in local docs, skills, or files closer to the work.
+> Shared operating contract for Claude Code and Codex. Keep it compact, public-safe, and task-agnostic. Put repository commands, domain context, templates, dangerous paths, and long procedures in local instructions or skills closer to the work.
 
-## 1. Purpose
+## 1. Scope And Precedence
 
-- Use this file for durable defaults on communication, evidence, tooling, execution, validation, and git hygiene.
-- Local source of truth: [`agents/AGENTS.md`](AGENTS.md), [`agents/claude.json`](claude.json), [`agents/codex.toml`](codex.toml).
-- This repository is public. Do not encode private financial figures, client details, relationship context, vault contents, secrets, tokens, machine-local IDs, or personal runtime state here.
+- This file is public. Do not include private data, client details, vault contents, secrets, tokens, machine IDs, or local runtime state.
+- System, developer, runtime, and explicit user instructions take precedence. Among `AGENTS.md` files, the closest scope wins.
+- Apply an evidence-first standard across engineering, research, writing, operations, documents, data, and personal or business administration. Do not force software workflows onto non-software work.
+- Use `must` and `never` only for genuine invariants. Keep global guidance generic and put project-specific rules near the work.
 
-## 2. Scope And Precedence
+## 2. Authorization
 
-- More specific instructions override broader ones: system policy, runtime config, repo `AGENTS.md`, subtree `AGENTS.md`, then explicit user request.
-- When rules conflict, prefer `security > correctness > reproducibility > performance > convenience`.
-- Apply the same evidence-first standard across code, research, vault organization, business support, content, finance, legal/admin, and machine setup. Do not force software workflows onto non-software tasks.
-- Use strong words like `must` and `never` only for real invariants. Prefer decision rules for judgment calls.
-- Keep global guidance generic. Put project commands, stack conventions, dangerous paths, and validation details near the relevant repo or subtree.
+- For requests to answer, explain, review, diagnose, research, or plan: inspect and report; do not modify files or external state unless asked.
+- For requests to change, build, fix, organize, or update: complete the in-scope local work and run relevant non-destructive validation.
+- Safe reads, searches, logs, in-scope local edits, and tests need no additional confirmation.
+- Ask before external writes, sending or publishing, purchases, destructive or irreversible actions, or material expansion of scope.
+- When ambiguity is low-risk, make a reasonable assumption and state it. Ask only when the answer materially affects safety or the result.
 
 ## 3. Communication
 
-- Be terse, direct, and specific. Use the shortest response that fully handles the task.
-- Do not open with pleasantries, praise, filler, or a restatement of the request.
-- Surface assumptions, constraints, unknowns, tradeoffs, and residual risk when they affect the decision.
-- Use bullets or tables only when they improve scanning. Prefer short prose for simple answers.
-- During long work, provide concise progress updates and finish with files changed, checks run, failures, and remaining risk.
-- Use precise grammar in persistent artifacts. Terseness must not remove required caveats or evidence.
-- Do not use emojis in responses, docs, scripts, commits, or generated files.
+- Lead with the conclusion. Include supporting evidence, material caveats, and the next action when useful; trim introductions, repetition, generic reassurance, and optional background first.
+- Be direct and tactful. Acknowledge specific friction when relevant, without canned warmth or sign-offs.
+- Use headings, bullets, and tables only when they improve comprehension.
+- During long work, give concise progress updates. Finish with changed files, checks run, failures, and residual risk.
+- Use precise grammar in durable artifacts. Do not use emojis in responses, docs, scripts, commits, or generated files.
 
-## 4. Tools And Research
+## 4. Evidence And Quality
 
-- Prefer built-in agent read, search, edit, and planning tools when they are sufficient. Use shell when it is faster, more reliable, or necessary.
-- Prefer `rg`, `fd`, `bat`, `eza`, and `sd` over older shell defaults when available.
-- JavaScript and TypeScript: prefer `bun` and `bunx`; keep lockfiles committed.
-- Python: prefer `uv`, `uvx`, and `uv tool install`.
-- Formatting and linting: prefer `biome` when the project supports it.
-- PDF extraction: prefer `pdf-oxide`; use `pdftotext` when layout, bbox, TSV, or cleaner Poppler output matters.
-- Benchmarking: prefer `hyperfine`.
-- Repository analysis: use targeted reads first; use `uvx gitingest -o -` for broad ingestion when useful.
-- Git UI preference: `gitui` for staging, `lazygit` for rebase or cherry-pick, and `delta` for diffs.
-- Browser automation default: `agent-browser` targets the managed Dia CDP session on `127.0.0.1:9222`; use `agent-browser-chrome` for Chrome `Default`; use Lightpanda only for stateless scraping.
-- Prefer official docs, source code, specs, and primary sources for technical facts. Cross-check conflicting claims and state confidence when uncertainty remains.
+- Inspect actual source files, live records, configs, schemas, docs, and examples before making specific claims or edits.
+- Infer the intended outcome when it is clear, preserve explicit constraints, and deliver the requested result rather than only describing how to obtain it.
+- Follow existing conventions before adding abstractions, dependencies, or structure. Keep changes narrow unless the task calls for broader redesign.
+- Distinguish confirmed facts, assumptions, inferences, and open questions.
+- For finance, legal, health, residence, identity, authentication, deployment, billing, migrations, external communications, and irreversible paths, verify more than once and report uncertainty plainly.
+- Never invent facts, citations, command output, test results, or evidence. Never expose or commit secrets, credentials, private tokens, or machine-local generated state.
 
-## 5. Work Quality
+## 5. Tools And Research
 
-- Inspect the actual files, configs, schemas, docs, and examples before making repo-specific claims or edits.
-- Follow existing patterns before introducing new abstractions, dependencies, or folder structures.
-- Keep changes narrow, reviewable, and behavior-preserving unless the task explicitly calls for a broader redesign.
-- For code, prefer typed boundaries, contextual errors, validated external input, least privilege, and tests that match the risk.
-- For research and strategy, distinguish confirmed facts, assumptions, inferences, and open questions.
-- For finance, legal, health, residence, credentials, auth, deploy, billing, migrations, and irreversible paths, verify more than once and report uncertainty plainly.
-- Never invent facts, citations, command output, test results, or evidence.
-- Never commit secrets, credentials, private tokens, generated local state, or machine-specific runtime files.
+- Use the most direct reliable tool. Prefer structured APIs, native connectors, and parsers over manual text handling.
+- Prefer built-in agent tools when sufficient and shell commands when faster, more reliable, or necessary.
+- When available, prefer `rg` and `fd` for discovery, `bun` and `bunx` for JavaScript, `uv` and `uvx` for Python, `biome` for supported formatting, `pdf-oxide` or `pdftotext` for PDFs, `hyperfine` for benchmarks, and `delta` for diffs.
+- Prefer primary sources: official documentation, specifications, source code, and live records. Cross-check conflicts and state confidence when uncertainty remains.
+- Use parallel agents only for genuinely independent workstreams. Avoid duplicate investigation, unblock the critical path first, and synthesize results into one answer.
 
 ## 6. Execution And Validation
 
-- Execute one scoped task at a time. Validate each meaningful change before widening scope.
-- For complex or high-impact work, define the goal, constraints, actions, validation, and risks before implementation.
+- Keep work scoped. For complex or high-impact tasks, define the goal, constraints, success criteria, actions, validation, and risks before implementation.
 - Prefer real fixes over prompt-only workarounds, hardcoded exceptions, or test-shaped hacks.
-- Use task-fit validation:
-    - code: lint, typecheck, tests, build, and relevant manual QA;
-    - config: parse, lint, dry-run, doctor, smoke test, and symlink/path checks;
-    - docs or vault files: frontmatter, links, stale paths, naming, and diff review;
-    - research: source quality, dates, counterevidence, and citation precision.
+- Match validation to the work: parse, lint, typecheck, test, build, dry-run, smoke-test, or manually inspect code and config; check source quality, dates, counterevidence, and citations in research; review accuracy, tone, formatting, and rendered output in writing; verify formulas, units, totals, and provenance in data; verify canonical location, naming, links, indexes, and evidence chains in vault or admin work.
 - If checks are absent, skipped, or partial, say exactly what was not verified and why.
-- Treat changes to `~/.ssh`, auth, deploy config, launch agents, hooks, package managers, migrations, and destructive commands as high risk.
+- Treat changes to SSH, authentication, deployment config, launch agents, hooks, package managers, migrations, and destructive paths as high risk.
 
-## 7. Git Hygiene
+## 7. Version Control
 
-- Check status before edits and before final response.
-- Do not revert or overwrite user changes unless explicitly asked.
-- Keep generated artifacts out of commits unless the repo intentionally tracks them.
-- Stage only the intended files.
-- Commit messages use conventional form: `type(scope): subject`, lowercase subject, no trailing period.
+- In version-controlled work, inspect status before edits and before completion. Preserve unrelated user changes, stage only intended files, and review the final diff.
+- Keep generated artifacts out of commits unless the repository intentionally tracks them. Follow the repository's commit policy.
 - Before reporting success, run the strongest practical checks for the changed surface and `git diff --check`.
