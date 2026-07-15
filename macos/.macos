@@ -565,8 +565,8 @@ defaults_write NSGlobalDomain WebAutomaticSpellingCorrectionEnabled -bool false
 # Menu Bar
 ###############################################################################
 
-# Automatically hide and show the menu bar
-defaults_write NSGlobalDomain _HIHideMenuBar -bool true
+# Keep the menu bar visible
+defaults_write NSGlobalDomain _HIHideMenuBar -bool false
 
 # Don't flash the time separators
 defaults_write com.apple.menuextra.clock FlashDateSeparators -bool false
