@@ -39,11 +39,12 @@
 	"spinnerTipsEnabled": false,
 	"alwaysThinkingEnabled": true,
 	"autoUpdatesChannel": "latest",
+	"tui": "fullscreen",
 	"voice": {
 		"enabled": true
 	},
 	"showThinkingSummaries": true,
 	"skipDangerousModePermissionPrompt": true,
-	"teammateMode": "in-process",
-	"tui": "fullscreen"
+	"theme": "dark",
+	"teammateMode": "in-process"
 }
