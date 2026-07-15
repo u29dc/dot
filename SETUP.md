@@ -22,6 +22,10 @@ macOS
 
 `setup.env` is the single machine-local form. Create it from `setup.env.example`. It is ignored and must not be committed.
 
+Machine-specific package changes belong in ignored `homebrew/Brewfile.local`.
+Copy `homebrew/Brewfile.primary` there, edit the local copy, and set
+`DOT_BREWFILES="homebrew/Brewfile.local"` in `setup.env`.
+
 ## 2. Bootstrap
 
 ```sh
@@ -32,11 +36,15 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 
 brew install --cask 1password 1password-cli codex chatgpt
 
-mkdir -p ~/Git
-git clone https://github.com/u29dc/dot.git ~/Git/dot
-cd ~/Git/dot
+mkdir -p "$HOME/_git"
+git clone https://github.com/u29dc/dot.git "$HOME/_git/dot"
+cd "$HOME/_git/dot"
 cp setup.env.example setup.env
 ```
+
+`$HOME/_git/dot` is the suggested checkout location, not a runtime requirement.
+Setup derives the repository root from `scripts/setup.sh`, so the checkout can
+live elsewhere and the script can be invoked from any working directory.
 
 Open and sign in to 1Password and ChatGPT, then select Codex before continuing.
 
@@ -45,7 +53,7 @@ Open and sign in to 1Password and ChatGPT, then select Codex before continuing.
 If using Codex on the new machine:
 
 ```text
-Open ~/Git/dot.
+Open the cloned dotfiles repository.
 Read AGENTS.md and SETUP.md.
 Interview me for setup.env values.
 Run a dry run before applying setup.
@@ -77,8 +85,8 @@ DOT_SKILL_SOURCES=""
 Preview, then apply:
 
 ```sh
-bash ~/Git/dot/scripts/setup.sh --dry-run --no-brew
-bash ~/Git/dot/scripts/setup.sh
+./scripts/setup.sh --dry-run --no-brew
+./scripts/setup.sh
 ```
 
 Restart the terminal after setup. Fish is the default when `DOT_DEFAULT_SHELL=fish`; Zsh remains available with `zsh`.
@@ -132,15 +140,14 @@ Use `:` between multiple skill sources. Each source may be a parent folder that 
 ## 7. Final Setup
 
 ```sh
-bash ~/Git/dot/scripts/setup.sh --dry-run --no-brew
-bash ~/Git/dot/scripts/setup.sh
-~/Git/dot/scripts/doctor.sh
+./scripts/setup.sh --dry-run --no-brew
+./scripts/setup.sh
+./scripts/doctor.sh
 ```
 
 Switch this repo to SSH after GitHub SSH works:
 
 ```sh
-cd ~/Git/dot
 ssh -T git@github.com
 git remote set-url origin git@github.com:u29dc/dot.git
 ```
@@ -186,8 +193,8 @@ agent-browser-dia tab new about:blank
 If setup validation fails, fix the named variable in `setup.env`.
 
 ```sh
-bash ~/Git/dot/scripts/setup.sh --dry-run --no-brew
-bash ~/Git/dot/scripts/setup.sh --no-brew
+./scripts/setup.sh --dry-run --no-brew
+./scripts/setup.sh --no-brew
 ```
 
 SSH checks:
