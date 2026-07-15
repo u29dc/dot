@@ -938,7 +938,7 @@ check_bash_parse "$DOTFILES_DIR/macos/.macos" "macOS preferences source"
 
 say ""
 say "Tool wrappers"
-for tool in agent-browser-chrome agent-browser-dia agent-browser-dia-off agent-browser-dia-on agent-browser-dia-status buf cho fin grn let pdf tao upd; do
+for tool in agent-browser-chrome agent-browser-dia agent-browser-dia-off agent-browser-dia-on agent-browser-dia-status buf cho dot-markdown fin grn let pdf tao upd; do
     check_wrapper "$tool"
 done
 

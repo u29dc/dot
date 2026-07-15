@@ -11,24 +11,84 @@ import re
 import sys
 from typing import List, Tuple
 
-FENCE_RE = re.compile(r"^\s*(```+|~~~+)")
+FENCE_RE = re.compile(r"^[ \t]{0,3}(`{3,}|~{3,})(.*)$")
 SEPARATOR_RE = re.compile(r"^\s*\|?\s*:?-{1,}:?\s*(?:\|\s*:?-{1,}:?\s*)+\|?\s*$")
 INDENT_RE = re.compile(r"^\s*")
+
+
+def is_escaped(text: str, index: int) -> bool:
+    backslashes = 0
+    index -= 1
+    while index >= 0 and text[index] == "\\":
+        backslashes += 1
+        index -= 1
+    return backslashes % 2 == 1
+
+
+def has_closing_code_span(row: str, start: int, tick_count: int) -> bool:
+    index = start
+    while index < len(row):
+        tick_start = row.find("`", index)
+        if tick_start == -1:
+            return False
+
+        tick_end = tick_start + 1
+        while tick_end < len(row) and row[tick_end] == "`":
+            tick_end += 1
+        if tick_end - tick_start == tick_count:
+            return True
+        index = tick_end
+
+    return False
+
+
+def delimiter_positions(row: str) -> List[int]:
+    positions: List[int] = []
+    code_tick_count = 0
+    index = 0
+
+    while index < len(row):
+        if row[index] == "`" and not is_escaped(row, index):
+            run_end = index + 1
+            while run_end < len(row) and row[run_end] == "`":
+                run_end += 1
+            run_length = run_end - index
+
+            if code_tick_count == 0 and has_closing_code_span(row, run_end, run_length):
+                code_tick_count = run_length
+            elif run_length == code_tick_count:
+                code_tick_count = 0
+
+            index = run_end
+            continue
+
+        if row[index] == "|" and code_tick_count == 0 and not is_escaped(row, index):
+            positions.append(index)
+
+        index += 1
+
+    return positions
 
 
 def split_row(line: str) -> Tuple[str, bool, bool, List[str]]:
     indent = INDENT_RE.match(line).group(0)
     stripped = line.strip()
-    starts_with_pipe = stripped.startswith("|")
-    ends_with_pipe = stripped.endswith("|")
+    delimiters = delimiter_positions(stripped)
+    starts_with_pipe = bool(delimiters and delimiters[0] == 0)
+    ends_with_pipe = bool(delimiters and delimiters[-1] == len(stripped) - 1)
 
-    core = stripped
-    if starts_with_pipe:
-        core = core[1:]
-    if ends_with_pipe:
-        core = core[:-1]
+    content_start = 1 if starts_with_pipe else 0
+    content_end = len(stripped) - 1 if ends_with_pipe else len(stripped)
+    content_delimiters = [
+        position for position in delimiters if content_start <= position < content_end
+    ]
 
-    cells = [cell.strip() for cell in core.split("|")]
+    cells: List[str] = []
+    cell_start = content_start
+    for position in content_delimiters:
+        cells.append(stripped[cell_start:position].strip())
+        cell_start = position + 1
+    cells.append(stripped[cell_start:content_end].strip())
     return indent, starts_with_pipe, ends_with_pipe, cells
 
 
@@ -82,26 +142,47 @@ def compact_tables(text: str) -> str:
     has_trailing_newline = text.endswith("\n")
     lines = text.splitlines()
     output: List[str] = []
-    in_fence = False
+    fence_marker = ""
+    fence_length = 0
     index = 0
 
     while index < len(lines):
         line = lines[index]
 
-        if FENCE_RE.match(line):
-            in_fence = not in_fence
+        fence_match = FENCE_RE.match(line)
+        if not fence_marker and fence_match:
+            marker = fence_match.group(1)
+            fence_marker = marker[0]
+            fence_length = len(marker)
             output.append(line)
             index += 1
             continue
 
-        if in_fence:
+        if fence_marker:
             output.append(line)
+            if fence_match:
+                marker = fence_match.group(1)
+                trailing = fence_match.group(2)
+                if (
+                    marker[0] == fence_marker
+                    and len(marker) >= fence_length
+                    and not trailing.strip()
+                ):
+                    fence_marker = ""
+                    fence_length = 0
             index += 1
             continue
 
-        has_header = "|" in line
+        header_parts = split_row(line)
+        separator_parts = (
+            split_row(lines[index + 1]) if index + 1 < len(lines) else None
+        )
+        has_header = bool(delimiter_positions(line.strip()))
         has_separator = (
-            index + 1 < len(lines) and SEPARATOR_RE.match(lines[index + 1]) is not None
+            separator_parts is not None
+            and SEPARATOR_RE.match(lines[index + 1]) is not None
+            and len(header_parts[3]) >= 2
+            and len(header_parts[3]) == len(separator_parts[3])
         )
 
         if has_header and has_separator:
@@ -110,7 +191,11 @@ def compact_tables(text: str) -> str:
 
             while index < len(lines):
                 row = lines[index]
-                if not row.strip() or "|" not in row or FENCE_RE.match(row):
+                if (
+                    not row.strip()
+                    or not delimiter_positions(row.strip())
+                    or FENCE_RE.match(row)
+                ):
                     break
                 block.append(row)
                 index += 1

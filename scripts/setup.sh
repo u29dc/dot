@@ -172,6 +172,7 @@ link_file "$DOTFILES_DIR/terminal/bin/agent-browser-dia-off" "$HOME/.local/bin/a
 link_file "$DOTFILES_DIR/terminal/bin/agent-browser-dia-on" "$HOME/.local/bin/agent-browser-dia-on"
 link_file "$DOTFILES_DIR/terminal/bin/agent-browser-dia-status" "$HOME/.local/bin/agent-browser-dia-status"
 link_file "$DOTFILES_DIR/terminal/bin/delta-themed" "$HOME/.local/bin/delta-themed"
+link_file "$DOTFILES_DIR/terminal/bin/dot-markdown" "$HOME/.local/bin/dot-markdown"
 link_file "$DOTFILES_DIR/terminal/bin/fin" "$HOME/.local/bin/fin"
 link_file "$DOTFILES_DIR/terminal/bin/grn" "$HOME/.local/bin/grn"
 link_file "$DOTFILES_DIR/terminal/bin/let" "$HOME/.local/bin/let"

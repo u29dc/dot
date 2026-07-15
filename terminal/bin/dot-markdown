@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+wrapper_path="$(/bin/realpath "${BASH_SOURCE[0]}")"
+DOTFILES_DIR="${DOTFILES_DIR:-$(cd "$(dirname "$wrapper_path")/../.." && pwd -P)}"
+
+exec "$DOTFILES_DIR/scripts/markdown.sh" "$@"
