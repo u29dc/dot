@@ -1,9 +1,12 @@
 # Fish entrypoint. Keep this compact and source shared functions from
 # ~/.config/fish/functions.fish.
 
-# Dotfiles checkout and machine-local setup facts. setup.sh renders env.fish
-# from setup.env; fallback values keep Fish usable before setup has run.
-set -q DOTFILES_DIR; or set -gx DOTFILES_DIR "$HOME/Git/dot"
+# Dotfiles checkout and machine-local setup facts. Resolve the checkout from
+# this symlinked config so the repository can live anywhere.
+if not set -q DOTFILES_DIR
+    set -l dot_fish_config (path resolve (status filename))
+    set -gx DOTFILES_DIR (path dirname (path dirname (path dirname "$dot_fish_config")))
+end
 set -q DOT_ENV_FILE; or set -gx DOT_ENV_FILE "$DOTFILES_DIR/setup.env"
 set -q DOT_FISH_ENV_FILE; or set -gx DOT_FISH_ENV_FILE "$HOME/.config/dot/env.fish"
 

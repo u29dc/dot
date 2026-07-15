@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # System update function
 
+# shellcheck disable=SC2154
 # shellcheck source=scripts/lib/progress.sh
-source "${DOTFILES_DIR:-$HOME/Git/dot}/scripts/lib/progress.sh"
+source "$DOTFILES_DIR/scripts/lib/progress.sh"
 
 upd() {
     # ANSI colors

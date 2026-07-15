@@ -11,9 +11,11 @@ path=("$HOME/.bun/bin" "$HOME/bin" "/opt/homebrew/bin" "/opt/homebrew/sbin" "$HO
 typeset -U path
 export PATH
 
-# Dotfiles checkout and machine-local setup facts. setup.sh renders env.zsh
-# from setup.env; sourcing setup.env directly is only a bootstrap fallback.
-export DOTFILES_DIR="${DOTFILES_DIR:-$HOME/Git/dot}"
+# Dotfiles checkout and machine-local setup facts. Resolve the checkout from
+# this symlinked config so the repository can live anywhere.
+_dot_zshrc_path="${${(%):-%N}:A}"
+export DOTFILES_DIR="${DOTFILES_DIR:-${_dot_zshrc_path:h:h:h}}"
+unset _dot_zshrc_path
 export DOT_ENV_FILE="${DOT_ENV_FILE:-$DOTFILES_DIR/setup.env}"
 DOT_ZSH_ENV_FILE="${DOT_ZSH_ENV_FILE:-$HOME/.config/dot/env.zsh}"
 if [ -f "$DOT_ZSH_ENV_FILE" ]; then

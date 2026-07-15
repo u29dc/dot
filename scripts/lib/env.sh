@@ -46,9 +46,22 @@ dot_default() {
 }
 
 initialize_setup_environment() {
+    local runtime_dotfiles_dir="$DOTFILES_DIR"
+    local runtime_dry_run="${DRY_RUN:-false}"
+    local runtime_no_brew="${NO_BREW:-false}"
+
     DOT_ENV_FILE="$(normalize_env_file_path "$DOT_ENV_FILE")"
+    local runtime_env_file="$DOT_ENV_FILE"
     export DOT_ENV_FILE
     load_env_file "$DOT_ENV_FILE"
+
+    # Repository location, selected env file and CLI modes are operational
+    # inputs. A sourced setup.env must not override them.
+    DOTFILES_DIR="$runtime_dotfiles_dir"
+    DOT_ENV_FILE="$runtime_env_file"
+    DRY_RUN="$runtime_dry_run"
+    NO_BREW="$runtime_no_brew"
+    export DOTFILES_DIR DOT_ENV_FILE DRY_RUN NO_BREW
 
     dot_default DOT_BREWFILES "homebrew/Brewfile.primary"
     dot_default DOT_DEFAULT_SHELL "none"

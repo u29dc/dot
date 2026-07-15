@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-DOTFILES_DIR="${DOTFILES_DIR:-$HOME/Git/dot}"
+wrapper_path="$(/bin/realpath "${BASH_SOURCE[0]}")"
+DOTFILES_DIR="${DOTFILES_DIR:-$(cd "$(dirname "$wrapper_path")/../.." && pwd -P)}"
+export DOTFILES_DIR
 # shellcheck source=shell/zsh/functions/update.sh
 source "$DOTFILES_DIR/shell/zsh/functions/update.sh"
 
