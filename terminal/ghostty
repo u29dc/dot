@@ -1,7 +1,9 @@
 # -----------------------------------------------------------------------------
 # Updates
 # -----------------------------------------------------------------------------
-# Use the tip (beta) channel for prerelease builds.
+# Use the tip (beta) channel for prerelease builds. Install the matching
+# ghostty@tip cask; the stable cask plus a tip channel makes Homebrew and the
+# in-app updater replace each other's builds.
 auto-update-channel = tip
 
 # -----------------------------------------------------------------------------
@@ -55,7 +57,7 @@ unfocused-split-opacity = 0.9
 cursor-style = "block"
 cursor-style-blink = true
 
-# Use the "blueprint" variant for the macOS application icon.
+# Use the "glass" variant for the macOS application icon.
 macos-icon = "glass"
 
 # Show the current working directory in the window subtitle.

@@ -1,4 +1,5 @@
 {
+	"proxy": "",
 	"edit_predictions": {
 		"provider": "zed"
 	},
@@ -19,10 +20,39 @@
 		"dock": "right"
 	},
 	"agent": {
+		"show_turn_stats": false,
+		"thinking_display": "preview",
+		"expand_terminal_card": false,
+		"expand_edit_card": false,
+		"tool_permissions": {
+			"default": "allow",
+			"tools": {
+				"skill": {
+					"default": "allow"
+				},
+				"fetch": {
+					"default": "allow"
+				},
+				"terminal": {
+					"default": "allow"
+				}
+			}
+		},
+		"sandbox_permissions": {
+			"allow_unsandboxed": true
+		},
+		"default_model": {
+			"provider": "openai-subscribed",
+			"model": "gpt-5.6-sol",
+			"enable_thinking": true,
+			"effort": "max"
+		},
 		"dock": "left",
 		"favorite_models": [],
 		"model_parameters": []
 	},
+
+	"session": { "trust_all_worktrees": true },
 
 	"theme": { "mode": "system", "light": "Github Plus Light", "dark": "Github Plus Dark" },
 	"ui_font_size": 15,
@@ -40,7 +70,6 @@
 		"source.fixAll.biome": true,
 		"source.organizeImports.biome": true
 	},
-	"formatter": { "language_server": { "name": "biome" } },
 
 	"terminal": {
 		"font_family": "SF Mono",

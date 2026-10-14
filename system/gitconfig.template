@@ -44,6 +44,7 @@
 	conflictStyle = zdiff3
 
 [diff]
+	algorithm = histogram
 	colorMoved = default
 
 [rebase]

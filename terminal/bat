@@ -23,10 +23,10 @@
 # Output is displayed directly to terminal
 --paging=never
 
-# Style components to display
+# Style components to display (the BAT_STYLE env var would override this)
 # - numbers: show line numbers
 # - changes: show git modification markers (+/-/~)
---style=changes
+--style=numbers,changes
 
 # Display options
 --wrap=never
@@ -36,41 +36,18 @@
 # SYNTAX MAPPINGS
 # ------------------------------------------------------------------------------
 
-# Map specific file patterns to syntax highlighting languages
-# This helps bat correctly highlight files with non-standard extensions
+# Only files bat does not already detect. Built-in mappings cover .gitignore,
+# Dockerfile.*, *.conf, *.cfg, Brewfile, justfile, *.toml, **/.ssh/config and
+# .env files (DotENV), so they are not repeated here.
 
-# Shell configuration files without extensions
+# Shell configuration files without a leading dot, as stored in this repo
 --map-syntax="zshrc:Bourne Again Shell (bash)"
 --map-syntax="bashrc:Bourne Again Shell (bash)"
 --map-syntax="zprofile:Bourne Again Shell (bash)"
 --map-syntax="bash_profile:Bourne Again Shell (bash)"
 
-# Git configuration files
---map-syntax=".gitignore:Git Ignore"
---map-syntax=".gitattributes:Git Attributes"
-
-# Docker files
---map-syntax="Dockerfile.*:Dockerfile"
-
-# Configuration files often use INI syntax
---map-syntax="*.conf:INI"
---map-syntax="*.cfg:INI"
-
-# Treat .env files as shell scripts (they define environment variables)
---map-syntax=".env:Bourne Again Shell (bash)"
---map-syntax=".env.*:Bourne Again Shell (bash)"
-
-# SSH config
---map-syntax="ssh_config:SSH Config"
---map-syntax="config:SSH Config"
-
-# Build and package files
---map-syntax="Brewfile:Ruby"
---map-syntax="justfile:Makefile"
---map-syntax="*.toml:TOML"
+# Logs and JSON-flavoured configuration files
 --map-syntax="*.log:Log File"
-
-# Configuration files
 --map-syntax=".prettierrc:JSON"
 --map-syntax=".eslintrc:JSON"
 --map-syntax="*.jsonc:JSON"

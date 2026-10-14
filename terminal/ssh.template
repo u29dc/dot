@@ -13,18 +13,10 @@ Include ~/.ssh/config.local
 Host *
 __SSH_IDENTITY_AGENT__
 
-  # Modern Cryptography (security + performance)
-  # Prefer curve25519 for key exchange (fast, quantum-resistant)
-  KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256
-
-  # Prefer ChaCha20-Poly1305 and AES-GCM ciphers (hardware accelerated on modern CPUs)
-  Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
-
-  # Use modern MAC algorithms with Encrypt-then-MAC (ETM) for better security
-  MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com
-
-  # Prefer Ed25519 host keys (compact, fast, secure)
-  HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256
+  # Cryptography: keep OpenSSH defaults. Since OpenSSH 10 they prefer the
+  # post-quantum hybrid mlkem768x25519-sha256 key exchange, which a pinned
+  # KexAlgorithms list would silently disable; pinned host key lists also
+  # break servers that only offer ECDSA keys.
 
   # Connection Stability
   # Send keepalive every 60 seconds to prevent timeout through firewalls

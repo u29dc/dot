@@ -43,9 +43,6 @@ Ubuntu = "󰕈"
 Arch = "󰣇"
 Debian = "󰣚"
 
-[time]
-disabled = true
-
 [directory]
 truncation_length = 1
 truncate_to_repo = false
@@ -60,9 +57,6 @@ symbol = ""
 style = "fg:color_fg bg:color_segment3"
 detect_files = ["bun.lock", "bun.lockb", "bunfig.toml"]
 disabled = false
-
-[nodejs]
-disabled = true
 
 [rust]
 format = "[  rs:$version  ]($style)"
@@ -121,116 +115,8 @@ staged = "+${count}"
 renamed = "r${count}"
 deleted = "x${count}"
 
-[jobs]
-disabled = true
-
-[cmd_duration]
-disabled = true
-
-[status]
-disabled = true
-
 [character]
 success_symbol = "[>](color_fg)"
 error_symbol = "[>](bold color_error)"
 vimcmd_symbol = "[<](color_fg)"
 vimcmd_visual_symbol = "[<](dimmed color_fg)"
-
-[username]
-disabled = true
-
-[hostname]
-disabled = true
-
-[package]
-disabled = true
-
-[ruby]
-disabled = true
-
-[java]
-disabled = true
-
-[php]
-disabled = true
-
-[dotnet]
-disabled = true
-
-[swift]
-disabled = true
-
-[nim]
-disabled = true
-
-[lua]
-disabled = true
-
-[perl]
-disabled = true
-
-[elixir]
-disabled = true
-
-[erlang]
-disabled = true
-
-[haskell]
-disabled = true
-
-[julia]
-disabled = true
-
-[kotlin]
-disabled = true
-
-[scala]
-disabled = true
-
-[dart]
-disabled = true
-
-[deno]
-disabled = true
-
-[ocaml]
-disabled = true
-
-[crystal]
-disabled = true
-
-[vlang]
-disabled = true
-
-[vagrant]
-disabled = true
-
-[nix_shell]
-disabled = true
-
-[conda]
-disabled = true
-
-[aws]
-disabled = true
-
-[gcloud]
-disabled = true
-
-[azure]
-disabled = true
-
-[kubernetes]
-disabled = true
-
-[terraform]
-disabled = true
-
-[docker_context]
-disabled = true
-
-[battery]
-disabled = true
-
-[memory_usage]
-disabled = true

@@ -5,7 +5,7 @@ Canonical source for project bootstrap templates used by `/align`.
 ## Usage Rules
 
 - Treat this folder as the template source of truth.
-- Keep `agents/AGENTS.md` policy-only; do not paste full file templates there.
+- Keep the global agent policy (`agents/AGENTS.md` in the dotfiles repo) policy-only; do not paste full file templates there.
 - Preserve project-specific values when aligning existing repos.
 - Use variants only when project type requires them.
 

@@ -5,7 +5,9 @@ BUFFER_PATH="${1:-stdin.md}"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 COMPACTOR="$SCRIPT_DIR/markdown.py"
 LOCAL_PRETTIER="$SCRIPT_DIR/../node_modules/.bin/prettier"
-PRETTIER_VERSION="3.9.5"
+# The bunx fallback uses the version pinned in package.json.
+PRETTIER_VERSION="$(sed -nE 's/^[[:space:]]*"prettier": "([0-9][0-9.]*)".*/\1/p' "$SCRIPT_DIR/../package.json")"
+PRETTIER_VERSION="${PRETTIER_VERSION:-3}"
 
 export PATH="$HOME/.bun/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
 

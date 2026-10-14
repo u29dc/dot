@@ -1,5 +1,9 @@
 # Global ignore file for ripgrep, fd, and other tools
 # Symlinked to ~/.ignore
+#
+# Applies to every search under $HOME, on top of each repository's .gitignore.
+# Keep it to directories that are never source: generic names such as bin/ or
+# build/ also hold tracked scripts (this repo's terminal/bin, plugin build/).
 
 # Dependencies
 node_modules/
@@ -10,8 +14,6 @@ bun.lockb
 
 # Build outputs
 dist/
-build/
-bin/
 out/
 *.bun-build
 *.tsbuildinfo

@@ -8,6 +8,11 @@ indent_size = 4
 insert_final_newline = true
 trim_trailing_whitespace = false
 
+# Shell scripts follow `shfmt -i 4`; Python and Fish use four spaces.
+[{*.sh,*.bash,*.zsh,*.fish,*.py,zshrc,zprofile,*.example,.macos,terminal/bin/*}]
+indent_style = space
+indent_size = 4
+
 [*.{yml,yaml}]
 indent_style = space
 indent_size = 2

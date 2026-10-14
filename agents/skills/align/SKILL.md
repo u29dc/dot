@@ -7,7 +7,7 @@ allowed-tools: Bash, Read, Write, Glob, Grep, Edit
 
 # Align
 
-Audit and enforce project baseline standards from `agents/AGENTS.md` using canonical templates under `agents/skills/align/references/`, including the canonical repo-level agent-doc template at `agents/skills/align/references/templates/AGENTS.md`.
+Audit and enforce project baseline standards from the global agent policy (`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`) using canonical templates under this skill's `references/` directory, including the canonical repo-level agent-doc template at `references/templates/AGENTS.md`. Paths below are relative to this skill's directory, not to the project being aligned.
 
 ## How to Use
 
@@ -37,10 +37,10 @@ Optional: `$ARGUMENTS`
 
 ## Canonical Sources
 
-- Primary: `agents/skills/align/references/index.md`
-- Agent docs template: `agents/skills/align/references/templates/AGENTS.md`
-- Templates: `agents/skills/align/references/templates/`
-- Variants: `agents/skills/align/references/variants/`
+- Primary: `references/index.md`
+- Agent docs template: `references/templates/AGENTS.md`
+- Templates: `references/templates/`
+- Variants: `references/variants/`
 - Remote fallback: `https://github.com/u29dc/dot/tree/main/agents/skills/align/references`
 
 ## Standards Contract
