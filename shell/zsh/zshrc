@@ -21,43 +21,28 @@ DOT_ZSH_ENV_FILE="${DOT_ZSH_ENV_FILE:-$HOME/.config/dot/env.zsh}"
 if [ -f "$DOT_ZSH_ENV_FILE" ]; then
     source "$DOT_ZSH_ENV_FILE"
 elif [ -f "$DOT_ENV_FILE" ]; then
+    set -a
     source "$DOT_ENV_FILE"
+    set +a
 fi
 
 # Obsidian CLI
 export PATH="$PATH:/Applications/Obsidian.app/Contents/MacOS"
 
-# Canonical tool install directory
+# Fallbacks for a shell started before setup rendered env.zsh; rendered values win.
 export TOOLS_HOME="${TOOLS_HOME:-$HOME/.tools}"
-
-# Per-tool home directories
-export BUF_HOME="$TOOLS_HOME/buf"
-export CHO_HOME="$TOOLS_HOME/cho"
-export FIN_HOME="$TOOLS_HOME/fin"
-export GRN_HOME="$TOOLS_HOME/grn"
-export LET_HOME="$TOOLS_HOME/let"
-export PDF_HOME="$TOOLS_HOME/pdf"
-export TAO_HOME="$TOOLS_HOME/tao"
-
-# Agent-friendly executable paths
-export BUF="$BUF_HOME/buf"
-export CHO="$CHO_HOME/cho"
-export FIN="$FIN_HOME/fin"
-export GRN="$GRN_HOME/grn"
-export LET="$LET_HOME/let"
-export PDF="$PDF_HOME/pdf"
-export TAO="$TAO_HOME/tao"
-
-# Agent skill directories
+export CHO_HOME="${CHO_HOME:-$TOOLS_HOME/cho}"
+export FIN_HOME="${FIN_HOME:-$TOOLS_HOME/fin}"
+export LET_HOME="${LET_HOME:-$TOOLS_HOME/let}"
+export TAO_HOME="${TAO_HOME:-$TOOLS_HOME/tao}"
+export CHO="${CHO:-$CHO_HOME/cho}"
+export FIN="${FIN:-$FIN_HOME/fin}"
+export LET="${LET:-$LET_HOME/let}"
+export TAO="${TAO:-$TAO_HOME/tao}"
 export SKILLS_BASE="${SKILLS_BASE:-$DOTFILES_DIR/agents/skills}"
-
-# Silence Homebrew environment hints
-export HOMEBREW_NO_ENV_HINTS=1
-
-# Tool defaults
-export BAT_PAGER=""
-export BAT_STYLE="numbers,changes"
-EZA_DEFAULT_IGNORE="node_modules|.cache|cache|dist|build|.next|.nuxt|.turbo|coverage|.pytest_cache|__pycache__|.venv|venv|.env"
+export HOMEBREW_NO_ENV_HINTS="${HOMEBREW_NO_ENV_HINTS:-1}"
+export BAT_PAGER="${BAT_PAGER-}"
+EZA_DEFAULT_IGNORE="${EZA_DEFAULT_IGNORE:-node_modules|.cache|cache|dist|build|.next|.nuxt|.turbo|coverage|.pytest_cache|__pycache__|.venv|venv|.env}"
 
 # Starship theme switching based on macOS appearance
 starship_theme() {
@@ -148,13 +133,11 @@ alias virtualenv='uv venv'
 # Custom shell functions for enhanced functionality
 # ------------------------------------------------------------------------------
 
-buf() { "$BUF" "$@"; }
 cho() { "$CHO" "$@"; }
 fin() { "$FIN" "$@"; }
-grn() { "$GRN" "$@"; }
-let() { "$LET" "$@"; }
-pdf() { "$PDF" "$@"; }
 tao() { "$TAO" "$@"; }
+# let is an alias at the end of this file: a let() function would replace the
+# let builtin that zsh completion (_arguments) relies on.
 
 # Navigation and app shortcuts. Paths are optional and come from setup.env.
 _dot_cd_required() {
@@ -263,10 +246,15 @@ eza() {
 }
 
 zed() {
+    if ! command -v zed-preview >/dev/null 2>&1; then
+        printf 'zed-preview not found; install the zed@preview cask\n' >&2
+        return 127
+    fi
+
     if [ $# -eq 0 ]; then
-        command zed .
+        command zed-preview .
     else
-        command zed "$@"
+        command zed-preview "$@"
     fi
 }
 
@@ -331,6 +319,9 @@ fi
 # Initialize uv completions
 _dot_source_cached_init uv-completion uv generate-shell-completion zsh
 
+# Initialize direnv (per-directory .envrc environments)
+_dot_source_cached_init direnv-hook direnv hook zsh
+
 # Bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
@@ -344,6 +335,9 @@ GCLOUD_SDK_HOME="${GCLOUD_SDK_HOME:-$HOME/google-cloud-sdk}"
 [ -f "$GCLOUD_SDK_HOME/path.zsh.inc" ] && source "$GCLOUD_SDK_HOME/path.zsh.inc"
 [ -f "$GCLOUD_SDK_HOME/completion.zsh.inc" ] && source "$GCLOUD_SDK_HOME/completion.zsh.inc"
 
+# CF CLI completions
+[[ -f "$HOME/.config/cf/completions/_cf.zsh" ]] && source "$HOME/.config/cf/completions/_cf.zsh"
+
 # ------------------------------------------------------------------------------
 # LOCAL OVERRIDES
 # Machine-specific settings like API keys, aliases, PATH modifications
@@ -355,5 +349,6 @@ if [ -f "$HOME/.zshrc.local" ]; then
     source "$HOME/.zshrc.local"
 fi
 
-# CF CLI completions
-[[ -f "$HOME/.config/cf/completions/_cf.zsh" ]] && source "$HOME/.config/cf/completions/_cf.zsh"
+# Defined last so no later-parsed function body captures it. `command let`
+# runs the external tool; autoloaded code still gets the let builtin.
+alias let='command let'

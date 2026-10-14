@@ -18,37 +18,30 @@ set -q TOOLS_HOME; or set -gx TOOLS_HOME "$HOME/.tools"
 set -q SKILLS_BASE; or set -gx SKILLS_BASE "$DOTFILES_DIR/agents/skills"
 set -q CARGO_HOME; or set -gx CARGO_HOME "$HOME/.cargo"
 
-set -q BUF_HOME; or set -gx BUF_HOME "$TOOLS_HOME/buf"
 set -q CHO_HOME; or set -gx CHO_HOME "$TOOLS_HOME/cho"
 set -q FIN_HOME; or set -gx FIN_HOME "$TOOLS_HOME/fin"
-set -q GRN_HOME; or set -gx GRN_HOME "$TOOLS_HOME/grn"
 set -q LET_HOME; or set -gx LET_HOME "$TOOLS_HOME/let"
-set -q PDF_HOME; or set -gx PDF_HOME "$TOOLS_HOME/pdf"
 set -q TAO_HOME; or set -gx TAO_HOME "$TOOLS_HOME/tao"
 
-set -q BUF; or set -gx BUF "$BUF_HOME/buf"
 set -q CHO; or set -gx CHO "$CHO_HOME/cho"
 set -q FIN; or set -gx FIN "$FIN_HOME/fin"
-set -q GRN; or set -gx GRN "$GRN_HOME/grn"
 set -q LET; or set -gx LET "$LET_HOME/let"
-set -q PDF; or set -gx PDF "$PDF_HOME/pdf"
 set -q TAO; or set -gx TAO "$TAO_HOME/tao"
 
 set -q HOMEBREW_NO_ENV_HINTS; or set -gx HOMEBREW_NO_ENV_HINTS 1
 set -q BAT_PAGER; or set -gx BAT_PAGER ""
-set -q BAT_STYLE; or set -gx BAT_STYLE "numbers,changes"
 set -q EZA_DEFAULT_IGNORE; or set -gx EZA_DEFAULT_IGNORE "node_modules|.cache|cache|dist|build|.next|.nuxt|.turbo|coverage|.pytest_cache|__pycache__|.venv|venv|.env"
 
 # Runtime PATH. One ordered call preserves Zsh parity while --path avoids
-# mutating Fish universal variables.
+# mutating Fish universal variables. App bundle binaries go last, as in Zsh.
 fish_add_path --path --move \
     "$HOME/.bun/bin" \
     "$HOME/bin" \
     /opt/homebrew/bin \
     /opt/homebrew/sbin \
     "$HOME/.local/bin" \
-    "$CARGO_HOME/bin" \
-    "/Applications/Obsidian.app/Contents/MacOS"
+    "$CARGO_HOME/bin"
+fish_add_path --path --append "/Applications/Obsidian.app/Contents/MacOS"
 
 if test -f "$HOME/.config/fish/functions.fish"
     source "$HOME/.config/fish/functions.fish"
@@ -92,6 +85,7 @@ if status is-interactive
         _dot_source_cached_init starship-init starship init fish
     end
     _dot_source_cached_init uv-completion uv generate-shell-completion fish
+    _dot_source_cached_init direnv-hook direnv hook fish
 
     if test -f "$HOME/.config/broot/launcher/fish/br"
         source "$HOME/.config/broot/launcher/fish/br"

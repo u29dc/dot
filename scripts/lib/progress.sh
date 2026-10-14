@@ -1,20 +1,12 @@
 #!/usr/bin/env bash
 # Shared progress/status UI for repo-managed shell scripts.
 
-if [ -z "${DOT_PROGRESS_RED+x}" ]; then
-    DOT_PROGRESS_RED='\x1b[31m'
-fi
-if [ -z "${DOT_PROGRESS_BLUE+x}" ]; then
-    DOT_PROGRESS_BLUE='\x1b[34m'
-fi
-if [ -z "${DOT_PROGRESS_YELLOW+x}" ]; then
-    DOT_PROGRESS_YELLOW='\x1b[33m'
-fi
-if [ -z "${DOT_PROGRESS_DIM+x}" ]; then
-    DOT_PROGRESS_DIM='\x1b[2m'
-fi
-if [ -z "${DOT_PROGRESS_RESET+x}" ]; then
-    DOT_PROGRESS_RESET='\x1b[0m'
+# Colors stay off for NO_COLOR and for output that is not a terminal, so logs
+# and agent transcripts do not collect raw escape sequences.
+if [ -n "${NO_COLOR:-}" ] || [ ! -t 1 ]; then
+    : "${DOT_PROGRESS_RED=}" "${DOT_PROGRESS_BLUE=}" "${DOT_PROGRESS_YELLOW=}" "${DOT_PROGRESS_DIM=}" "${DOT_PROGRESS_RESET=}"
+else
+    : "${DOT_PROGRESS_RED=\x1b[31m}" "${DOT_PROGRESS_BLUE=\x1b[34m}" "${DOT_PROGRESS_YELLOW=\x1b[33m}" "${DOT_PROGRESS_DIM=\x1b[2m}" "${DOT_PROGRESS_RESET=\x1b[0m}"
 fi
 
 dot_progress_format_time() {

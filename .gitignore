@@ -25,6 +25,7 @@ setup.env
 .clawpatch/
 
 # project
+system/karabiner/automatic_backups/
 .zshrc.local
 .bashrc.local
 shell/zsh/zshrc.local

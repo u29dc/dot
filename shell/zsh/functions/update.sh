@@ -295,6 +295,11 @@ upd() {
     local homebrew_core_tap_ready=1
     local step_result=0
 
+    # Refresh metadata first: the outdated lists below decide what is upgraded,
+    # and stale metadata would leave newly outdated packages behind.
+    dot_progress_run_step "Refreshing Homebrew metadata" brew update || step_result=$?
+    upd__apply_step_result "$step_result" || return $?
+
     # Include greedy cask checks so auto-updating casks can still be reported/upgraded.
     local formula_before
     local cask_before_json
@@ -333,7 +338,7 @@ upd() {
     total_before=$((formula_before_count + cask_before_count))
 
     if [ "$total_before" -eq 0 ]; then
-        echo -e "${BLUE}No outdated formulae/casks found before update.${RESET}"
+        echo -e "${BLUE}No outdated formulae/casks found.${RESET}"
     else
         echo -e "${BLUE}Outdated before update:${RESET} ${formula_before_count} formulae, ${cask_before_count} casks"
         if [ "$formula_before_count" -gt 0 ]; then
@@ -346,14 +351,10 @@ upd() {
 
     upd__ensure_sudo_session "$actionable_cask_before_count" "prompt" || return 1
 
-    dot_progress_run_step "Refreshing Homebrew metadata" brew update
-    step_result=$?
-    upd__apply_step_result "$step_result" || return $?
-
     # Third-party formula upgrades can lazily tap homebrew/core mid-upgrade; prepare it as a separate visible step.
     if [ "$formula_before_count" -gt 0 ] && upd__has_tapped_formulae "$formula_before" && ! upd__tap_is_installed "homebrew/core"; then
-        dot_progress_run_step --stream "Preparing Homebrew core tap" brew tap --force homebrew/core
-        step_result=$?
+        step_result=0
+        dot_progress_run_step --stream "Preparing Homebrew core tap" brew tap --force homebrew/core || step_result=$?
         if [ "$step_result" -ne 0 ]; then
             homebrew_core_tap_ready=0
         fi
@@ -362,8 +363,8 @@ upd() {
 
     if [ "$formula_before_count" -gt 0 ]; then
         if [ "$homebrew_core_tap_ready" -eq 1 ]; then
-            dot_progress_run_step "Upgrading formulae" brew upgrade --formula
-            step_result=$?
+            step_result=0
+            dot_progress_run_step "Upgrading formulae" brew upgrade --formula || step_result=$?
             upd__apply_step_result "$step_result" || return $?
         else
             echo -e "${YELLOW}[SKIP]${RESET} Upgrading formulae (Homebrew core tap unavailable)."
@@ -384,8 +385,8 @@ upd() {
 
         # Refresh ticket right before cask upgrades to reduce chance of mid-step prompts.
         upd__ensure_sudo_session "$actionable_cask_before_count" "refresh" || return 1
-        dot_progress_run_step --stream "Upgrading casks (greedy)" brew upgrade --cask --greedy "${actionable_cask_args[@]}"
-        step_result=$?
+        step_result=0
+        dot_progress_run_step --stream "Upgrading casks (greedy)" brew upgrade --cask --greedy "${actionable_cask_args[@]}" || step_result=$?
         upd__apply_step_result "$step_result" || return $?
     elif [ "$cask_before_count" -gt 0 ]; then
         echo -e "${YELLOW}[SKIP]${RESET} Upgrading casks (all outdated casks are installer-manual)."
@@ -393,17 +394,17 @@ upd() {
         echo -e "${YELLOW}[SKIP]${RESET} Upgrading casks (none outdated)."
     fi
 
-    dot_progress_run_step "Removing stale dependencies" brew autoremove
-    step_result=$?
+    step_result=0
+    dot_progress_run_step "Removing stale dependencies" brew autoremove || step_result=$?
     upd__apply_step_result "$step_result" || return $?
 
-    dot_progress_run_step "Cleaning old versions and cache" brew cleanup -s --prune=all
-    step_result=$?
+    step_result=0
+    dot_progress_run_step "Cleaning old versions and cache" brew cleanup -s --prune=all || step_result=$?
     upd__apply_step_result "$step_result" || return $?
 
     dot_progress_run "Checking Codex install and remote-control..."
-    upd__codex_postflight
-    step_result=$?
+    step_result=0
+    upd__codex_postflight || step_result=$?
     if [ "$step_result" -eq 0 ]; then
         dot_progress_ok "Checking Codex install and remote-control"
     else

@@ -63,13 +63,24 @@ initialize_setup_environment() {
     NO_BREW="$runtime_no_brew"
     export DOTFILES_DIR DOT_ENV_FILE DRY_RUN NO_BREW
 
-    dot_default DOT_BREWFILES "homebrew/Brewfile.primary"
-    dot_default DOT_DEFAULT_SHELL "none"
+    dot_apply_defaults
+}
+
+# Defaults and derived values. Standalone scripts that run without setup.env
+# (claude.sh, codex.sh) call this directly.
+dot_apply_defaults() {
+    : "${DRY_RUN:=false}"
+    dot_default DOT_BREWFILES "homebrew/Brewfile.primary:homebrew/Brewfile.personal"
+    dot_default DOT_DEFAULT_SHELL "fish"
     dot_default DOT_ENABLE_DIA 1
     dot_default DOT_ENABLE_ONEPASSWORD 0
     dot_default DOT_ENABLE_SYSTEM_EXTENSIONS 1
     dot_default DOT_ENABLE_CODEX_CONFIG 1
     dot_default DOT_ENABLE_GIT_CONFIG 0
+    dot_default DOT_ONEPASSWORD_CHANNEL stable
+    # Homebrew filters custom env names; its own namespace survives the hand-off.
+    HOMEBREW_BUNDLE_ONEPASSWORD_CHANNEL="$DOT_ONEPASSWORD_CHANNEL"
+    export HOMEBREW_BUNDLE_ONEPASSWORD_CHANNEL
 
     if [ -n "${DOT_TOOLS_HOME:-}" ] && [ -z "${TOOLS_HOME:-}" ]; then
         TOOLS_HOME="$DOT_TOOLS_HOME"
@@ -79,37 +90,33 @@ initialize_setup_environment() {
     dot_default TOOLS_HOME "$HOME/.tools"
     dot_default SKILLS_BASE "$DOTFILES_DIR/agents/skills"
     dot_default DOT_SKILL_SOURCES ""
+    dot_default DOT_PLUGIN_MODE link
     dot_default DOT_PRUNE_EXTRA_SKILLS 0
     dot_default DOT_SKILL_ROOTS_STATE "$HOME/.config/dot/extra-skill-roots"
     dot_default DOT_DIA_APP "/Applications/Dia.app"
     dot_default DOT_DIA_LOG_DIR "$HOME/Library/Logs"
     dot_default AGENT_BROWSER_DIA_PORT 9222
-    dot_default CODEX_NODE_REPL_ENV_FILE "$HOME/.config/dot/codex-node-repl.env.toml"
     dot_default DOT_CODEX_NOTIFY_COMMAND "$HOME/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient"
     dot_default DOT_GIT_ALLOWED_SIGNERS_FILE "$HOME/.config/git/allowed-signers"
 
-    BUF_HOME="$TOOLS_HOME/buf"
     CHO_HOME="$TOOLS_HOME/cho"
     FIN_HOME="$TOOLS_HOME/fin"
-    GRN_HOME="$TOOLS_HOME/grn"
     LET_HOME="$TOOLS_HOME/let"
-    PDF_HOME="$TOOLS_HOME/pdf"
     TAO_HOME="$TOOLS_HOME/tao"
-    BUF="$BUF_HOME/buf"
     CHO="$CHO_HOME/cho"
     FIN="$FIN_HOME/fin"
-    GRN="$GRN_HOME/grn"
     LET="$LET_HOME/let"
-    PDF="$PDF_HOME/pdf"
     TAO="$TAO_HOME/tao"
     EZA_DEFAULT_IGNORE="node_modules|.cache|cache|dist|build|.next|.nuxt|.turbo|coverage|.pytest_cache|__pycache__|.venv|venv|.env"
     HOMEBREW_NO_ENV_HINTS=1
     BAT_PAGER=""
-    BAT_STYLE="numbers,changes"
 
+    # Child processes inherit one run directory and manifest, so a single setup
+    # run never scatters backups across timestamps.
     DOT_RUN_ID="${DOT_RUN_ID:-$(date +%Y%m%d-%H%M%S)}"
     DOT_BACKUP_DIR="${DOT_BACKUP_DIR:-$HOME/.dotfiles-backups/$DOT_RUN_ID}"
     DOT_BACKUP_MANIFEST="$DOT_BACKUP_DIR/manifest.tsv"
+    export DOT_RUN_ID DOT_BACKUP_DIR DOT_BACKUP_MANIFEST
 
     AGENT_BROWSER_DIA_APP="$DOT_DIA_APP"
     AGENT_BROWSER_DIA_BIN="$AGENT_BROWSER_DIA_APP/Contents/MacOS/Dia"
@@ -131,6 +138,23 @@ dot_apply() {
     fi
 
     "$@"
+}
+
+# Plan or create a directory only when it is actually missing.
+dot_ensure_dir() {
+    [ -d "$1" ] || dot_apply mkdir -p "$1"
+}
+
+dot_require_command() {
+    local name="$1"
+    local reason="$2"
+
+    if command -v "$name" >/dev/null 2>&1; then
+        return 0
+    fi
+
+    dot_progress_fail "$name is required $reason; install it (brew install $name) or rerun setup without --no-brew"
+    return 1
 }
 
 dot_require() {
@@ -205,6 +229,22 @@ validate_setup_env() {
     dot_validate_bool DOT_ENABLE_GIT_CONFIG || status=1
     dot_validate_bool DOT_PRUNE_EXTRA_SKILLS || status=1
 
+    case "${DOT_PLUGIN_MODE:-}" in
+        link | package) ;;
+        *)
+            dot_progress_fail "DOT_PLUGIN_MODE must be link or package"
+            status=1
+            ;;
+    esac
+
+    case "${DOT_ONEPASSWORD_CHANNEL:-}" in
+        stable | beta | nightly) ;;
+        *)
+            dot_progress_fail "DOT_ONEPASSWORD_CHANNEL must be stable, beta, or nightly"
+            status=1
+            ;;
+    esac
+
     case "${DOT_DEFAULT_SHELL:-}" in
         "" | none | zsh | fish | /*) ;;
         *)
@@ -233,7 +273,7 @@ validate_setup_env() {
         dot_validate_port AGENT_BROWSER_DIA_PORT || status=1
     fi
 
-    if [ -z "$DOT_BREWFILES" ]; then
+    if [ -z "$(dot_each_colon_item "$DOT_BREWFILES")" ]; then
         dot_progress_fail "DOT_BREWFILES must contain at least one Brewfile"
         status=1
     fi

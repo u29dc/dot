@@ -1,3 +1,7 @@
+# Shared workstation baseline for every machine. Personal-only apps live in
+# Brewfile.personal; machine-only additions belong in ignored Brewfile.local.
+# Layers are additive and listed in DOT_BREWFILES.
+
 # 00 Terminal and shell
 brew "fish"
 brew "starship"
@@ -6,9 +10,11 @@ brew "atuin"
 brew "tmux"
 brew "broot"
 
-cask "ghostty"
+cask "ghostty@tip"
+cask "font-fira-code"
 cask "font-jetbrains-mono-nerd-font"
 cask "font-new-computer-modern"
+cask "font-sf-mono"
 
 # 10 Git and source control
 brew "git"
@@ -24,7 +30,6 @@ brew "neovim"
 
 cask "cursor"
 cask "google-chrome"
-cask "arc"
 cask "zed@preview"
 cask "thebrowsercompany-dia"
 
@@ -38,7 +43,7 @@ brew "go"
 brew "cmake"
 brew "typst"
 brew "uv"
-brew "pipx"
+brew "python"
 brew "ruff"
 
 # 40 CLI utilities and data tools
@@ -48,7 +53,7 @@ brew "fd"
 brew "bottom"
 brew "ripgrep"
 brew "hyperfine"
-brew "neofetch"
+brew "fastfetch"
 brew "parallel"
 brew "scc"
 brew "tokei"
@@ -62,7 +67,7 @@ brew "jsongrep"
 brew "yq"
 brew "just"
 brew "direnv"
-brew "tldr"
+brew "tlrc"
 brew "shellcheck"
 brew "shfmt"
 
@@ -86,7 +91,7 @@ brew "yfedoseev/tap/pdf-oxide", trusted: true
 brew "ghostscript"
 brew "qpdf"
 
-cask "pluk-inc/tap/markdown-preview", trusted: true
+cask "markdown-preview"
 cask "iina"
 cask "keka"
 cask "blender"
@@ -94,29 +99,34 @@ cask "blender"
 # 60 AI and agent tools
 brew "anomalyco/tap/opencode", trusted: true
 brew "agent-browser"
-brew "lightpanda-io/browser/lightpanda", trusted: true
+brew "getagentseal/codeburn/codeburn", trusted: true
+brew "higgsfield-ai/tap/higgsfield", trusted: true
 brew "openclaw/tap/gogcli", trusted: true
 brew "whisperkit-cli"
-brew "vercel-cli"
+brew "vercel"
 
 cask "codex"
 cask "chatgpt"
 cask "claude"
+cask "claude-code"
 cask "codexbar"
 cask "granola"
-cask "macwhisper"
-cask "ollama-app"
+cask "opencode-desktop"
 
 # 70 Work and productivity
 brew "gnupg"
 
 cask "1password-cli"
-cask "1password"
+# Keep the package channel aligned with this machine's existing app data.
+onepassword_casks = { "stable" => "1password", "beta" => "1password@beta", "nightly" => "1password@nightly" }
+cask onepassword_casks.fetch(ENV.fetch("HOMEBREW_BUNDLE_ONEPASSWORD_CHANNEL", "stable"))
 cask "slack"
 cask "zoom"
 cask "notion"
 cask "notion-calendar"
+cask "linear"
 cask "obsidian"
+cask "ticktick"
 cask "figma"
 cask "adobe-creative-cloud"
 cask "cleanshot"
@@ -140,14 +150,10 @@ brew "vnstat"
 
 cask "jordanbaird-ice"
 cask "rana-gmbh/netfluss/netfluss", trusted: true
-cask "nordvpn"
-cask "transmission"
+cask "blip"
 cask "spotify"
-cask "telegram"
 cask "whatsapp"
 cask "google-drive"
-cask "dropbox"
-cask "backblaze"
 cask "adguard"
 
 # Unmanaged applications

@@ -1,0 +1,76 @@
+{
+	"$schema": "https://raw.githubusercontent.com/fastfetch-cli/fastfetch/2.67.1/doc/json_schema.json",
+	"logo": {
+		"type": "builtin",
+		"color": {
+			"1": "@8",
+			"2": "@8",
+			"3": "@8",
+			"4": "@8",
+			"5": "@8",
+			"6": "@8",
+			"7": "@8",
+			"8": "@8",
+			"9": "@8"
+		}
+	},
+	"general": {
+		"detectVersion": true
+	},
+	"display": {
+		"separator": ": ",
+		"brightColor": false,
+		"color": {
+			"keys": "@8",
+			"title": "@8",
+			"output": "@8",
+			"separator": "@8"
+		},
+		"size": {
+			"binaryPrefix": "iec",
+			"maxPrefix": "MB",
+			"ndigits": 0,
+			"spaceBeforeUnit": "never"
+		}
+	},
+	"modules": [
+		{
+			"type": "title",
+			"fqdn": false,
+			"color": {
+				"user": "@8",
+				"at": "@8",
+				"host": "@8"
+			}
+		},
+		{
+			"type": "separator",
+			"string": "-",
+			"outputColor": "@8",
+			"times": 0
+		},
+		{
+			"type": "os",
+			"format": "{pretty-name} {arch}"
+		},
+		"host",
+		{
+			"type": "kernel",
+			"format": "{release}"
+		},
+		{
+			"type": "shell",
+			"format": "{pretty-name}{?version} {version}{?}"
+		},
+		"terminal",
+		{
+			"type": "cpu",
+			"temp": false,
+			"format": "{name} ({cores-logical}){?freq-max} @ {freq-max}{?}"
+		},
+		{
+			"type": "memory",
+			"format": "{used} / {total}"
+		}
+	]
+}

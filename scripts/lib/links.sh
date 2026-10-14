@@ -27,7 +27,7 @@ backup_existing_target() {
     rel="${dest#/}"
     backup="$DOT_BACKUP_DIR/$rel"
     dot_progress_status "BACKUP" "$DOT_PROGRESS_YELLOW" "$dest -> $backup"
-    dot_apply mkdir -p "$(dirname "$backup")"
+    dot_ensure_dir "$(dirname "$backup")"
 
     if dot_dry_run; then
         dot_manifest_append "$action" "$src" "$dest" "$backup"
@@ -43,9 +43,27 @@ backup_existing_target() {
     dot_manifest_append "$action" "$src" "$dest" "$backup"
 }
 
+# Copy the current content into the run backup, leaving the live file in place
+# until the caller replaces it atomically. Symlinks are dereferenced.
+backup_copy_target() {
+    local src="$1"
+    local dest="$2"
+    local action="$3"
+    local backup="$DOT_BACKUP_DIR/${dest#/}"
+
+    [ -e "$dest" ] || return 0
+    dot_progress_status "BACKUP" "$DOT_PROGRESS_YELLOW" "$dest -> $backup"
+    dot_dry_run && return 0
+
+    mkdir -p "$(dirname "$backup")"
+    cp -pL "$dest" "$backup"
+    dot_manifest_append "$action" "$src" "$dest" "$backup"
+}
+
 link_file() {
     local src="$1"
     local dest="$2"
+    local previous
 
     if [ ! -e "$src" ]; then
         dot_progress_skip "Source not found: $src"
@@ -53,18 +71,20 @@ link_file() {
     fi
 
     if [ -L "$dest" ]; then
-        if [ "$(readlink "$dest")" = "$src" ]; then
+        previous="$(readlink "$dest")"
+        if [ "$previous" = "$src" ]; then
             dot_progress_ok "Already linked: $dest"
             return 0
         fi
 
+        # The replaced link target is recorded so the change can be reverted.
         dot_apply rm "$dest"
-        dot_manifest_append "remove-symlink" "$src" "$dest"
+        dot_manifest_append "replace-symlink" "$src" "$dest" "$previous"
     elif [ -e "$dest" ]; then
         backup_existing_target "$src" "$dest" "backup"
     fi
 
-    dot_apply mkdir -p "$(dirname "$dest")"
+    dot_ensure_dir "$(dirname "$dest")"
     dot_apply ln -s "$src" "$dest"
     dot_manifest_append "link" "$src" "$dest"
 
@@ -81,6 +101,26 @@ link_file() {
     fi
 }
 
+# Link every executable in a directory, skipping dot and underscore helpers,
+# then drop links into that directory whose source no longer exists.
+link_executables() {
+    local src_dir="$1"
+    local dest_dir="$2"
+    local src
+    local link
+
+    for src in "$src_dir"/*; do
+        [ -f "$src" ] && [ -x "$src" ] || continue
+        case "$(basename "$src")" in .* | _*) continue ;; esac
+        link_file "$src" "$dest_dir/$(basename "$src")"
+    done
+
+    for link in "$dest_dir"/*; do
+        [ -L "$link" ] && [ ! -e "$link" ] || continue
+        remove_legacy_managed_link "$link" "$src_dir"
+    done
+}
+
 remove_legacy_managed_link() {
     local dest="$1"
     local legacy_prefix="$2"
@@ -90,7 +130,7 @@ remove_legacy_managed_link() {
 
     link_target="$(readlink "$dest")"
     case "$link_target" in
-        "$legacy_prefix"/*)
+        "$legacy_prefix" | "$legacy_prefix"/*)
             if dot_dry_run; then
                 dot_progress_status "PLAN" "$DOT_PROGRESS_DIM" "rm $dest"
             else

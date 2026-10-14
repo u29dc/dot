@@ -1,0 +1,18 @@
+# Personal-machine additions on top of Brewfile.primary. Work machines omit
+# this layer from DOT_BREWFILES.
+
+# 20 Editors and browsers
+cask "arc"
+
+# 60 AI and agent tools
+brew "lightpanda-io/browser/lightpanda", trusted: true
+
+cask "macwhisper"
+cask "ollama-app"
+
+# 90 Sync, backup, network, and personal
+cask "nordvpn"
+cask "transmission"
+cask "telegram"
+cask "dropbox"
+cask "backblaze"

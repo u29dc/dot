@@ -1,0 +1,13 @@
+# Global Git ignore, linked to ~/.config/git/ignore (Git's default location).
+# Keep this to operating-system metadata; project artifacts belong in each
+# repository's own .gitignore.
+
+.DS_Store
+._*
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+.fseventsd
+.TemporaryItems
+.DocumentRevisions-V100

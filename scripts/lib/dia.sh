@@ -75,10 +75,14 @@ dia_launch_agent_loaded() {
     launchctl print "$(dia_launch_agent_service)" >/dev/null 2>&1
 }
 
+# $1 is 1 when the LaunchAgent definition changed in this run. Only a changed
+# definition reloads the agent; reloading a healthy agent would quit Dia.
 setup_dia_cdp() {
+    local plist_changed="${1:-1}"
     local plist_path
     local domain_target
     local service_target
+    local i
 
     plist_path="$HOME/Library/LaunchAgents/${AGENT_BROWSER_DIA_LAUNCH_AGENT}.plist"
     domain_target="$(dia_launch_agent_domain)"
@@ -109,9 +113,14 @@ setup_dia_cdp() {
         return 0
     fi
 
-    if dia_launch_agent_loaded; then
-        dot_progress_run "Reloading Dia CDP LaunchAgent"
-        launchctl bootout "$service_target"
+    if dia_launch_agent_loaded && [ "$plist_changed" = 1 ]; then
+        dot_progress_run "Reloading changed Dia CDP LaunchAgent"
+        launchctl bootout "$service_target" 2>/dev/null || true
+        # Let the old process release the port before health is re-checked.
+        for ((i = 0; i < 20; i++)); do
+            dia_cdp_healthy || break
+            sleep 0.25
+        done
     fi
 
     if dia_cdp_healthy; then

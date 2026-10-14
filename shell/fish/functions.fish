@@ -96,11 +96,16 @@ function pip3 --wraps uv
     command uv pip $argv
 end
 
-function zed --wraps zed
+function zed --wraps zed-preview
+    if not type -q zed-preview
+        echo 'zed-preview not found; install the zed@preview cask' >&2
+        return 127
+    end
+
     if test (count $argv) -eq 0
-        command zed .
+        command zed-preview .
     else
-        command zed $argv
+        command zed-preview $argv
     end
 end
 
@@ -213,6 +218,11 @@ function bup
     end
 
     if test -n "$biome_before"; and test -n "$biome_after"; and test "$biome_before" != "$biome_after"; and test -x "$biome_bin"
+        pushd "$repo_root" >/dev/null
+        or return 1
         command "$biome_bin" migrate --write
+        set -l migrate_status $status
+        popd >/dev/null
+        return $migrate_status
     end
 end

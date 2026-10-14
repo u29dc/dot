@@ -12,6 +12,14 @@ link_skills_from_source() {
         return 0
     fi
 
+    # Link the complete root so sibling skills and shared resources stay together.
+    if dot_is_plugin "$src_dir"; then
+        if [ "${DOT_PLUGIN_MODE:-link}" = link ]; then
+            link_file "$src_dir" "$target/$(basename "$src_dir")"
+        fi
+        return 0
+    fi
+
     if [ -f "$src_dir/SKILL.md" ]; then
         name="$(basename "$src_dir")"
         case "$name" in .*) return 0 ;; esac
@@ -23,6 +31,10 @@ link_skills_from_source() {
         [ -d "$skill" ] || continue
         name="$(basename "$skill")"
         case "$name" in .*) continue ;; esac
+        if dot_is_plugin "${skill%/}"; then
+            link_skills_from_source "$target" "${skill%/}"
+            continue
+        fi
         [ -f "$skill/SKILL.md" ] || continue
         link_file "${skill%/}" "$target/$name"
     done
@@ -127,7 +139,7 @@ link_skills() {
     local target="$1"
     local source
 
-    dot_apply mkdir -p "$target"
+    dot_ensure_dir "$target"
     remove_inactive_extra_skill_links "$target"
     link_skills_from_source "$target" "$SKILLS_BASE"
 

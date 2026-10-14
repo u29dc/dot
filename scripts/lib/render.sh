@@ -6,7 +6,8 @@ dot_render_line() {
     local dia_bin="$AGENT_BROWSER_DIA_BIN"
     local dia_stdout="$DOT_DIA_LOG_DIR/com.u29dc.dia-cdp.log"
     local dia_stderr="$DOT_DIA_LOG_DIR/com.u29dc.dia-cdp.err"
-    local git_allowed_signer="${DOT_GIT_USER_EMAIL:-} ${DOT_GIT_SIGNING_KEY:-}"
+    local git_allowed_signer_principals="${DOT_GIT_ALLOWED_SIGNER_PRINCIPALS:-${DOT_GIT_USER_EMAIL:-}}"
+    local git_allowed_signer="$git_allowed_signer_principals ${DOT_GIT_SIGNING_KEY:-}"
     local ssh_identity_agent="  # IdentityAgent disabled by DOT_ENABLE_ONEPASSWORD=0"
 
     line="${line//__HOME__/$HOME}"
@@ -41,6 +42,44 @@ render_template_to_file() {
     done <"$template" >"$dest"
 }
 
+# Install a generated file. Unchanged content is left alone; unmanaged files are
+# backed up first. Changed destinations are recorded for dot_changed_in_run.
+install_generated_file() {
+    local tmp="$1"
+    local dest="$2"
+    local label="$3"
+    local source="$4"
+
+    if { [ -e "$dest" ] || [ -L "$dest" ]; } && cmp -s "$tmp" "$dest"; then
+        rm -f "$tmp"
+        dot_progress_ok "$label already current: $dest"
+        return 0
+    fi
+
+    DOT_CHANGED_FILES="${DOT_CHANGED_FILES:-}${dest}"$'\n'
+    if dot_dry_run; then
+        rm -f "$tmp"
+        dot_progress_status "PLAN" "$DOT_PROGRESS_DIM" "render $label -> $dest"
+        return 0
+    fi
+
+    if { [ -e "$dest" ] || [ -L "$dest" ]; } && ! grep -Fq "dotfiles-managed:" "$dest" 2>/dev/null; then
+        backup_existing_target "$source" "$dest" "backup-generated"
+    fi
+
+    mkdir -p "$(dirname "$dest")"
+    mv "$tmp" "$dest"
+    dot_manifest_append "render" "$source" "$dest"
+    dot_progress_status "RENDER" "$DOT_PROGRESS_BLUE" "$label -> $dest"
+}
+
+dot_changed_in_run() {
+    case $'\n'"${DOT_CHANGED_FILES:-}" in
+        *$'\n'"$1"$'\n'*) return 0 ;;
+    esac
+    return 1
+}
+
 write_managed_file() {
     local template="$1"
     local dest="$2"
@@ -52,31 +91,9 @@ write_managed_file() {
         return 1
     fi
 
-    dot_apply mkdir -p "$(dirname "$dest")"
-
-    if dot_dry_run; then
-        dot_progress_status "RENDER" "$DOT_PROGRESS_BLUE" "$label -> $dest"
-        return 0
-    fi
-
     tmp="$(mktemp "${TMPDIR:-/tmp}/dot-render.XXXXXX")"
     render_template_to_file "$template" "$tmp"
-
-    if [ -e "$dest" ] || [ -L "$dest" ]; then
-        if cmp -s "$tmp" "$dest"; then
-            rm -f "$tmp"
-            dot_progress_status "RENDER" "$DOT_PROGRESS_BLUE" "$label already current: $dest"
-            return 0
-        fi
-
-        if ! grep -Fq "dotfiles-managed:" "$dest" 2>/dev/null; then
-            backup_existing_target "$template" "$dest" "backup-generated"
-        fi
-    fi
-
-    mv "$tmp" "$dest"
-    dot_manifest_append "render" "$template" "$dest"
-    dot_progress_status "RENDER" "$DOT_PROGRESS_BLUE" "$label -> $dest"
+    install_generated_file "$tmp" "$dest" "$label" "$template"
 }
 
 dot_shell_quote() {
